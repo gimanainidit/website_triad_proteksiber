@@ -16,6 +16,7 @@ import uuid
 
 from models import Resource, Base
 from database import get_db, engine
+from file_converter import FileConverter
 
 # Initialize FastAPI
 app = FastAPI(title="TRIAD AI-based CMS", version="1.0.0")
