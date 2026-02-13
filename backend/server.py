@@ -42,6 +42,7 @@ api_router = APIRouter(prefix="/api")
 
 # Initialize services
 ai_generator = AIContentGenerator()
+n8n_integration = N8NIntegration()
 
 @app.on_event("startup")
 async def startup_db():
