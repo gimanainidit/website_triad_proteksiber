@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Search, BookOpen, Download, Filter, Upload, Trash2 } from 'lucide-react'
+import { Search, BookOpen, Download, Filter, Upload, Trash2, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
