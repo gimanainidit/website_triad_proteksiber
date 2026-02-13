@@ -703,7 +703,7 @@ def test_ai_content_generation():
         response = requests.post(
             f"{API_BASE}/ai/generate-content",
             data=form_data,
-            timeout=60  # AI generation may take longer
+            timeout=120  # AI generation may take longer
         )
         
         if response.status_code == 200:
