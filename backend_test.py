@@ -478,11 +478,12 @@ def test_invalid_file_types():
         print_info(f"Testing {filename}...")
         
         # Create temporary file
-        temp_file = tempfile.NamedTemporaryFile(delete=False, mode='wb' if isinstance(content, bytes) else 'w')
         if isinstance(content, bytes):
+            temp_file = tempfile.NamedTemporaryFile(delete=False, mode='wb')
             temp_file.write(content)
         else:
-            temp_file.write(content.encode() if hasattr(content, 'encode') else str(content))
+            temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w')
+            temp_file.write(content)
         temp_file.close()
         
         try:
