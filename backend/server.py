@@ -141,30 +141,39 @@ async def upload_resource(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db)
 ):
-    """Upload a new resource file to Supabase Storage"""
-    
-    # Validate file type
-    allowed_types = ['pdf', 'pptx', 'ppt', 'docx', 'doc']
-    file_extension = file.filename.split('.')[-1].lower() if file.filename else ''
-    
-    if file_extension not in allowed_types:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"File type '{file_extension}' not allowed. Allowed types: {allowed_types}"
-        )
+    """Upload a new resource file to Supabase Storage with PPTX to PDF conversion"""
     
     try:
-        # Create unique filename
-        unique_filename = f"{uuid.uuid4()}-{file.filename}"
-        
         # Read file content
         file_content = await file.read()
+        
+        # Validate file (15MB limit, only PDF and PPTX)
+        is_valid, error_msg = FileConverter.validate_file(
+            file_content, 
+            file.filename or "", 
+            max_size_mb=15
+        )
+        
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
+        
+        # Process file (convert PPTX to PDF if needed)
+        processed_content, final_filename, final_file_type = FileConverter.process_file_for_storage(
+            file_content, 
+            file.filename or ""
+        )
+        
+        if processed_content is None:
+            raise HTTPException(status_code=400, detail=final_file_type)  # Error message is in final_file_type
+        
+        # Create unique filename for storage
+        unique_filename = f"{uuid.uuid4()}-{final_filename}"
         
         # Upload to Supabase Storage
         storage_response = supabase.storage.from_("resources").upload(
             unique_filename, 
-            file_content,
-            {"content-type": file.content_type}
+            processed_content,
+            {"content-type": "application/pdf"}  # Always PDF after processing
         )
         
         if hasattr(storage_response, 'error') and storage_response.error:
@@ -184,15 +193,21 @@ async def upload_resource(
         # Process tags
         tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()] if tags else []
         
+        # Determine if file was converted
+        original_extension = file.filename.lower().split('.')[-1] if file.filename else ''
+        conversion_note = ""
+        if original_extension == 'pptx':
+            conversion_note = " (converted from PPTX)"
+        
         new_resource = Resource(
             title=title,
             slug=slug,
-            description=description,
+            description=description + conversion_note,
             category=category,
             tags=tag_list,
             file_url=public_url,
-            file_size=format_file_size(len(file_content)),
-            file_type=file_extension,
+            file_size=format_file_size(len(processed_content)),
+            file_type='pdf',  # Always PDF after processing
             author_id=uuid.uuid4(),  # For now, use a dummy UUID
             published=True
         )
@@ -201,13 +216,20 @@ async def upload_resource(
         await db.commit()
         await db.refresh(new_resource)
         
+        success_msg = "Resource uploaded successfully"
+        if original_extension == 'pptx':
+            success_msg += " (PPTX converted to PDF)"
+        
         return {
             "id": str(new_resource.id),
             "title": new_resource.title,
-            "message": "Resource uploaded successfully",
-            "file_url": public_url
+            "message": success_msg,
+            "file_url": public_url,
+            "converted_from": original_extension if original_extension == 'pptx' else None
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
