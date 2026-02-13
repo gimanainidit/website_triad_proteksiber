@@ -1,3 +1,10 @@
+# Load environment variables first
+from pathlib import Path
+from dotenv import load_dotenv
+
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
@@ -6,15 +13,9 @@ from sqlalchemy import select, and_
 from typing import List, Optional
 import os
 import uuid
-from pathlib import Path
-from dotenv import load_dotenv
 
 from models import Resource, Base
 from database import get_db, engine
-
-# Load environment variables
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
 
 # Initialize FastAPI
 app = FastAPI(title="TRIAD AI-based CMS", version="1.0.0")
