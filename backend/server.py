@@ -18,6 +18,7 @@ from models import Resource, Base
 from database import get_db, engine
 from file_converter import FileConverter
 from ai_service import AIContentGenerator
+from n8n_service import N8NIntegration
 
 # Initialize FastAPI
 app = FastAPI(title="TRIAD AI-based CMS", version="1.0.0")
