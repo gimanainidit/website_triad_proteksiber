@@ -223,7 +223,67 @@ backend:
     status_history:
         - working: true
           agent: "testing"
-          comment: "File validation working correctly. Invalid file types (txt, etc.) properly rejected with 400 status. Missing required fields (title, description) properly rejected with 422 status. File size handling working. Allowed file types: pdf, pptx, ppt, docx, doc."
+          comment: "Updated file validation working correctly. Only PDF and PPTX files allowed with 15MB limit. Invalid file types (txt, doc, jpg, xlsx) properly rejected with 400 status. Missing required fields properly rejected with 422 status. File size validation working - oversized files (>15MB) correctly rejected."
+
+  - task: "PPTX to PDF Conversion"
+    implemented: true
+    working: true
+    file: "backend/file_converter.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "PPTX to PDF conversion working perfectly. FileConverter.convert_pptx_to_pdf() successfully converts PPTX files to PDF format. Conversion process extracts text content from slides and creates proper PDF structure. Converted files stored with .pdf extension and correct content-type."
+
+  - task: "File Processing Workflow"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Complete file processing workflow working correctly. FileConverter.process_file_for_storage() handles both PDF (pass-through) and PPTX (conversion) files. Upload endpoint correctly processes files, adds conversion notes to description, returns conversion metadata in API response, and stores all files as PDF format in database."
+
+  - task: "Database Schema Updates for Conversion"
+    implemented: true
+    working: true
+    file: "backend/models.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Database correctly stores converted files. All uploaded files (including converted PPTX) have file_type='pdf' in database. Description field includes conversion notes '(converted from PPTX)' for converted files. File URLs point to PDF files with correct .pdf extension. File size calculated from converted PDF content."
+
+  - task: "API Response Enhancement for Conversion"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "API responses correctly indicate conversion status. Upload response includes 'converted_from' field set to 'pptx' for converted files. Success message includes '(PPTX converted to PDF)' for converted files. File URLs in response point to converted PDF files. All conversion metadata properly returned to client."
+
+  - task: "Supabase Storage Integration for Converted Files"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Supabase Storage correctly handles converted files. Converted PDFs uploaded with proper content-type 'application/pdf'. Public URLs generated correctly for converted files. File accessibility verified - all converted files accessible via public URLs. Content-type headers correctly set to 'application/pdf' for all stored files."
 
   - task: "Full CRUD Flow Integration"
     implemented: true
