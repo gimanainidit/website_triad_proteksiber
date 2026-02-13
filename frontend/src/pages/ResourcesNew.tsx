@@ -69,7 +69,7 @@ const ResourcesNew = () => {
       )
     }
 
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== 'all') {
       filtered = filtered.filter(resource => resource.category === selectedCategory)
     }
 
