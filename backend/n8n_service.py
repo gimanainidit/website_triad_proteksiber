@@ -44,40 +44,15 @@ class N8NIntegration:
                 },
                 {
                     "parameters": {
-                        "promptType": "define",
-                        "text": "={{ $json.message }}",
-                        "hasOutputParser": False,
+                        "prompt": "={{ $json.message }}",
                         "options": {
                             "systemMessage": "You are an expert cybersecurity educator creating educational materials. Generate comprehensive, practical, and well-structured cybersecurity content based on user prompts."
                         }
                     },
                     "id": "ai-generator",
                     "name": "AI Content Generator",
-                    "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+                    "type": "n8n-nodes-base.openAi",
                     "position": [460, 300]
-                },
-                {
-                    "parameters": {
-                        "conditions": {
-                            "options": {
-                                "caseSensitive": True,
-                                "leftValue": "",
-                                "operation": "contains"
-                            },
-                            "conditions": [
-                                {
-                                    "id": "approval-check",
-                                    "leftValue": "={{ $json.approval }}",
-                                    "rightValue": "approved",
-                                    "operation": "equal"
-                                }
-                            ]
-                        }
-                    },
-                    "id": "approval-gate",
-                    "name": "Approval Gate",
-                    "type": "n8n-nodes-base.if",
-                    "position": [680, 300]
                 },
                 {
                     "parameters": {
@@ -86,21 +61,26 @@ class N8NIntegration:
                         "headerParameters": {
                             "parameters": [
                                 {
-                                    "name": "Authorization",
+                                    "name": "Authorization", 
                                     "value": "Bearer n8n-webhook"
+                                },
+                                {
+                                    "name": "Content-Type",
+                                    "value": "application/x-www-form-urlencoded"
                                 }
                             ]
                         },
                         "sendBody": True,
+                        "contentType": "form",
                         "bodyParameters": {
                             "parameters": [
                                 {
                                     "name": "title",
-                                    "value": "={{ $json.title }}"
+                                    "value": "={{ $json.title || 'AI Generated Content from Telegram' }}"
                                 },
                                 {
-                                    "name": "content",
-                                    "value": "={{ $json.content }}"
+                                    "name": "content", 
+                                    "value": "={{ $json.content || $json.response || $('AI Content Generator').first().json.choices[0].message.content }}"
                                 },
                                 {
                                     "name": "category",
@@ -112,7 +92,7 @@ class N8NIntegration:
                                 },
                                 {
                                     "name": "material_type",
-                                    "value": "={{ $json.material_type }}"
+                                    "value": "={{ $json.material_type || 'guide' }}"
                                 }
                             ]
                         }
@@ -120,17 +100,7 @@ class N8NIntegration:
                     "id": "backend-upload",
                     "name": "Upload to Backend",
                     "type": "n8n-nodes-base.httpRequest",
-                    "position": [900, 240]
-                },
-                {
-                    "parameters": {
-                        "text": "Content approval rejected. Workflow stopped.",
-                        "options": {}
-                    },
-                    "id": "rejection-notice",
-                    "name": "Approval Rejected",
-                    "type": "n8n-nodes-base.noOp",
-                    "position": [900, 360]
+                    "position": [680, 300]
                 }
             ],
             "connections": {
@@ -149,25 +119,7 @@ class N8NIntegration:
                     "main": [
                         [
                             {
-                                "node": "Approval Gate",
-                                "type": "main",
-                                "index": 0
-                            }
-                        ]
-                    ]
-                },
-                "Approval Gate": {
-                    "main": [
-                        [
-                            {
                                 "node": "Upload to Backend",
-                                "type": "main",
-                                "index": 0
-                            }
-                        ],
-                        [
-                            {
-                                "node": "Approval Rejected",
                                 "type": "main",
                                 "index": 0
                             }
@@ -175,15 +127,11 @@ class N8NIntegration:
                     ]
                 }
             },
-            "active": True,
             "settings": {
                 "executionOrder": "v1"
             },
-            "staticData": None,
             "tags": [
                 {
-                    "createdAt": "2026-02-13T08:00:00.000Z",
-                    "updatedAt": "2026-02-13T08:00:00.000Z",
                     "id": "telegram-content-generation",
                     "name": "telegram-content-generation"
                 }
