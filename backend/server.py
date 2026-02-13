@@ -536,6 +536,156 @@ async def get_generation_types():
         "difficulty_levels": ["beginner", "intermediate", "advanced", "expert"]
     }
 
+# N8N Workflow Integration Endpoints
+@api_router.post("/n8n/webhook/content")
+async def n8n_content_webhook(
+    title: str = Form(...),
+    content: str = Form(...),
+    category: str = Form("Telegram Generated"),
+    source: str = Form("telegram-bot"),
+    material_type: str = Form("guide"),
+    db: AsyncSession = Depends(get_db)
+):
+    """Webhook endpoint for n8n to upload generated content"""
+    try:
+        # Create slug from title
+        slug = create_slug(title)
+        
+        # Handle duplicate slugs
+        existing_resource = await db.execute(select(Resource).where(Resource.slug == slug))
+        if existing_resource.scalar_one_or_none():
+            slug = f"{slug}-{str(uuid.uuid4())[:8]}"
+        
+        # Create tags for n8n generated content
+        tags = [
+            "n8n-generated", 
+            f"source:{source}",
+            f"type:{material_type}",
+            "telegram-bot"
+        ]
+        
+        # Create resource record
+        new_resource = Resource(
+            title=title,
+            slug=slug,
+            description=f"Generated via {source} using n8n workflow automation",
+            category=category,
+            tags=tags,
+            content=content,
+            file_url=None,
+            file_size=f"{len(content.split())} words",
+            file_type='n8n-content',
+            author_id=uuid.uuid4(),
+            published=True
+        )
+        
+        db.add(new_resource)
+        await db.commit()
+        await db.refresh(new_resource)
+        
+        return {
+            "success": True,
+            "resource_id": str(new_resource.id),
+            "title": new_resource.title,
+            "message": "Content uploaded successfully via n8n webhook",
+            "word_count": len(content.split()),
+            "source": source
+        }
+        
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"n8n webhook failed: {str(e)}")
+
+@api_router.get("/n8n/workflows")
+async def get_n8n_workflows():
+    """Get all workflows from n8n instance"""
+    try:
+        result = await n8n_integration.get_workflows()
+        if result["success"]:
+            return {
+                "success": True,
+                "workflows": result["workflows"],
+                "count": result["count"]
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get workflows: {str(e)}")
+
+@api_router.post("/n8n/workflow/create")
+async def create_telegram_workflow():
+    """Create the Telegram content generation workflow in n8n"""
+    try:
+        result = await n8n_integration.create_telegram_content_workflow()
+        if result["success"]:
+            return {
+                "success": True,
+                "workflow": result["workflow"],
+                "message": result["message"],
+                "webhook_url": f"{n8n_integration.n8n_url}/webhook/telegram-content"
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create workflow: {str(e)}")
+
+@api_router.post("/n8n/workflow/{workflow_id}/execute")
+async def execute_n8n_workflow(
+    workflow_id: str,
+    input_data: dict
+):
+    """Execute n8n workflow with input data"""
+    try:
+        result = await n8n_integration.execute_workflow(workflow_id, input_data)
+        if result["success"]:
+            return result
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to execute workflow: {str(e)}")
+
+@api_router.post("/n8n/webhook/{webhook_path}/trigger")
+async def trigger_n8n_webhook(
+    webhook_path: str,
+    data: dict
+):
+    """Trigger n8n workflow via webhook"""
+    try:
+        result = await n8n_integration.trigger_workflow_webhook(webhook_path, data)
+        if result["success"]:
+            return result
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to trigger webhook: {str(e)}")
+
+@api_router.get("/n8n/workflow/{workflow_id}/executions")
+async def get_workflow_executions(
+    workflow_id: str,
+    limit: int = 10
+):
+    """Get execution history for a workflow"""
+    try:
+        result = await n8n_integration.get_workflow_executions(workflow_id, limit)
+        if result["success"]:
+            return result
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get executions: {str(e)}")
+
+@api_router.get("/n8n/health")
+async def n8n_health_check():
+    """Check n8n instance health and connectivity"""
+    try:
+        result = await n8n_integration.health_check()
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"n8n health check failed: {str(e)}"
+        }
+
 # Include API router
 app.include_router(api_router)
 
