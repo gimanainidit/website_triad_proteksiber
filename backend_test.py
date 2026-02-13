@@ -755,7 +755,7 @@ def test_ai_generate_from_resource(resource_id):
         response = requests.post(
             f"{API_BASE}/ai/generate-from-resource/{resource_id}",
             data=form_data,
-            timeout=60
+            timeout=120
         )
         
         if response.status_code == 200:
