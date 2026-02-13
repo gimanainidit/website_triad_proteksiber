@@ -39,6 +39,9 @@ supabase: Client = create_client(supabase_url, supabase_key)
 # API Router
 api_router = APIRouter(prefix="/api")
 
+# Initialize services
+ai_generator = AIContentGenerator()
+
 @app.on_event("startup")
 async def startup_db():
     """Create database tables if they don't exist"""
