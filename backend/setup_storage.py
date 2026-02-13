@@ -34,7 +34,7 @@ def main():
         
         if not resources_bucket:
             print("\nCreating 'resources' bucket...")
-            result = supabase.storage.create_bucket('resources', {'public': True})
+            result = supabase.storage.create_bucket('resources')
             print(f"Bucket creation result: {result}")
         else:
             print("\n'resources' bucket already exists")
