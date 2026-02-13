@@ -7,7 +7,6 @@ from typing import List, Optional
 import os
 import uuid
 from pathlib import Path
-import aiofiles
 from dotenv import load_dotenv
 
 from models import Resource, Base
