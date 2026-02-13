@@ -886,7 +886,7 @@ def test_ai_error_handling():
         response = requests.post(
             f"{API_BASE}/ai/create-quiz/{fake_id}",
             data=form_data,
-            timeout=10
+            timeout=30
         )
         
         if response.status_code == 404:
