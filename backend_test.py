@@ -1076,7 +1076,32 @@ def run_all_tests():
         except:
             pass
     
-    # 13. Delete resources (cleanup)
+    # === SPRINT 2 AI GENERATION TESTS ===
+    print(f"\n{Colors.BOLD}{Colors.YELLOW}")
+    print("=" * 60)
+    print("SPRINT 2 AI GENERATION TESTS")
+    print("=" * 60)
+    print(f"{Colors.ENDC}")
+    
+    # 13. AI Generation Types endpoint
+    test_results['ai_generation_types'] = test_ai_generation_types()
+    
+    # 14. AI Content Generation
+    ai_content_success, ai_resource_id = test_ai_content_generation()
+    test_results['ai_content_generation'] = ai_content_success
+    if ai_content_success and ai_resource_id:
+        uploaded_resource_ids.append(ai_resource_id)
+    
+    # 15. AI Integration with existing resources
+    integration_success, integration_resource_ids = test_ai_integration_with_existing_resources()
+    test_results['ai_integration'] = integration_success
+    if integration_success:
+        uploaded_resource_ids.extend(integration_resource_ids)
+    
+    # 16. AI Error handling
+    test_results['ai_error_handling'] = test_ai_error_handling()
+    
+    # 17. Delete resources (cleanup)
     for i, resource_id in enumerate(uploaded_resource_ids):
         test_name = f'delete_resource_{i+1}'
         test_results[test_name] = test_delete_resource(resource_id)
