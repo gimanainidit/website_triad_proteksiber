@@ -631,12 +631,381 @@ def test_missing_required_fields():
         except:
             pass
 
+# AI Generation Testing Functions
+
+def test_ai_generation_types():
+    """Test GET /api/ai/generation-types endpoint"""
+    print_test_header("AI Generation Types Endpoint")
+    
+    try:
+        response = requests.get(f"{API_BASE}/ai/generation-types", timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_success("AI generation types endpoint working!")
+            print_info(f"Response: {json.dumps(data, indent=2)}")
+            
+            # Verify required fields
+            required_fields = ['material_types', 'generation_types', 'difficulty_levels']
+            for field in required_fields:
+                if field not in data:
+                    print_error(f"Missing required field: {field}")
+                    return False
+            
+            # Verify material types
+            expected_material_types = ['guide', 'checklist', 'template', 'whitepaper', 'report']
+            for material_type in expected_material_types:
+                if material_type not in data['material_types']:
+                    print_error(f"Missing material type: {material_type}")
+                    return False
+            
+            # Verify generation types
+            expected_generation_types = ['summary', 'expanded_guide', 'checklist', 'case_study', 'best_practices']
+            for gen_type in expected_generation_types:
+                if gen_type not in data['generation_types']:
+                    print_error(f"Missing generation type: {gen_type}")
+                    return False
+            
+            # Verify difficulty levels
+            expected_difficulties = ['beginner', 'intermediate', 'advanced']
+            for difficulty in expected_difficulties:
+                if difficulty not in data['difficulty_levels']:
+                    print_error(f"Missing difficulty level: {difficulty}")
+                    return False
+            
+            return True
+        else:
+            print_error(f"AI generation types failed with status {response.status_code}: {response.text}")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        print_error(f"AI generation types request failed: {str(e)}")
+        return False
+
+def test_ai_content_generation():
+    """Test POST /api/ai/generate-content endpoint"""
+    print_test_header("AI Content Generation")
+    
+    try:
+        # Test data for content generation
+        form_data = {
+            'prompt': 'Create a comprehensive guide on network security fundamentals for beginners',
+            'material_type': 'guide',
+            'context': 'This is for cybersecurity training program',
+            'title': 'Network Security Fundamentals Guide',
+            'description': 'AI-generated guide covering basic network security concepts',
+            'category': 'Security Guide',
+            'tags': 'network, security, fundamentals, beginner',
+            'save_as_resource': 'true'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/ai/generate-content",
+            data=form_data,
+            timeout=60  # AI generation may take longer
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_success("AI content generation successful!")
+            print_info(f"Generated content length: {len(data.get('content', ''))}")
+            print_info(f"Word count: {data.get('word_count', 'N/A')}")
+            print_info(f"Resource ID: {data.get('resource_id', 'N/A')}")
+            
+            # Verify required fields
+            required_fields = ['success', 'content', 'material_type', 'word_count', 'session_id']
+            for field in required_fields:
+                if field not in data:
+                    print_error(f"Missing required field: {field}")
+                    return False, None
+            
+            # Verify content is not empty
+            if not data.get('content') or len(data['content']) < 100:
+                print_error("Generated content is too short or empty")
+                return False, None
+            
+            # Verify resource was saved
+            if data.get('save_as_resource') and not data.get('resource_id'):
+                print_error("Resource should be saved but no resource_id returned")
+                return False, None
+            
+            return True, data.get('resource_id')
+        else:
+            print_error(f"AI content generation failed with status {response.status_code}: {response.text}")
+            return False, None
+            
+    except requests.exceptions.RequestException as e:
+        print_error(f"AI content generation request failed: {str(e)}")
+        return False, None
+
+def test_ai_generate_from_resource(resource_id):
+    """Test POST /api/ai/generate-from-resource/{resource_id} endpoint"""
+    print_test_header(f"AI Generate from Resource (ID: {resource_id})")
+    
+    try:
+        form_data = {
+            'generation_type': 'summary',
+            'specific_prompt': 'Create a concise executive summary of this content',
+            'save_as_new_resource': 'true',
+            'new_title': 'Executive Summary - Network Security',
+            'new_category': 'Summary'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/ai/generate-from-resource/{resource_id}",
+            data=form_data,
+            timeout=60
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_success("AI generation from resource successful!")
+            print_info(f"Generated content length: {len(data.get('content', ''))}")
+            print_info(f"Generation type: {data.get('generation_type')}")
+            print_info(f"New resource ID: {data.get('new_resource_id', 'N/A')}")
+            
+            # Verify required fields
+            required_fields = ['success', 'content', 'generation_type', 'source_resource_id', 'session_id']
+            for field in required_fields:
+                if field not in data:
+                    print_error(f"Missing required field: {field}")
+                    return False, None
+            
+            # Verify content is generated
+            if not data.get('content') or len(data['content']) < 50:
+                print_error("Generated content is too short or empty")
+                return False, None
+            
+            return True, data.get('new_resource_id')
+        elif response.status_code == 404:
+            print_error("Resource not found for AI generation")
+            return False, None
+        else:
+            print_error(f"AI generation from resource failed with status {response.status_code}: {response.text}")
+            return False, None
+            
+    except requests.exceptions.RequestException as e:
+        print_error(f"AI generation from resource request failed: {str(e)}")
+        return False, None
+
+def test_ai_create_quiz(resource_id):
+    """Test POST /api/ai/create-quiz/{resource_id} endpoint"""
+    print_test_header(f"AI Quiz Creation (ID: {resource_id})")
+    
+    try:
+        form_data = {
+            'question_count': '5',
+            'difficulty': 'intermediate',
+            'save_as_resource': 'true'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/ai/create-quiz/{resource_id}",
+            data=form_data,
+            timeout=60
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_success("AI quiz creation successful!")
+            print_info(f"Quiz content length: {len(data.get('quiz_content', ''))}")
+            print_info(f"Question count: {data.get('question_count')}")
+            print_info(f"Difficulty: {data.get('difficulty')}")
+            print_info(f"Quiz resource ID: {data.get('quiz_resource_id', 'N/A')}")
+            
+            # Verify required fields
+            required_fields = ['success', 'quiz_content', 'question_count', 'difficulty', 'source_resource_id', 'session_id']
+            for field in required_fields:
+                if field not in data:
+                    print_error(f"Missing required field: {field}")
+                    return False, None
+            
+            # Verify quiz content
+            if not data.get('quiz_content') or len(data['quiz_content']) < 100:
+                print_error("Quiz content is too short or empty")
+                return False, None
+            
+            # Verify question count matches
+            if data.get('question_count') != 5:
+                print_error(f"Expected 5 questions, got {data.get('question_count')}")
+                return False, None
+            
+            return True, data.get('quiz_resource_id')
+        elif response.status_code == 404:
+            print_error("Resource not found for quiz creation")
+            return False, None
+        else:
+            print_error(f"AI quiz creation failed with status {response.status_code}: {response.text}")
+            return False, None
+            
+    except requests.exceptions.RequestException as e:
+        print_error(f"AI quiz creation request failed: {str(e)}")
+        return False, None
+
+def test_ai_error_handling():
+    """Test AI endpoints error handling"""
+    print_test_header("AI Error Handling Tests")
+    
+    all_passed = True
+    
+    # Test 1: Generate from non-existent resource
+    print_info("Testing generation from non-existent resource...")
+    try:
+        fake_id = str(uuid.uuid4())
+        form_data = {
+            'generation_type': 'summary',
+            'specific_prompt': 'Create a summary'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/ai/generate-from-resource/{fake_id}",
+            data=form_data,
+            timeout=10
+        )
+        
+        if response.status_code == 404:
+            print_success("✅ Non-existent resource correctly returns 404")
+        else:
+            print_error(f"❌ Expected 404 for non-existent resource, got {response.status_code}")
+            all_passed = False
+            
+    except requests.exceptions.RequestException as e:
+        print_error(f"❌ Request failed: {str(e)}")
+        all_passed = False
+    
+    # Test 2: Quiz from non-existent resource
+    print_info("Testing quiz creation from non-existent resource...")
+    try:
+        fake_id = str(uuid.uuid4())
+        form_data = {
+            'question_count': '5',
+            'difficulty': 'intermediate'
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/ai/create-quiz/{fake_id}",
+            data=form_data,
+            timeout=10
+        )
+        
+        if response.status_code == 404:
+            print_success("✅ Non-existent resource for quiz correctly returns 404")
+        else:
+            print_error(f"❌ Expected 404 for non-existent resource quiz, got {response.status_code}")
+            all_passed = False
+            
+    except requests.exceptions.RequestException as e:
+        print_error(f"❌ Quiz request failed: {str(e)}")
+        all_passed = False
+    
+    # Test 3: Content generation with missing required fields
+    print_info("Testing content generation with missing fields...")
+    try:
+        form_data = {
+            'prompt': 'Test prompt'
+            # Missing title, description, category
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/ai/generate-content",
+            data=form_data,
+            timeout=10
+        )
+        
+        if response.status_code == 422:  # FastAPI validation error
+            print_success("✅ Missing required fields correctly returns 422")
+        else:
+            print_error(f"❌ Expected 422 for missing fields, got {response.status_code}")
+            all_passed = False
+            
+    except requests.exceptions.RequestException as e:
+        print_error(f"❌ Content generation request failed: {str(e)}")
+        all_passed = False
+    
+    return all_passed
+
+def test_ai_integration_with_existing_resources():
+    """Test AI integration with actual uploaded resources"""
+    print_test_header("AI Integration with Existing Resources")
+    
+    # First upload a resource with content
+    test_file_path = create_test_pdf()
+    
+    try:
+        # Upload resource
+        with open(test_file_path, 'rb') as f:
+            files = {
+                'file': ('cybersecurity_guide.pdf', f, 'application/pdf')
+            }
+            data = {
+                'title': 'Cybersecurity Best Practices Guide',
+                'description': 'Comprehensive guide on cybersecurity best practices for organizations',
+                'category': 'Security Guide',
+                'tags': 'cybersecurity, best practices, security, guide'
+            }
+            
+            response = requests.post(
+                f"{API_BASE}/admin/resources/upload",
+                files=files,
+                data=data,
+                timeout=30
+            )
+        
+        if response.status_code != 200:
+            print_error(f"Failed to upload test resource: {response.status_code}")
+            return False, []
+        
+        upload_data = response.json()
+        resource_id = upload_data['id']
+        print_success(f"Test resource uploaded with ID: {resource_id}")
+        
+        # Test AI generation from this resource
+        ai_resource_ids = []
+        
+        # Test 1: Generate summary
+        print_info("Testing summary generation...")
+        summary_success, summary_id = test_ai_generate_from_resource(resource_id)
+        if summary_success and summary_id:
+            ai_resource_ids.append(summary_id)
+        
+        # Test 2: Create quiz
+        print_info("Testing quiz creation...")
+        quiz_success, quiz_id = test_ai_create_quiz(resource_id)
+        if quiz_success and quiz_id:
+            ai_resource_ids.append(quiz_id)
+        
+        # Verify AI-generated resources are in database
+        for ai_id in ai_resource_ids:
+            try:
+                response = requests.get(f"{API_BASE}/resources/{ai_id}", timeout=10)
+                if response.status_code == 200:
+                    ai_resource = response.json()
+                    print_success(f"✅ AI resource {ai_id} found in database")
+                    print_info(f"Title: {ai_resource.get('title')}")
+                    print_info(f"File type: {ai_resource.get('file_type')}")
+                    print_info(f"Tags: {ai_resource.get('tags')}")
+                else:
+                    print_error(f"❌ AI resource {ai_id} not found in database")
+            except Exception as e:
+                print_error(f"❌ Error checking AI resource {ai_id}: {str(e)}")
+        
+        return True, [resource_id] + ai_resource_ids
+        
+    except Exception as e:
+        print_error(f"AI integration test failed: {str(e)}")
+        return False, []
+    finally:
+        try:
+            os.unlink(test_file_path)
+        except:
+            pass
+
 def run_all_tests():
-    """Run all backend tests including PPTX conversion and file validation"""
+    """Run all backend tests including Sprint 2 AI generation features"""
     print(f"{Colors.BOLD}{Colors.BLUE}")
     print("=" * 80)
     print("TRIAD AI-based CMS Backend Test Suite")
-    print("Testing PPTX to PDF Conversion & File Validation")
+    print("Testing Sprint 2 AI Generation Features")
     print("=" * 80)
     print(f"{Colors.ENDC}")
     
