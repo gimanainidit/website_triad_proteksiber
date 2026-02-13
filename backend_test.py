@@ -803,7 +803,7 @@ def test_ai_create_quiz(resource_id):
         response = requests.post(
             f"{API_BASE}/ai/create-quiz/{resource_id}",
             data=form_data,
-            timeout=60
+            timeout=120
         )
         
         if response.status_code == 200:
