@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import declarative_base
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from models import Base
 
 # Load environment variables
 ROOT_DIR = Path(__file__).parent
@@ -34,8 +34,6 @@ AsyncSessionLocal = async_sessionmaker(
     autocommit=False,
     autoflush=False
 )
-
-Base = declarative_base()
 
 async def get_db():
     async with AsyncSessionLocal() as session:

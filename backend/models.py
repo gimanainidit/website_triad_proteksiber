@@ -1,9 +1,10 @@
 from sqlalchemy import Column, String, Text, DateTime, Boolean, Integer
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.sql import func
+from sqlalchemy.orm import declarative_base
 import uuid
-from .database import Base
 
+Base = declarative_base()
 
 def generate_uuid():
     return str(uuid.uuid4())
