@@ -30,11 +30,11 @@ class N8NIntegration:
         
         workflow_data = {
             "name": "TRIAD Telegram Content Generation",
+            "settings": {},
             "nodes": [
                 {
                     "parameters": {
-                        "path": "telegram-content",
-                        "options": {}
+                        "path": "telegram-content"
                     },
                     "id": "webhook-telegram",
                     "name": "Telegram Webhook",
