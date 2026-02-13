@@ -38,7 +38,7 @@ const AdminUpload = () => {
   }
 
   const handleFileSelect = (file: File) => {
-    const allowedTypes = ['pdf', 'pptx', 'ppt', 'docx', 'doc']
+    const allowedTypes = ['pdf', 'pptx']
     const fileExtension = file.name.split('.').pop()?.toLowerCase()
     
     if (!fileExtension || !allowedTypes.includes(fileExtension)) {
@@ -50,10 +50,10 @@ const AdminUpload = () => {
       return
     }
 
-    if (file.size > 50 * 1024 * 1024) { // 50MB limit
+    if (file.size > 15 * 1024 * 1024) { // 15MB limit
       toast({
         title: 'File terlalu besar',
-        description: 'Ukuran file maksimal 50MB',
+        description: 'Ukuran file maksimal 15MB',
         variant: 'destructive'
       })
       return
