@@ -80,6 +80,66 @@ def create_test_pdf():
         temp_file.close()
         return temp_file.name
 
+def create_test_pptx():
+    """Create a simple test PPTX file"""
+    try:
+        from pptx import Presentation
+        from pptx.util import Inches
+        
+        # Create temporary PPTX file
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
+        temp_file.close()
+        
+        # Create PowerPoint presentation
+        prs = Presentation()
+        
+        # Add first slide
+        slide_layout = prs.slide_layouts[0]  # Title slide
+        slide = prs.slides.add_slide(slide_layout)
+        title = slide.shapes.title
+        subtitle = slide.placeholders[1]
+        
+        title.text = "Test PPTX Document"
+        subtitle.text = "This is a test PowerPoint file for TRIAD CMS conversion testing"
+        
+        # Add second slide with content
+        slide_layout = prs.slide_layouts[1]  # Title and content
+        slide = prs.slides.add_slide(slide_layout)
+        title = slide.shapes.title
+        content = slide.placeholders[1]
+        
+        title.text = "Test Content Slide"
+        content.text = "This slide contains test content that should be converted to PDF format."
+        
+        # Save the presentation
+        prs.save(temp_file.name)
+        
+        return temp_file.name
+    except ImportError:
+        print_warning("python-pptx not available, creating mock PPTX file")
+        # Create a mock PPTX file (actually a ZIP with minimal structure)
+        import zipfile
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
+        temp_file.close()
+        
+        with zipfile.ZipFile(temp_file.name, 'w') as zf:
+            zf.writestr('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
+            zf.writestr('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
+        
+        return temp_file.name
+
+def create_oversized_file():
+    """Create a file larger than 15MB for testing size limits"""
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf', mode='wb')
+    
+    # Write 16MB of data
+    chunk_size = 1024 * 1024  # 1MB chunks
+    for i in range(16):
+        temp_file.write(b'0' * chunk_size)
+    
+    temp_file.close()
+    return temp_file.name
+
 def test_health_check():
     """Test API health check endpoint"""
     print_test_header("API Health Check")
