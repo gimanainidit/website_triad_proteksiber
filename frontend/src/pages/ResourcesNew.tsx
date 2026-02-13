@@ -183,6 +183,13 @@ const ResourcesNew = () => {
                 <Upload className="h-4 w-4 mr-2" />
                 Upload Resource
               </Button>
+              <Button 
+                onClick={() => navigate('/ai-generator')}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3"
+              >
+                <Brain className="h-4 w-4 mr-2" />
+                AI Generator
+              </Button>
             </div>
           </div>
 
