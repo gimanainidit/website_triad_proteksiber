@@ -354,49 +354,242 @@ def test_delete_resource(resource_id):
         print_error(f"DELETE resource request failed: {str(e)}")
         return False
 
-def test_invalid_file_type():
-    """Test upload with invalid file type"""
-    print_test_header("Invalid File Type Test")
+def test_pptx_to_pdf_conversion():
+    """Test PPTX to PDF conversion functionality"""
+    print_test_header("PPTX to PDF Conversion Test")
     
-    # Create a text file with .txt extension
-    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.txt', mode='w')
-    temp_file.write("This is a test text file that should be rejected")
-    temp_file.close()
+    # Create test PPTX file
+    test_file_path = create_test_pptx()
     
     try:
-        with open(temp_file.name, 'rb') as f:
+        # Prepare form data
+        with open(test_file_path, 'rb') as f:
             files = {
-                'file': ('test_file.txt', f, 'text/plain')
+                'file': ('test_presentation.pptx', f, 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
             }
             data = {
-                'title': 'Invalid File Test',
-                'description': 'This should fail due to invalid file type',
-                'category': 'Test',
-                'tags': 'invalid, test'
+                'title': 'Test PPTX Conversion',
+                'description': 'This PPTX file should be converted to PDF',
+                'category': 'Presentation',
+                'tags': 'test, pptx, conversion, pdf'
             }
             
             response = requests.post(
                 f"{API_BASE}/admin/resources/upload",
                 files=files,
                 data=data,
-                timeout=10
+                timeout=30
+            )
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_success(f"PPTX upload and conversion successful!")
+            print_info(f"Response: {json.dumps(data, indent=2)}")
+            
+            # Verify conversion indicators
+            if 'converted_from' in data and data['converted_from'] == 'pptx':
+                print_success("✅ Conversion metadata correctly set")
+            else:
+                print_error("❌ Missing or incorrect conversion metadata")
+                return False, None
+            
+            if 'PPTX converted to PDF' in data.get('message', ''):
+                print_success("✅ Conversion message correctly included")
+            else:
+                print_error("❌ Missing conversion message")
+                return False, None
+            
+            return True, data['id']
+        else:
+            print_error(f"PPTX upload failed with status {response.status_code}: {response.text}")
+            return False, None
+            
+    except requests.exceptions.RequestException as e:
+        print_error(f"PPTX upload request failed: {str(e)}")
+        return False, None
+    finally:
+        # Clean up test file
+        try:
+            os.unlink(test_file_path)
+        except:
+            pass
+
+def test_file_size_limit():
+    """Test file size limit (15MB max)"""
+    print_test_header("File Size Limit Test (15MB)")
+    
+    # Create oversized file
+    test_file_path = create_oversized_file()
+    
+    try:
+        with open(test_file_path, 'rb') as f:
+            files = {
+                'file': ('oversized_file.pdf', f, 'application/pdf')
+            }
+            data = {
+                'title': 'Oversized File Test',
+                'description': 'This file should be rejected due to size',
+                'category': 'Test',
+                'tags': 'oversized, test'
+            }
+            
+            response = requests.post(
+                f"{API_BASE}/admin/resources/upload",
+                files=files,
+                data=data,
+                timeout=30
             )
         
         if response.status_code == 400:
-            print_success("Invalid file type correctly rejected (400)")
-            return True
+            response_data = response.json()
+            if 'exceeds' in response_data.get('detail', '').lower():
+                print_success("Oversized file correctly rejected with size limit message")
+                return True
+            else:
+                print_error(f"File rejected but wrong error message: {response_data}")
+                return False
         else:
-            print_error(f"Expected 400 for invalid file type, got {response.status_code}: {response.text}")
+            print_error(f"Expected 400 for oversized file, got {response.status_code}: {response.text}")
             return False
             
     except requests.exceptions.RequestException as e:
-        print_error(f"Invalid file type test failed: {str(e)}")
+        print_error(f"File size limit test failed: {str(e)}")
         return False
     finally:
         try:
-            os.unlink(temp_file.name)
+            os.unlink(test_file_path)
         except:
             pass
+
+def test_invalid_file_types():
+    """Test various invalid file types"""
+    print_test_header("Invalid File Types Test")
+    
+    invalid_files = [
+        ('test.txt', 'text/plain', 'This is a text file'),
+        ('test.doc', 'application/msword', 'This is a DOC file'),
+        ('test.jpg', 'image/jpeg', b'\xff\xd8\xff\xe0\x00\x10JFIF'),
+        ('test.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Excel content')
+    ]
+    
+    all_passed = True
+    
+    for filename, content_type, content in invalid_files:
+        print_info(f"Testing {filename}...")
+        
+        # Create temporary file
+        temp_file = tempfile.NamedTemporaryFile(delete=False, mode='wb' if isinstance(content, bytes) else 'w')
+        if isinstance(content, bytes):
+            temp_file.write(content)
+        else:
+            temp_file.write(content.encode() if hasattr(content, 'encode') else str(content))
+        temp_file.close()
+        
+        try:
+            with open(temp_file.name, 'rb') as f:
+                files = {
+                    'file': (filename, f, content_type)
+                }
+                data = {
+                    'title': f'Invalid File Test - {filename}',
+                    'description': 'This should be rejected',
+                    'category': 'Test',
+                    'tags': 'invalid'
+                }
+                
+                response = requests.post(
+                    f"{API_BASE}/admin/resources/upload",
+                    files=files,
+                    data=data,
+                    timeout=10
+                )
+            
+            if response.status_code == 400:
+                response_data = response.json()
+                if 'not allowed' in response_data.get('detail', '').lower():
+                    print_success(f"✅ {filename} correctly rejected")
+                else:
+                    print_error(f"❌ {filename} rejected but wrong error message: {response_data}")
+                    all_passed = False
+            else:
+                print_error(f"❌ {filename} should be rejected, got {response.status_code}: {response.text}")
+                all_passed = False
+                
+        except requests.exceptions.RequestException as e:
+            print_error(f"Request failed for {filename}: {str(e)}")
+            all_passed = False
+        finally:
+            try:
+                os.unlink(temp_file.name)
+            except:
+                pass
+    
+    return all_passed
+
+def test_database_verification(resource_id):
+    """Test database verification for converted files"""
+    print_test_header(f"Database Verification (ID: {resource_id})")
+    
+    try:
+        response = requests.get(f"{API_BASE}/resources/{resource_id}", timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Check file_type is 'pdf'
+            if data.get('file_type') == 'pdf':
+                print_success("✅ File type correctly stored as 'pdf'")
+            else:
+                print_error(f"❌ Expected file_type 'pdf', got '{data.get('file_type')}'")
+                return False
+            
+            # Check description includes conversion note
+            description = data.get('description', '')
+            if 'converted from PPTX' in description:
+                print_success("✅ Description includes conversion note")
+            else:
+                print_error(f"❌ Description missing conversion note: {description}")
+                return False
+            
+            # Check file URL points to PDF
+            file_url = data.get('file_url', '')
+            if file_url.endswith('.pdf'):
+                print_success("✅ File URL points to PDF file")
+            else:
+                print_error(f"❌ File URL doesn't end with .pdf: {file_url}")
+                return False
+            
+            return True
+        else:
+            print_error(f"Failed to get resource for verification: {response.status_code}")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        print_error(f"Database verification request failed: {str(e)}")
+        return False
+
+def test_pdf_content_type(file_url):
+    """Test that stored files have correct PDF content-type"""
+    print_test_header("PDF Content-Type Verification")
+    
+    try:
+        response = requests.head(file_url, timeout=10)
+        
+        if response.status_code == 200:
+            content_type = response.headers.get('content-type', '').lower()
+            if 'application/pdf' in content_type:
+                print_success(f"✅ Correct content-type: {content_type}")
+                return True
+            else:
+                print_error(f"❌ Expected PDF content-type, got: {content_type}")
+                return False
+        else:
+            print_error(f"Failed to check content-type, status: {response.status_code}")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        print_error(f"Content-type check failed: {str(e)}")
+        return False
 
 def test_missing_required_fields():
     """Test upload with missing required fields"""
