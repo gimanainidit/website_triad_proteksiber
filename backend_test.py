@@ -1129,7 +1129,7 @@ def run_all_tests():
     print(f"\n{Colors.BOLD}Results: {passed}/{total} tests passed{Colors.ENDC}")
     
     if passed == total:
-        print_success("🎉 All tests passed! PPTX to PDF conversion and file validation working correctly!")
+        print_success("🎉 All tests passed! Sprint 2 AI generation features working correctly!")
         return True
     else:
         print_error(f"❌ {total - passed} tests failed:")
