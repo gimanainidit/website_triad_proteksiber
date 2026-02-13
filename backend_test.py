@@ -910,7 +910,7 @@ def test_ai_error_handling():
         response = requests.post(
             f"{API_BASE}/ai/generate-content",
             data=form_data,
-            timeout=10
+            timeout=30
         )
         
         if response.status_code == 422:  # FastAPI validation error
