@@ -631,18 +631,19 @@ def test_missing_required_fields():
             pass
 
 def run_all_tests():
-    """Run all backend tests"""
+    """Run all backend tests including PPTX conversion and file validation"""
     print(f"{Colors.BOLD}{Colors.BLUE}")
     print("=" * 80)
     print("TRIAD AI-based CMS Backend Test Suite")
+    print("Testing PPTX to PDF Conversion & File Validation")
     print("=" * 80)
     print(f"{Colors.ENDC}")
     
     print_info(f"Testing backend at: {BASE_URL}")
     
     test_results = {}
-    uploaded_resource_id = None
-    file_url = None
+    uploaded_resource_ids = []
+    file_urls = []
     
     # 1. Health Check
     test_results['health_check'] = test_health_check()
@@ -653,39 +654,62 @@ def run_all_tests():
     # 3. Get categories (empty)
     test_results['get_categories_empty'] = test_get_categories_empty()
     
-    # 4. File upload
+    # 4. Test PDF upload (should work normally)
+    print_info("Testing normal PDF upload...")
     upload_success, resource_id = test_file_upload()
-    test_results['file_upload'] = upload_success
-    if upload_success:
-        uploaded_resource_id = resource_id
+    test_results['pdf_upload'] = upload_success
+    if upload_success and resource_id:
+        uploaded_resource_ids.append(resource_id)
     
-    # 5. Get single resource (if upload succeeded)
-    if uploaded_resource_id:
-        test_results['get_single_resource'] = test_get_single_resource(uploaded_resource_id)
+    # 5. Test PPTX to PDF conversion
+    print_info("Testing PPTX to PDF conversion...")
+    pptx_success, pptx_resource_id = test_pptx_to_pdf_conversion()
+    test_results['pptx_conversion'] = pptx_success
+    if pptx_success and pptx_resource_id:
+        uploaded_resource_ids.append(pptx_resource_id)
     
-    # 6. Get resources after upload
+    # 6. Test file size limits
+    test_results['file_size_limit'] = test_file_size_limit()
+    
+    # 7. Test invalid file types
+    test_results['invalid_file_types'] = test_invalid_file_types()
+    
+    # 8. Test missing required fields
+    test_results['missing_required_fields'] = test_missing_required_fields()
+    
+    # 9. Database verification for PPTX conversion
+    if pptx_resource_id:
+        test_results['database_verification'] = test_database_verification(pptx_resource_id)
+    
+    # 10. Get single resource tests
+    for i, resource_id in enumerate(uploaded_resource_ids):
+        test_name = f'get_single_resource_{i+1}'
+        test_results[test_name] = test_get_single_resource(resource_id)
+    
+    # 11. Get resources after uploads
     test_results['get_resources_after_upload'] = test_get_resources_after_upload()
     
-    # 7. Test file URL accessibility (if we have a resource)
-    if uploaded_resource_id:
-        # Get the resource to extract file URL
+    # 12. Test file URL accessibility and content-type
+    for i, resource_id in enumerate(uploaded_resource_ids):
         try:
-            response = requests.get(f"{API_BASE}/resources/{uploaded_resource_id}")
+            response = requests.get(f"{API_BASE}/resources/{resource_id}")
             if response.status_code == 200:
                 resource_data = response.json()
                 file_url = resource_data.get('file_url')
                 if file_url:
-                    test_results['file_url_accessibility'] = test_file_url_accessibility(file_url)
+                    file_urls.append(file_url)
+                    test_name = f'file_url_accessibility_{i+1}'
+                    test_results[test_name] = test_file_url_accessibility(file_url)
+                    
+                    test_name = f'pdf_content_type_{i+1}'
+                    test_results[test_name] = test_pdf_content_type(file_url)
         except:
             pass
     
-    # 8. Error handling tests
-    test_results['invalid_file_type'] = test_invalid_file_type()
-    test_results['missing_required_fields'] = test_missing_required_fields()
-    
-    # 9. Delete resource (if we have one)
-    if uploaded_resource_id:
-        test_results['delete_resource'] = test_delete_resource(uploaded_resource_id)
+    # 13. Delete resources (cleanup)
+    for i, resource_id in enumerate(uploaded_resource_ids):
+        test_name = f'delete_resource_{i+1}'
+        test_results[test_name] = test_delete_resource(resource_id)
     
     # Print summary
     print(f"\n{Colors.BOLD}{Colors.BLUE}")
@@ -696,6 +720,7 @@ def run_all_tests():
     
     passed = 0
     total = 0
+    failed_tests = []
     
     for test_name, result in test_results.items():
         total += 1
@@ -703,15 +728,18 @@ def run_all_tests():
             passed += 1
             print_success(f"{test_name}: PASSED")
         else:
+            failed_tests.append(test_name)
             print_error(f"{test_name}: FAILED")
     
     print(f"\n{Colors.BOLD}Results: {passed}/{total} tests passed{Colors.ENDC}")
     
     if passed == total:
-        print_success("🎉 All tests passed!")
+        print_success("🎉 All tests passed! PPTX to PDF conversion and file validation working correctly!")
         return True
     else:
-        print_error(f"❌ {total - passed} tests failed")
+        print_error(f"❌ {total - passed} tests failed:")
+        for test in failed_tests:
+            print_error(f"  - {test}")
         return False
 
 if __name__ == "__main__":
