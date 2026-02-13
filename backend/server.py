@@ -271,14 +271,6 @@ async def get_categories(db: AsyncSession = Depends(get_db)):
     categories = [row[0] for row in result.all() if row[0]]
     return {"categories": categories}
 
-# Include API router
-app.include_router(api_router)
-
-# Health check endpoint at root
-@app.get("/")
-async def root():
-    return {"message": "TRIAD AI-based CMS API", "version": "1.0.0"}
-
 # AI Generation Endpoints
 @api_router.post("/ai/generate-content")
 async def generate_ai_content(
@@ -541,3 +533,11 @@ async def get_generation_types():
         },
         "difficulty_levels": ["beginner", "intermediate", "advanced", "expert"]
     }
+
+# Include API router
+app.include_router(api_router)
+
+# Health check endpoint at root
+@app.get("/")
+async def root():
+    return {"message": "TRIAD AI-based CMS API", "version": "1.0.0"}
