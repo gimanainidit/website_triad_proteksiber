@@ -20,7 +20,7 @@ class N8NIntegration:
         self.n8n_url = self.n8n_url.rstrip('/')
         
         self.headers = {
-            "Authorization": f"Bearer {self.api_key}",
+            "X-N8N-API-KEY": self.api_key,
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
