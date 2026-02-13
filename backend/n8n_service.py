@@ -109,7 +109,7 @@ class N8NIntegration:
                     json=workflow_data
                 )
                 
-                if response.status_code == 201:
+                if response.status_code == 201 or response.status_code == 200:
                     return {
                         "success": True,
                         "workflow": response.json(),
