@@ -9,6 +9,7 @@ import Services from "./pages/Services";
 import Resources from "./pages/Resources";
 import ResourcesNew from "./pages/ResourcesNew";
 import AdminUpload from "./pages/AdminUpload";
+import AIGenerator from "./pages/AIGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/resources" element={<Resources />} />
           <Route path="/resources-new" element={<ResourcesNew />} />
           <Route path="/admin/upload" element={<AdminUpload />} />
+          <Route path="/ai-generator" element={<AIGenerator />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
