@@ -222,7 +222,11 @@ const AdminUpload = () => {
                       </p>
                       <p className="text-gray-500 mb-4">atau klik untuk memilih file</p>
                       <p className="text-sm text-gray-400">
-                        Support: PDF, PPTX, PPT, DOCX, DOC (Max 50MB)
+                        Support: PDF, PPTX (Max 15MB)
+                        <br />
+                        <span className="text-xs text-blue-400">
+                          *PPTX akan otomatis dikonversi ke PDF
+                        </span>
                       </p>
                     </div>
                   )}
