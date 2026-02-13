@@ -39,20 +39,7 @@ class N8NIntegration:
                     "id": "webhook-telegram",
                     "name": "Telegram Webhook",
                     "type": "n8n-nodes-base.webhook",
-                    "position": [240, 300],
-                    "webhookId": str(uuid.uuid4())
-                },
-                {
-                    "parameters": {
-                        "prompt": "={{ $json.message }}",
-                        "options": {
-                            "systemMessage": "You are an expert cybersecurity educator creating educational materials. Generate comprehensive, practical, and well-structured cybersecurity content based on user prompts."
-                        }
-                    },
-                    "id": "ai-generator",
-                    "name": "AI Content Generator",
-                    "type": "n8n-nodes-base.openAi",
-                    "position": [460, 300]
+                    "position": [240, 300]
                 },
                 {
                     "parameters": {
@@ -60,10 +47,6 @@ class N8NIntegration:
                         "sendHeaders": True,
                         "headerParameters": {
                             "parameters": [
-                                {
-                                    "name": "Authorization", 
-                                    "value": "Bearer n8n-webhook"
-                                },
                                 {
                                     "name": "Content-Type",
                                     "value": "application/x-www-form-urlencoded"
@@ -76,11 +59,11 @@ class N8NIntegration:
                             "parameters": [
                                 {
                                     "name": "title",
-                                    "value": "={{ $json.title || 'AI Generated Content from Telegram' }}"
+                                    "value": "={{ $json.title || 'AI Generated from Telegram' }}"
                                 },
                                 {
                                     "name": "content", 
-                                    "value": "={{ $json.content || $json.response || $('AI Content Generator').first().json.choices[0].message.content }}"
+                                    "value": "={{ $json.content || $json.message }}"
                                 },
                                 {
                                     "name": "category",
@@ -92,30 +75,19 @@ class N8NIntegration:
                                 },
                                 {
                                     "name": "material_type",
-                                    "value": "={{ $json.material_type || 'guide' }}"
+                                    "value": "guide"
                                 }
                             ]
                         }
                     },
                     "id": "backend-upload",
-                    "name": "Upload to Backend",
+                    "name": "Upload to Backend", 
                     "type": "n8n-nodes-base.httpRequest",
-                    "position": [680, 300]
+                    "position": [460, 300]
                 }
             ],
             "connections": {
                 "Telegram Webhook": {
-                    "main": [
-                        [
-                            {
-                                "node": "AI Content Generator",
-                                "type": "main",
-                                "index": 0
-                            }
-                        ]
-                    ]
-                },
-                "AI Content Generator": {
                     "main": [
                         [
                             {
@@ -126,16 +98,7 @@ class N8NIntegration:
                         ]
                     ]
                 }
-            },
-            "settings": {
-                "executionOrder": "v1"
-            },
-            "tags": [
-                {
-                    "id": "telegram-content-generation",
-                    "name": "telegram-content-generation"
-                }
-            ]
+            }
         }
         
         try:
