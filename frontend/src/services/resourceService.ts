@@ -1,6 +1,6 @@
 import { Resource } from '@/lib/supabase'
 
-const API_BASE_URL = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://website-sprint-dev.preview.emergentagent.com'
 
 export class ResourceService {
   private static apiUrl = `${API_BASE_URL}/api`
