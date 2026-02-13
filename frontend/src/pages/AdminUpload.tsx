@@ -200,7 +200,7 @@ const AdminUpload = () => {
                   <input
                     type="file"
                     onChange={handleFileInputChange}
-                    accept=".pdf,.pptx,.ppt,.docx,.doc"
+                    accept=".pdf,.pptx"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
                   
