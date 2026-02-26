@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Upload, ArrowLeft, FileText } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { ResourceService } from '@/services/resourceService'
+import { ResourceService, TemplateMeta } from '@/services/resourceService'
 
 const AdminUpload = () => {
   const [loading, setLoading] = useState(false)
@@ -20,9 +20,25 @@ const AdminUpload = () => {
     category: '',
     tags: ''
   })
-  
+  const [templates, setTemplates] = useState<TemplateMeta[]>([])
+  const [selectedTemplate, setSelectedTemplate] = useState('')
+  const [reviewResult, setReviewResult] = useState<string | null>(null)
+  const [reviewLoading, setReviewLoading] = useState(false)
+
   const navigate = useNavigate()
   const { toast } = useToast()
+
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const data = await ResourceService.getTemplates()
+        setTemplates(data)
+      } catch (error) {
+        console.error('Failed to load templates', error)
+      }
+    }
+    loadTemplates()
+  }, [])
 
   const categories = [
     'Panduan',
@@ -60,6 +76,7 @@ const AdminUpload = () => {
     }
 
     setSelectedFile(file)
+    setReviewResult(null)
     
     // Auto-generate title from filename if empty
     if (!formData.title) {
@@ -96,7 +113,7 @@ const AdminUpload = () => {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     
     if (!selectedFile) {
@@ -124,6 +141,7 @@ const AdminUpload = () => {
         description: formData.description,
         category: formData.category,
         tags: formData.tags,
+        template_id: selectedTemplate || undefined,
         file: selectedFile
       })
 
@@ -153,6 +171,25 @@ const AdminUpload = () => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleReview = async () => {
+    if (!selectedFile) {
+      toast({ title: 'File diperlukan', variant: 'destructive' })
+      return
+    }
+    setReviewLoading(true)
+    try {
+      const result = await ResourceService.reviewDocument(selectedFile, selectedTemplate || undefined)
+      const reviewText = result.review?.review || result.review
+      setReviewResult(typeof reviewText === 'string' ? reviewText : JSON.stringify(reviewText, null, 2))
+      toast({ title: 'Review selesai', description: 'Silakan periksa hasil sebelum upload' })
+    } catch (error) {
+      console.error('Review error:', error)
+      toast({ title: 'Review gagal', description: (error as Error).message, variant: 'destructive' })
+    } finally {
+      setReviewLoading(false)
     }
   }
 
@@ -275,6 +312,24 @@ const AdminUpload = () => {
                 </Select>
               </div>
 
+              {/* Template Reference */}
+              <div className="space-y-2">
+                <Label>Template Referensi (opsional)</Label>
+                <Select value={selectedTemplate} onValueChange={(value) => setSelectedTemplate(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Tanpa template</SelectItem>
+                    {templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name} ({template.material_type})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Tags */}
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags</Label>
@@ -289,8 +344,28 @@ const AdminUpload = () => {
                 </p>
               </div>
 
-              {/* Submit Button */}
-              <div className="pt-4">
+              {/* Review + Submit */}
+              <div className="pt-4 space-y-3">
+                <Button
+                  type="button"
+                  disabled={reviewLoading || !selectedFile}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 text-lg"
+                  onClick={handleReview}
+                >
+                  {reviewLoading ? 'Melakukan review...' : 'Review Dokumen dengan AI'}
+                </Button>
+
+                {reviewResult && (
+                  <Card className="border border-border bg-secondary/50">
+                    <CardHeader>
+                      <CardTitle>Review AI</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <pre className="text-sm font-mono whitespace-pre-wrap">{reviewResult}</pre>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <Button 
                   type="submit" 
                   disabled={loading}

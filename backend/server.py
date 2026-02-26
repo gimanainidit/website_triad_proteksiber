@@ -4,22 +4,23 @@ from dotenv import load_dotenv
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-from fastapi import FastAPI, APIRouter, Depends, HTTPException, File, UploadFile, Form
+from fastapi import FastAPI, APIRouter, Depends, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
-from supabase import create_client, Client
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from typing import List, Optional
 import os
 import uuid
 
-from models import Resource, Base
+from models import Resource, Base, UserRole, User
 from database import get_db, engine
-from file_converter import FileConverter
 from ai_service import AIContentGenerator
 from n8n_service import N8NIntegration
-from config import settings
+from storage import supabase
+from utils import create_slug, format_file_size
+from dependencies import require_roles
 from routes.auth import router as auth_router
+from routes.admin import router as admin_router
 
 # Initialize FastAPI
 app = FastAPI(title="TRIAD AI-based CMS", version="1.0.0")
@@ -33,16 +34,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize Supabase client
-supabase_url = os.environ.get("SUPABASE_URL")
-supabase_key = os.environ.get("SUPABASE_SERVICE_KEY")
-supabase: Client = create_client(supabase_url, supabase_key)
-
 # API Router
 api_router = APIRouter(prefix="/api")
 
 # Initialize services
 ai_generator = AIContentGenerator()
+ai_guard = require_roles(UserRole.ADMIN, UserRole.SUPERADMIN)
 n8n_integration = N8NIntegration()
 
 @app.on_event("startup")
@@ -54,28 +51,6 @@ async def startup_db():
 @app.on_event("shutdown")
 async def shutdown_db():
     await engine.dispose()
-
-# Utility functions
-def create_slug(title: str) -> str:
-    """Create URL-friendly slug from title"""
-    slug = title.lower().replace(" ", "-")
-    # Remove special characters, keep only alphanumeric and hyphens
-    slug = ''.join(c for c in slug if c.isalnum() or c == '-')
-    # Remove consecutive hyphens
-    while '--' in slug:
-        slug = slug.replace('--', '-')
-    return slug.strip('-')
-
-def format_file_size(size_bytes: int) -> str:
-    """Convert bytes to human readable format"""
-    if size_bytes == 0:
-        return "0 B"
-    size_names = ["B", "KB", "MB", "GB"]
-    i = 0
-    while size_bytes >= 1024 and i < len(size_names) - 1:
-        size_bytes /= 1024.0
-        i += 1
-    return f"{size_bytes:.1f} {size_names[i]}"
 
 # API Endpoints
 @api_router.get("/health")
@@ -139,132 +114,6 @@ async def get_resource(resource_id: str, db: AsyncSession = Depends(get_db)):
         "content": resource.content
     }
 
-@api_router.post("/admin/resources/upload")
-async def upload_resource(
-    title: str = Form(...),
-    description: str = Form(...),
-    category: str = Form(...),
-    tags: str = Form(""),  # Comma-separated tags
-    file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db)
-):
-    """Upload a new resource file to Supabase Storage with PPTX to PDF conversion"""
-    
-    try:
-        # Read file content
-        file_content = await file.read()
-        
-        # Validate file (15MB limit, only PDF and PPTX)
-        is_valid, error_msg = FileConverter.validate_file(
-            file_content, 
-            file.filename or "", 
-            max_size_mb=15
-        )
-        
-        if not is_valid:
-            raise HTTPException(status_code=400, detail=error_msg)
-        
-        # Process file (convert PPTX to PDF if needed)
-        processed_content, final_filename, final_file_type = FileConverter.process_file_for_storage(
-            file_content, 
-            file.filename or ""
-        )
-        
-        if processed_content is None:
-            raise HTTPException(status_code=400, detail=final_file_type)  # Error message is in final_file_type
-        
-        # Create unique filename for storage
-        unique_filename = f"{uuid.uuid4()}-{final_filename}"
-        
-        # Upload to Supabase Storage
-        storage_response = supabase.storage.from_("resources").upload(
-            unique_filename, 
-            processed_content,
-            {"content-type": "application/pdf"}  # Always PDF after processing
-        )
-        
-        if hasattr(storage_response, 'error') and storage_response.error:
-            raise HTTPException(status_code=400, detail=f"Storage error: {storage_response.error}")
-        
-        # Get public URL
-        public_url = supabase.storage.from_("resources").get_public_url(unique_filename)
-        
-        # Create database record
-        slug = create_slug(title)
-        
-        # Handle duplicate slugs
-        existing_resource = await db.execute(select(Resource).where(Resource.slug == slug))
-        if existing_resource.scalar_one_or_none():
-            slug = f"{slug}-{str(uuid.uuid4())[:8]}"
-        
-        # Process tags
-        tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()] if tags else []
-        
-        # Determine if file was converted
-        original_extension = file.filename.lower().split('.')[-1] if file.filename else ''
-        conversion_note = ""
-        if original_extension == 'pptx':
-            conversion_note = " (converted from PPTX)"
-        
-        new_resource = Resource(
-            title=title,
-            slug=slug,
-            description=description + conversion_note,
-            category=category,
-            tags=tag_list,
-            file_url=public_url,
-            file_size=format_file_size(len(processed_content)),
-            file_type='pdf',  # Always PDF after processing
-            author_id=uuid.uuid4(),  # For now, use a dummy UUID
-            published=True
-        )
-        
-        db.add(new_resource)
-        await db.commit()
-        await db.refresh(new_resource)
-        
-        success_msg = "Resource uploaded successfully"
-        if original_extension == 'pptx':
-            success_msg += " (PPTX converted to PDF)"
-        
-        return {
-            "id": str(new_resource.id),
-            "title": new_resource.title,
-            "message": success_msg,
-            "file_url": public_url,
-            "converted_from": original_extension if original_extension == 'pptx' else None
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        await db.rollback()
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
-
-@api_router.delete("/admin/resources/{resource_id}")
-async def delete_resource(resource_id: str, db: AsyncSession = Depends(get_db)):
-    """Delete a resource"""
-    result = await db.execute(select(Resource).where(Resource.id == resource_id))
-    resource = result.scalar_one_or_none()
-    
-    if not resource:
-        raise HTTPException(status_code=404, detail="Resource not found")
-    
-    # Delete from Supabase Storage
-    try:
-        if resource.file_url:
-            # Extract filename from URL
-            filename = resource.file_url.split('/')[-1]
-            supabase.storage.from_("resources").remove([filename])
-    except Exception as e:
-        print(f"Storage deletion warning: {e}")
-    
-    # Delete from database
-    await db.delete(resource)
-    await db.commit()
-    
-    return {"message": "Resource deleted successfully"}
-
 @api_router.get("/categories")
 async def get_categories(db: AsyncSession = Depends(get_db)):
     """Get all available categories"""
@@ -285,7 +134,8 @@ async def generate_ai_content(
     category: str = Form(...),
     tags: str = Form(""),
     save_as_resource: bool = Form(True),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(ai_guard)
 ):
     """Generate AI content and optionally save as resource"""
     try:
@@ -361,7 +211,8 @@ async def generate_from_existing_resource(
     save_as_new_resource: bool = Form(False),
     new_title: Optional[str] = Form(None),
     new_category: Optional[str] = Form(None),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(ai_guard)
 ):
     """Generate new content based on existing resource"""
     try:
@@ -442,7 +293,8 @@ async def create_quiz_from_resource(
     question_count: int = Form(5),
     difficulty: str = Form("intermediate"),
     save_as_resource: bool = Form(True),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(ai_guard)
 ):
     """Create quiz questions from existing resource"""
     try:
@@ -597,84 +449,6 @@ async def n8n_content_webhook(
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"n8n webhook failed: {str(e)}")
 
-@api_router.get("/n8n/workflows")
-async def get_n8n_workflows():
-    """Get all workflows from n8n instance"""
-    try:
-        result = await n8n_integration.get_workflows()
-        if result["success"]:
-            return {
-                "success": True,
-                "workflows": result["workflows"],
-                "count": result["count"]
-            }
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get workflows: {str(e)}")
-
-@api_router.post("/n8n/workflow/create")
-async def create_telegram_workflow():
-    """Create the Telegram content generation workflow in n8n"""
-    try:
-        result = await n8n_integration.create_telegram_content_workflow()
-        if result["success"]:
-            return {
-                "success": True,
-                "workflow": result["workflow"],
-                "message": result["message"],
-                "webhook_url": f"{n8n_integration.n8n_url}/webhook/telegram-content"
-            }
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create workflow: {str(e)}")
-
-@api_router.post("/n8n/workflow/{workflow_id}/execute")
-async def execute_n8n_workflow(
-    workflow_id: str,
-    input_data: dict
-):
-    """Execute n8n workflow with input data"""
-    try:
-        result = await n8n_integration.execute_workflow(workflow_id, input_data)
-        if result["success"]:
-            return result
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to execute workflow: {str(e)}")
-
-@api_router.post("/n8n/webhook/{webhook_path}/trigger")
-async def trigger_n8n_webhook(
-    webhook_path: str,
-    data: dict
-):
-    """Trigger n8n workflow via webhook"""
-    try:
-        result = await n8n_integration.trigger_workflow_webhook(webhook_path, data)
-        if result["success"]:
-            return result
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to trigger webhook: {str(e)}")
-
-@api_router.get("/n8n/workflow/{workflow_id}/executions")
-async def get_workflow_executions(
-    workflow_id: str,
-    limit: int = 10
-):
-    """Get execution history for a workflow"""
-    try:
-        result = await n8n_integration.get_workflow_executions(workflow_id, limit)
-        if result["success"]:
-            return result
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get executions: {str(e)}")
-
 @api_router.get("/n8n/health")
 async def n8n_health_check():
     """Check n8n instance health and connectivity"""
@@ -688,6 +462,9 @@ async def n8n_health_check():
         }
 
 api_router.include_router(auth_router)
+
+api_router.include_router(auth_router)
+api_router.include_router(admin_router)
 
 # Include API router
 app.include_router(api_router)
