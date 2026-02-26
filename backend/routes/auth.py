@@ -38,3 +38,13 @@ async def logout(current_user: User = Depends(get_current_user), db: AsyncSessio
     await db.execute(delete(AdminSession).where(AdminSession.user_id == current_user.id))
     await db.commit()
     return {"message": "Logged out"}
+
+
+@router.get("/me")
+async def me(current_user: User = Depends(get_current_user)):
+    return {
+        "id": str(current_user.id),
+        "email": current_user.email,
+        "role": current_user.role.value,
+        "full_name": current_user.full_name,
+    }

@@ -14,3 +14,9 @@ class N8NProxyService:
 
     async def create_workflow(self, workflow_data: Dict[str, Any]) -> Dict[str, Any]:
         return await self.integration.create_telegram_content_workflow()
+
+    async def get_workflows(self) -> Dict[str, Any]:
+        return await self.integration.get_workflows()
+
+    async def get_workflow_executions(self, workflow_id: str, limit: int = 10) -> Dict[str, Any]:
+        return await self.integration.get_workflow_executions(workflow_id, limit)

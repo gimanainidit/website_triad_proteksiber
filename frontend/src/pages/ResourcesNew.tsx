@@ -96,7 +96,7 @@ const ResourcesNew = () => {
           title: 'Berhasil',
           description: 'Resource berhasil dihapus'
         })
-        loadResources() // Reload resources
+        loadResources()
       } catch (error) {
         console.error('Error deleting resource:', error)
         toast({
@@ -105,6 +105,24 @@ const ResourcesNew = () => {
           variant: 'destructive'
         })
       }
+    }
+  }
+
+  const handleTogglePublish = async (resourceId: string, publish: boolean) => {
+    try {
+      await ResourceService.togglePublish(resourceId, publish)
+      toast({
+        title: publish ? 'Dipublikasikan' : 'Diarsipkan',
+        description: `Resource berhasil ${publish ? 'dipublikasikan' : 'disembunyikan'}`
+      })
+      loadResources()
+    } catch (error) {
+      console.error('Publish toggle failed:', error)
+      toast({
+        title: 'Error',
+        description: 'Gagal mengubah status publikasi',
+        variant: 'destructive'
+      })
     }
   }
 
@@ -317,24 +335,31 @@ const ResourcesNew = () => {
                       </div>
                       
                       {/* Actions */}
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={() => handleDownload(resource.file_url, resource.title)}
-                          className="flex-1 bg-accent hover:bg-accent/80 text-accent-foreground"
-                          size="sm"
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
-                        <Button 
-                          onClick={() => handleDelete(resource.id)}
-                          variant="destructive"
-                          size="sm"
-                          className="px-3"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                       <div className="flex gap-2">
+                         <Button 
+                           onClick={() => handleDownload(resource.file_url, resource.title)}
+                           className="flex-1 bg-accent hover:bg-accent/80 text-accent-foreground"
+                           size="sm"
+                         >
+                           <Download className="h-4 w-4 mr-2" />
+                           Download
+                         </Button>
+                         <Button 
+                           onClick={() => handleTogglePublish(resource.id, !resource.published)}
+                           variant="outline"
+                           size="sm"
+                         >
+                           {resource.published ? 'Unpublish' : 'Publish'}
+                         </Button>
+                         <Button 
+                           onClick={() => handleDelete(resource.id)}
+                           variant="destructive"
+                           size="sm"
+                           className="px-3"
+                         >
+                           <Trash2 className="h-4 w-4" />
+                         </Button>
+                       </div>
                     </CardContent>
                   </Card>
                 </motion.div>

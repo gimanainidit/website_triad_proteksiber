@@ -1,108 +1,211 @@
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Download, ExternalLink } from "lucide-react";
+import { BookOpen, Download, Filter, Search } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
-// Static file-based content management (Option A)
-const resources = [
-  {
-    title: "Panduan Keamanan Siber untuk UMKM",
-    description: "Langkah-langkah praktis untuk melindungi bisnis kecil dan menengah dari ancaman siber umum.",
-    fileName: "panduan-keamanan-umkm.pdf",
-    fileSize: "2.4 MB",
-    category: "Panduan",
-  },
-  {
-    title: "Whitepaper: Tren Ancaman Siber 2025",
-    description: "Analisis mendalam tentang lanskap ancaman siber terkini dan prediksi untuk tahun mendatang.",
-    fileName: "tren-ancaman-siber-2025.pdf",
-    fileSize: "3.1 MB",
-    category: "Whitepaper",
-  },
-  {
-    title: "Checklist Kesiapan Insiden Keamanan",
-    description: "Daftar periksa komprehensif untuk memastikan organisasi Anda siap menghadapi insiden keamanan siber.",
-    fileName: "checklist-kesiapan-insiden.pdf",
-    fileSize: "1.8 MB",
-    category: "Checklist",
-  },
-];
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Resource } from "@/lib/supabase";
+import { ResourceService } from "@/services/resourceService";
 
 const Resources = () => {
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [filteredResources, setFilteredResources] = useState<Resource[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        setLoading(true);
+        const data = await ResourceService.getAllResources();
+        setResources(data);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchCategories = async () => {
+      try {
+        const data = await ResourceService.getCategories();
+        setCategories(data.categories);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchResources();
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    let filtered = resources;
+    if (searchQuery) {
+      filtered = filtered.filter((resource) =>
+        resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resource.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    if (selectedCategory && selectedCategory !== "all") {
+      filtered = filtered.filter((resource) => resource.category === selectedCategory);
+    }
+
+    setFilteredResources(filtered);
+  }, [resources, searchQuery, selectedCategory]);
+
+  const stats = useMemo(
+    () => ({
+      total: resources.length,
+      categories: categories.length,
+      results: filteredResources.length,
+    }),
+    [resources.length, categories.length, filteredResources.length]
+  );
+
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      Panduan: "bg-blue-100 text-blue-800",
+      Whitepaper: "bg-green-100 text-green-800",
+      Checklist: "bg-yellow-100 text-yellow-800",
+      Template: "bg-purple-100 text-purple-800",
+      Laporan: "bg-red-100 text-red-800",
+      Standar: "bg-indigo-100 text-indigo-800",
+    };
+    return colors[category] || "bg-gray-100 text-gray-800";
+  };
+
+  const getFileIcon = (fileType: string) => {
+    switch (fileType) {
+      case "pdf":
+        return "📄";
+      case "pptx":
+      case "ppt":
+        return "📊";
+      case "docx":
+      case "doc":
+        return "📝";
+      default:
+        return "📁";
+    }
+  };
+
+  const handleDownload = (fileUrl: string, title: string) => {
+    if (!fileUrl) return;
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = title;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <a href="#main-content" className="skip-to-content">Skip to content</a>
+      <a href="#main-content" className="skip-to-content">
+        Skip to content
+      </a>
       <Header />
-      <main id="main-content">
-        <section className="bg-hero-gradient text-dark-foreground py-16">
-          <div className="max-w-7xl mx-auto px-6">
-            <motion.h1
-              className="text-4xl md:text-5xl font-serif font-black mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              Cyber Education Resources
+
+      <main id="main-content" className="px-4 py-12">
+        <section className="py-14">
+          <div className="max-w-6xl mx-auto">
+            <motion.h1 className="text-4xl md:text-5xl font-serif font-black mb-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              Resource Center
             </motion.h1>
-            <p className="text-dark-foreground/70 text-lg max-w-2xl">
-              Materi edukasi keamanan siber dari tim ahli kami. Download gratis dalam format PDF.
+            <p className="text-lg text-muted-foreground/80">
+              Temukan materi edukasi keamanan siber terbaru dari tim TRIAD PRO-TX SIBER.
             </p>
           </div>
         </section>
 
-        <section className="py-16">
-          <div className="max-w-4xl mx-auto px-6">
-            <div className="space-y-6">
-              {resources.map((res, i) => (
-                <motion.div
-                  key={res.fileName}
-                  className="bg-card border border-border rounded-lg p-6 flex flex-col sm:flex-row items-start sm:items-center gap-6 glow-hover group"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.1 }}
-                >
-                  <div className="w-14 h-14 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
-                    <FileText className="w-7 h-7 text-accent" />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-bold uppercase tracking-widest text-accent">{res.category}</span>
-                      <span className="text-xs text-muted-foreground">• {res.fileSize}</span>
-                    </div>
-                    <h3 className="text-lg font-serif font-bold text-card-foreground mb-1">{res.title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{res.description}</p>
-                  </div>
-
-                  <a
-                    href={`/resources/${res.fileName}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-accent text-accent-foreground font-bold text-sm glow-hover shrink-0"
-                    download
-                  >
-                    <Download size={16} /> Download
-                  </a>
-                </motion.div>
-              ))}
+        <section className="max-w-6xl mx-auto space-y-10">
+          <div className="grid gap-4 md:grid-cols-[2fr,3fr]">
+            <div className="bg-card border border-border p-4 rounded-lg flex items-center gap-3">
+              <Search className="text-muted-foreground w-5 h-5" />
+              <Input
+                placeholder="Cari resources..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="border-0 bg-transparent focus:ring-0"
+              />
             </div>
+            <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value || "all")}> 
+              <SelectTrigger className="h-14">
+                <SelectValue placeholder="Semua kategori" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua kategori</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="mt-12 p-6 bg-secondary rounded-lg border border-border text-center">
-              <p className="text-muted-foreground text-sm">
-                Semua materi disediakan dalam format PDF untuk kemudahan akses. 
-                Hubungi kami di{" "}
-                <a href="mailto:triad-proteksiber@pm.me" className="text-accent hover:underline">
-                  triad-proteksiber@pm.me
-                </a>{" "}
-                jika Anda membutuhkan materi pelatihan khusus.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardStat label="Total" value={stats.total} icon={<BookOpen />} />
+            <CardStat label="Kategori" value={stats.categories} icon={<Filter />} />
+            <CardStat label="Hasil" value={stats.results} icon={<Download />} />
+          </div>
+
+          <div className="space-y-6">
+            {filteredResources.map((resource, index) => (
+              <motion.div
+                key={resource.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                className="bg-card border border-border rounded-2xl p-6 flex flex-col md:flex-row gap-6"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center text-3xl">
+                  {getFileIcon(resource.file_type)}
+                </div>
+                <div className="flex-1 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Badge className={getCategoryColor(resource.category)}>{resource.category}</Badge>
+                    <span className="text-xs text-muted-foreground">{resource.file_size}</span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-card-foreground">{resource.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
+                    {resource.description}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 justify-between">
+                  <Button className="bg-accent text-accent-foreground" onClick={() => handleDownload(resource.file_url, resource.title)}>
+                    <Download className="w-4 h-4 mr-2" /> Download
+                  </Button>
+                  <Button variant="secondary" asChild>
+                    <a href={`/resources/${resource.id}`}>Lihat detail</a>
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </section>
       </main>
+
       <Footer />
     </div>
-  );
-};
+  )
+}
+
+const CardStat = ({ label, value, icon }: { label: string; value: number; icon: JSX.Element }) => (
+  <div className="bg-card border border-border rounded-lg p-5 flex items-center gap-3">
+    <div className="text-accent text-2xl">{icon}</div>
+    <div>
+      <p className="text-3xl font-bold text-card-foreground">{value}</p>
+      <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
+    </div>
+  </div>
+)
 
 export default Resources;
