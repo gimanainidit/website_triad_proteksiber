@@ -1,4 +1,3 @@
-# Load environment variables first
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -19,6 +18,8 @@ from database import get_db, engine
 from file_converter import FileConverter
 from ai_service import AIContentGenerator
 from n8n_service import N8NIntegration
+from config import settings
+from routes.auth import router as auth_router
 
 # Initialize FastAPI
 app = FastAPI(title="TRIAD AI-based CMS", version="1.0.0")
@@ -685,6 +686,8 @@ async def n8n_health_check():
             "success": False,
             "error": f"n8n health check failed: {str(e)}"
         }
+
+api_router.include_router(auth_router)
 
 # Include API router
 app.include_router(api_router)
