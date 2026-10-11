@@ -90,3 +90,5 @@ android-sdk/ -e
 *.env
 *.env.*
 !backend/.env.example
+/.astro/
+frontend/build/
