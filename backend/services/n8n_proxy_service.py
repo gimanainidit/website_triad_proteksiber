@@ -2,10 +2,18 @@ from datetime import datetime
 from typing import Any, Dict
 
 from n8n_service import N8NIntegration
+from optional_features import require_n8n
 
 class N8NProxyService:
     def __init__(self):
-        self.integration = N8NIntegration()
+        self._integration = None
+
+    @property
+    def integration(self):
+        require_n8n()
+        if self._integration is None:
+            self._integration = N8NIntegration()
+        return self._integration
 
     async def trigger_workflow(self, webhook_path: str, data: Dict[str, Any], user_id: str) -> Dict[str, Any]:
         # Simple proxy that forwards to n8n

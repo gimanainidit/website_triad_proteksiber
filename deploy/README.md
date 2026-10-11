@@ -34,11 +34,12 @@ Supply these values securely on the VPS:
   and hostnames, including when the provider URL says `sslmode=require`.
 - `SUPABASE_URL` and `SUPABASE_SERVICE_KEY`: project URL and server-only secret.
 - `JWT_SECRET_KEY`: generate once and retain; `openssl rand -hex 48` can generate it.
-- `OPENAI_API_KEY`: your own key, required by current backend startup.
+- `OPENAI_API_KEY`: your own key; optional. Leave empty to disable AI endpoints.
 - `N8N_ENCRYPTION_KEY`: independently generate once and preserve with n8n backups.
 - `N8N_API_KEY`: create on this VPS n8n instance; a key from development is not portable.
 
-The backend currently requires AI/n8n credentials even when only serving the CMS.
+The CMS can start with blank OPENAI_API_KEY/N8N_API_KEY. AI and n8n operations return
+HTTP 503 with a configuration message until enabled. Restart backend after setting keys.
 No credentials from the Codex development checkout are baked into images or automatically
 copied to the production host. Existing development DATABASE_URL is Supabase;
 replace it with the intended Neon connection rather than assuming Neon is provisioned.

@@ -16,6 +16,7 @@ from models import Resource, Base, UserRole, User
 from database import get_db, engine
 from ai_service import AIContentGenerator
 from n8n_service import N8NIntegration
+from optional_features import ai_configured, n8n_configured, require_ai, require_n8n
 from storage import supabase
 from utils import create_slug, format_file_size
 from dependencies import require_roles
@@ -38,9 +39,9 @@ app.add_middleware(
 api_router = APIRouter(prefix="/api")
 
 # Initialize services
-ai_generator = AIContentGenerator()
+ai_generator = AIContentGenerator() if ai_configured() else None
 ai_guard = require_roles(UserRole.ADMIN, UserRole.SUPERADMIN)
-n8n_integration = N8NIntegration()
+n8n_integration = N8NIntegration() if n8n_configured() else None
 
 @app.on_event("startup")
 async def startup_db():
@@ -51,14 +52,16 @@ async def startup_db():
 
 @app.on_event("shutdown")
 async def shutdown_db():
-    await ai_generator.close()
+    if ai_generator is not None:
+        await ai_generator.close()
     await engine.dispose()
 
 # API Endpoints
 @api_router.get("/health")
 async def health_check():
     """Health check endpoint"""
-    return {"status": "healthy", "message": "TRIAD CMS API is running"}
+    return {"status": "healthy", "message": "TRIAD CMS API is running",
+            "features": {"ai_configured": ai_generator is not None, "n8n_configured": n8n_integration is not None}}
 
 @api_router.get("/resources")
 async def get_resources(
@@ -126,7 +129,7 @@ async def get_categories(db: AsyncSession = Depends(get_db)):
     return {"categories": categories}
 
 # AI Generation Endpoints
-@api_router.post("/ai/generate-content")
+@api_router.post("/ai/generate-content", dependencies=[Depends(require_ai)])
 async def generate_ai_content(
     prompt: str = Form(...),
     material_type: str = Form("guide"),
@@ -205,7 +208,7 @@ async def generate_ai_content(
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Content generation failed: {str(e)}")
 
-@api_router.post("/ai/generate-from-resource/{resource_id}")
+@api_router.post("/ai/generate-from-resource/{resource_id}", dependencies=[Depends(require_ai)])
 async def generate_from_existing_resource(
     resource_id: str,
     generation_type: str = Form(...),
@@ -289,7 +292,7 @@ async def generate_from_existing_resource(
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Content generation failed: {str(e)}")
 
-@api_router.post("/ai/create-quiz/{resource_id}")
+@api_router.post("/ai/create-quiz/{resource_id}", dependencies=[Depends(require_ai)])
 async def create_quiz_from_resource(
     resource_id: str,
     question_count: int = Form(5),
@@ -451,7 +454,7 @@ async def n8n_content_webhook(
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"n8n webhook failed: {str(e)}")
 
-@api_router.get("/n8n/health")
+@api_router.get("/n8n/health", dependencies=[Depends(require_n8n)])
 async def n8n_health_check():
     """Check n8n instance health and connectivity"""
     try:
