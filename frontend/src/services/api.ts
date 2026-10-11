@@ -1,7 +1,7 @@
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_URL ||
   import.meta.env.REACT_APP_BACKEND_URL ||
-  "https://website-sprint-dev.preview.emergentagent.com";
+  "";
 
 type ApiFetchOptions = Omit<RequestInit, "headers"> & {
   headers?: Record<string, string>;
