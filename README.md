@@ -16,3 +16,7 @@ features require a configured public backend.
 
 The original Astro starter files at the repository root are preserved from
 `main` for reference; the current Vercel deployment uses `frontend/`.
+
+## Production VPS
+
+See [VPS deployment guide](deploy/README.md) for containers, managed Neon/Supabase, pre-domain setup, GitHub Actions, and rollback. The workflow keeps VPS deployment disabled until installation and SSH secrets are configured.

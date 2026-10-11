@@ -28,7 +28,7 @@ app = FastAPI(title="TRIAD AI-based CMS", version="1.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[origin.strip() for origin in os.environ.get("CORS_ORIGINS", "").split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -45,8 +45,9 @@ n8n_integration = N8NIntegration()
 @app.on_event("startup")
 async def startup_db():
     """Create database tables if they don't exist"""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    if os.environ.get("AUTO_CREATE_TABLES", "true").lower() == "true":
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
 @app.on_event("shutdown")
 async def shutdown_db():
