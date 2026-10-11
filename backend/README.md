@@ -22,3 +22,7 @@ PYTHONPATH=backend python -m pytest tests/test_openai_services.py
 
 These tests exercise SDK requests with a simulated HTTP transport and do not
 require credentials or make paid API calls.
+
+AI and n8n are optional at startup. Leave their keys blank to run the CMS without
+these integrations; related endpoints return HTTP 503. Restart the backend after
+configuring the keys. CORS_ORIGINS may be blank for same-origin frontend/API routing.

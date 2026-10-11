@@ -13,6 +13,7 @@ from storage import supabase
 from file_converter import FileConverter
 from services.template_service import TemplateService
 from services.ai_review_service import AIReviewService
+from optional_features import require_ai
 from services.n8n_proxy_service import N8NProxyService
 from utils import create_slug, format_file_size
 
@@ -273,7 +274,7 @@ async def delete_template(
     return {"message": "Template archived"}
 
 
-@router.post("/ai-review")
+@router.post("/ai-review", dependencies=[Depends(require_ai)])
 async def review_document(
     file: UploadFile = File(...),
     template_id: Optional[str] = Form(None),
