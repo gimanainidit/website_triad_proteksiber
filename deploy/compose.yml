@@ -1,0 +1,45 @@
+name: triad
+services:
+  gateway:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?Set SITE_ADDRESS}
+      NO_PROXY: localhost,127.0.0.1,frontend,backend,n8n
+      no_proxy: localhost,127.0.0.1,frontend,backend,n8n
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [frontend, backend]
+  frontend:
+    image: ${FRONTEND_IMAGE:?Set FRONTEND_IMAGE}
+    restart: unless-stopped
+  backend:
+    image: ${BACKEND_IMAGE:?Set BACKEND_IMAGE}
+    restart: unless-stopped
+    env_file: ./backend.env
+    environment:
+      NO_PROXY: localhost,127.0.0.1,frontend,backend,n8n
+      no_proxy: localhost,127.0.0.1,frontend,backend,n8n
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/api/health', timeout=5)"]
+      interval: 15s
+      timeout: 6s
+      retries: 5
+      start_period: 30s
+  n8n:
+    image: n8nio/n8n@sha256:aa499e07898e1599bd50ba07e967fc47cdc7fc78adb2430f588e0f8386b8ff39
+    restart: unless-stopped
+    ports: ["127.0.0.1:5678:5678"]
+    env_file: ./n8n.env
+    environment:
+      NO_PROXY: localhost,127.0.0.1,frontend,backend,n8n
+      no_proxy: localhost,127.0.0.1,frontend,backend,n8n
+    volumes:
+      - n8n_data:/home/node/.n8n
+volumes:
+  caddy_data:
+  caddy_config:
+  n8n_data:
