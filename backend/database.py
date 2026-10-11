@@ -3,6 +3,9 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from models import Base
+from sqlalchemy.engine import make_url
+import ssl
+import certifi
 
 # Load environment variables
 ROOT_DIR = Path(__file__).parent
@@ -10,7 +13,15 @@ load_dotenv(ROOT_DIR / '.env')
 
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
-ASYNC_DATABASE_URL = DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://')
+if not DATABASE_URL:
+    raise RuntimeError("Required environment variable DATABASE_URL is missing")
+url = make_url(DATABASE_URL).set(drivername="postgresql+asyncpg")
+# asyncpg receives TLS through connect_args, not libpq URL parameters.
+sslmode = url.query.get("sslmode", "verify-full")
+if sslmode not in {"require", "verify-ca", "verify-full"}:
+    raise ValueError("DATABASE_URL must use TLS: require, verify-ca or verify-full")
+ssl_context = ssl.create_default_context(cafile=os.environ.get("PGSSLROOTCERT") or certifi.where())
+ASYNC_DATABASE_URL = url.difference_update_query(["sslmode", "channel_binding"])
 
 # Create async engine with proper configuration for Supabase Transaction Pooler
 engine = create_async_engine(
@@ -22,6 +33,7 @@ engine = create_async_engine(
     pool_pre_ping=False,
     echo=False,
     connect_args={
+        "ssl": ssl_context,
         "statement_cache_size": 0,  # CRITICAL: Required for transaction pooler
         "command_timeout": 30,
     }

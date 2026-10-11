@@ -43,7 +43,7 @@ class N8NIntegration:
                 },
                 {
                     "parameters": {
-                        "url": f"{os.environ.get('REACT_APP_BACKEND_URL', 'https://website-sprint-dev.preview.emergentagent.com')}/api/n8n/webhook/content",
+                        "url": f"{os.environ.get('BACKEND_INTERNAL_URL', 'http://backend:8001')}/api/n8n/webhook/content",
                         "sendHeaders": True,
                         "headerParameters": {
                             "parameters": [

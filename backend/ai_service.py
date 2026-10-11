@@ -1,18 +1,16 @@
 import asyncio
-import os
 import uuid
 from typing import Dict, List, Optional, Any
-from emergentintegrations.llm.chat import LlmChat, UserMessage
-from dotenv import load_dotenv
+from openai_service import OpenAITextGenerator
 
 class AIContentGenerator:
     """AI service for generating educational materials"""
     
     def __init__(self):
-        load_dotenv()
-        self.api_key = os.environ.get("EMERGENT_LLM_KEY")
-        if not self.api_key:
-            raise ValueError("EMERGENT_LLM_KEY not found in environment variables")
+        self.text_generator = OpenAITextGenerator()
+
+    async def close(self):
+        await self.text_generator.client.close()
     
     async def generate_educational_material(
         self,
@@ -52,18 +50,7 @@ class AIContentGenerator:
             # Enhanced prompt based on material type and context
             enhanced_prompt = self._enhance_prompt(prompt, material_type, context)
             
-            # Initialize LLM chat
-            chat = LlmChat(
-                api_key=self.api_key,
-                session_id=session_id,
-                system_message=system_message
-            ).with_model("openai", "gpt-5.2")
-            
-            # Create user message
-            user_message = UserMessage(text=enhanced_prompt)
-            
-            # Generate content
-            response = await chat.send_message(user_message)
+            response = await self.text_generator.generate(enhanced_prompt, system_message)
             
             return {
                 "success": True,
@@ -121,16 +108,7 @@ class AIContentGenerator:
             Please create high-quality educational material that builds upon the existing content.
             """
             
-            # Initialize chat
-            chat = LlmChat(
-                api_key=self.api_key,
-                session_id=session_id,
-                system_message=system_message
-            ).with_model("openai", "gpt-5.2")
-            
-            # Generate response
-            user_message = UserMessage(text=context_prompt)
-            response = await chat.send_message(user_message)
+            response = await self.text_generator.generate(context_prompt, system_message)
             
             return {
                 "success": True,
@@ -177,13 +155,7 @@ class AIContentGenerator:
             Focus on practical understanding and real-world application of cybersecurity concepts.
             """
             
-            chat = LlmChat(
-                api_key=self.api_key,
-                session_id=session_id,
-                system_message=system_message
-            ).with_model("openai", "gpt-5.2")
-            
-            response = await chat.send_message(UserMessage(text=quiz_prompt))
+            response = await self.text_generator.generate(quiz_prompt, system_message)
             
             return {
                 "success": True,

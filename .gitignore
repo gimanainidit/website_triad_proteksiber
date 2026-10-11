@@ -89,3 +89,8 @@ android-sdk/ -e
 # Environment files
 *.env
 *.env.*
+!backend/.env.example
+/.astro/
+frontend/build/
+
+!deploy/*.env.example
