@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Definisi Variabel Warna di sini agar terbaca oleh Tailwind */
+@theme {
+  --color-brand: #27e7e7;   
+  --color-dark: #000000;
+  --color-accent: #1827ca; /* Biru Deloitte */
+  
+  --font-serif: "Merriweather", serif;
+  --font-sans: "Inter", sans-serif;
+}
