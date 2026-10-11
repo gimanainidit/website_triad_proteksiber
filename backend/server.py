@@ -50,6 +50,7 @@ async def startup_db():
 
 @app.on_event("shutdown")
 async def shutdown_db():
+    await ai_generator.close()
     await engine.dispose()
 
 # API Endpoints
