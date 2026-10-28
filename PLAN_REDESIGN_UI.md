@@ -141,7 +141,8 @@ framer-motion tetap untuk menu mobile Header lama dan halaman admin. Landing bar
 - Output:
   - File `frontend/public/media/pixabay-<id>-<rendition>.<ext>` + poster `.jpg`.
   - `frontend/src/media/manifest.json` berisi `id, kind, src, poster, width, height, duration, pixabayId, pageURL, user, license`.
-- **Budget ukuran:** loop hero ≤ 4 MB (rendisi `small`/`medium` 1280w). Video modal ≤ 15 MB per file. Total `public/media` ≤ 40 MB. Script menolak rendisi di atas budget dan memilih yang lebih kecil.
+- **Budget ukuran** (disesuaikan 2026-10-28 setelah mengukur API: video 173102 `small` 960×540 = 5,99 MB, `medium` 1280×720 = 10,2 MB, `tiny` 640×360 = 2,8 MB): loop hero ≤ 6,5 MB (`small`). Video modal ≤ 15 MB per file (`medium`). Total `public/media` ≤ 40 MB. Script menolak rendisi di atas budget dan memilih yang lebih kecil. Satu `pixabayId` boleh dipakai untuk dua `MediaId` dengan rendisi berbeda (loop `small`, modal `medium`).
+- **Tanpa ffprobe:** `duration` video dan dimensi gambar diambil dari respons API. Poster video memakai `thumbnail` rendisi yang sama.
 - `frontend/nginx.conf`: tambah `location /media/ { expires 30d; add_header Cache-Control "public"; }`.
 - **Key API:**
   - Simpan sebagai `PIXABAY_API_KEY` di `frontend/.env.local`. File ini sudah di-ignore oleh pola `*.env.*` di `.gitignore`.
