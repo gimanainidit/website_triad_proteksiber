@@ -40,7 +40,7 @@ Pelaku: **Agent** (Claude) · **User** (kamu: key Pixabay, approval visual, merg
 | ID | Tiket | Pelaku | Blocker | Skill | Status | Bukti |
 |---|---|---|---|---|---|---|
 | R00 | Konfirmasi seam test dan pembagian tiket | User | – | `grilling` (opsional) | ✅ | Seam dan pembagian tiket disetujui user 2026-10-28, tanpa perubahan. `grilling` dilewati |
-| R01 | Branch `redesign/ui` + baseline | Agent | R00 | – | 🟡 | Branch + dokumen dibuat 2026-10-28. Belum: baseline `npm ci`/typecheck/lint/test/build dan screenshot |
+| R01 | Branch `redesign/ui` + baseline | Agent | R00 | – | ✅ | 2026-10-28, Node v24.22.1 lokal (CI memakai 22). `npm ci` 428 paket. `typecheck` lulus. **`lint` gagal: 3 error + 10 warning, sudah ada sebelum redesain** (`textarea.tsx:5` no-empty-object-type, `AIGenerator.tsx:25` no-explicit-any, `tailwind.config.ts:111` no-require-imports; CI tidak menjalankan lint). `test` 8 lulus di 4 file. `build` lulus. Bundle: JS 653.879 B (gzip 202,10 kB), CSS 50.863 B (gzip 9,21 kB), font 48 file 1.094.320 B, gambar 603.530 B, `build/` 3.874 KB. Batas R16: JS ≤ 752 kB. Screenshot `frontend/.cache/baseline/home-{375,768,1024,1440}.jpg` (tidak di-commit). Temuan baseline: animasi masuk hero (framer-motion) baru tampil setelah frame dirender, dan frasa aksen "dari Ancaman Siber." berwarna biru di atas gradien biru, kontrasnya rendah |
 | R02 | Pipeline aset Pixabay (script + manifest + atribusi) | Agent | R01 | `tdd`, `codebase-design` | ⬜ | |
 | R03 | Kurasi dan unduh aset | Agent + User | R02 | – | ⬜ | |
 | R04 | Prototipe hero + modal + draft copy, disetujui user | Agent + User | R03 | `prototype` | ⬜ | |
@@ -293,7 +293,7 @@ Hapus komponen lama yang tidak dipakai lagi (`HeroSection`, `AboutSection`, `Tea
 **Selesai bila:** semua test lama hijau, dan screenshot tiap halaman publik di 375/1440px tidak menunjukkan elemen rusak.
 
 ### R16 · QA
-1. `npm run typecheck && npm run lint && npm test && npm run build`.
+1. `npm run typecheck && npm test && npm run build` harus hijau. `npm run lint` tidak boleh menambah error di atas 3 error baseline R01 (satu di `tailwind.config.ts` hilang bila R05 mengganti `require` plugin dengan `import`).
 2. Browser pane (`npm run preview`) di 375/768/1024/1440: hero, cursor pill, modal (buka, kontrol, Escape, backdrop, Tab tetap di dalam modal), slider layanan, mask wipe, sticky nav.
 3. Reduced motion: emulasi lewat OS atau devtools. Tidak ada animasi, video loop diganti poster.
 4. `design:accessibility-review`: kontras (`steel` di `canvas` ≥ 4.5:1, label mono, tombol di atas video), focus visible, target sentuh 44px di mobile.
