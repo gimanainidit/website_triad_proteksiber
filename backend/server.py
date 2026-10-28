@@ -56,6 +56,23 @@ async def shutdown_db():
         await ai_generator.close()
     await engine.dispose()
 
+def resource_payload(resource: Resource) -> dict:
+    return {
+        "id": str(resource.id),
+        "title": resource.title,
+        "slug": resource.slug,
+        "description": resource.description,
+        "category": resource.category,
+        "tags": resource.tags,
+        "file_url": resource.file_url,
+        "file_size": resource.file_size,
+        "file_type": resource.file_type,
+        "created_at": resource.created_at.isoformat(),
+        "content": resource.content,
+        "published": resource.published,
+    }
+
+
 # API Endpoints
 @api_router.get("/health")
 async def health_check():
@@ -79,22 +96,7 @@ async def get_resources(
     result = await db.execute(query)
     resources = result.scalars().all()
     
-    return [
-        {
-            "id": str(resource.id),
-            "title": resource.title,
-            "slug": resource.slug,
-            "description": resource.description,
-            "category": resource.category,
-            "tags": resource.tags,
-            "file_url": resource.file_url,
-            "file_size": resource.file_size,
-            "file_type": resource.file_type,
-            "created_at": resource.created_at.isoformat(),
-            "content": resource.content
-        }
-        for resource in resources
-    ]
+    return [resource_payload(resource) for resource in resources]
 
 @api_router.get("/resources/{resource_id}")
 async def get_resource(resource_id: str, db: AsyncSession = Depends(get_db)):
@@ -105,19 +107,7 @@ async def get_resource(resource_id: str, db: AsyncSession = Depends(get_db)):
     if not resource:
         raise HTTPException(status_code=404, detail="Resource not found")
     
-    return {
-        "id": str(resource.id),
-        "title": resource.title,
-        "slug": resource.slug,
-        "description": resource.description,
-        "category": resource.category,
-        "tags": resource.tags,
-        "file_url": resource.file_url,
-        "file_size": resource.file_size,
-        "file_type": resource.file_type,
-        "created_at": resource.created_at.isoformat(),
-        "content": resource.content
-    }
+    return resource_payload(resource)
 
 @api_router.get("/categories")
 async def get_categories(db: AsyncSession = Depends(get_db)):

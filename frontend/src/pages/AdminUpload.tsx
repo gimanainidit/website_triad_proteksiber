@@ -182,8 +182,7 @@ const AdminUpload = () => {
     setReviewLoading(true)
     try {
       const result = await ResourceService.reviewDocument(selectedFile, selectedTemplate || undefined)
-      const reviewText = result.review?.review || result.review
-      setReviewResult(typeof reviewText === 'string' ? reviewText : JSON.stringify(reviewText, null, 2))
+      setReviewResult(result.review.review)
       toast({ title: 'Review selesai', description: 'Silakan periksa hasil sebelum upload' })
     } catch (error) {
       console.error('Review error:', error)

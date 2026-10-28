@@ -78,7 +78,7 @@ export class ResourceService {
     })
   }
 
-  static async reviewDocument(file: File, templateId?: string) {
+  static async reviewDocument(file: File, templateId?: string): Promise<{ review: { review: string }; template: string | null }> {
     const formData = new FormData()
     formData.append('file', file)
     if (templateId) {
@@ -117,7 +117,7 @@ export class ResourceService {
     return apiFetch(`/admin/templates/${id}`, { method: 'DELETE' })
   }
 
-  static async getCategories() {
+  static async getCategories(): Promise<{ categories: string[] }> {
     return apiFetch('/categories')
   }
 
