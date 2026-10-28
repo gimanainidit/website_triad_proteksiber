@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { serviceCategories } from "@/components/ServicesSection";
+import { serviceCategories } from "@/content/services";
 
 const Services = () => {
   const location = useLocation();
