@@ -52,3 +52,30 @@ describe("open and close", () => {
     expect(dialog().open).toBe(false);
   });
 });
+
+describe("ways to close", () => {
+  beforeEach(() => {
+    setup();
+    act(() => player.open("a"));
+  });
+
+  test("the Close button closes", () => {
+    fireEvent.click(screen.getByRole("button", { name: "Tutup" }));
+    expect(dialog().open).toBe(false);
+  });
+
+  test("a click on the backdrop (target is the dialog itself) closes", () => {
+    fireEvent.click(dialog());
+    expect(dialog().open).toBe(false);
+  });
+
+  test("a click inside the frame does not close", () => {
+    fireEvent.click(video());
+    expect(dialog().open).toBe(true);
+  });
+
+  test("the cancel event (Escape) closes", () => {
+    fireEvent(dialog(), new Event("cancel", { cancelable: true }));
+    expect(dialog().open).toBe(false);
+  });
+});

@@ -36,8 +36,23 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
   return (
     <VideoPlayerContext.Provider value={controls}>
       {children}
-      <dialog ref={dialogRef} aria-label={active?.title ?? "Pemutar video"} onClose={() => videoRef.current?.pause()}>
-        <video ref={videoRef} src={active?.src} poster={active?.poster} playsInline loop />
+      <dialog
+        ref={dialogRef}
+        className="vp-dialog"
+        aria-label={active?.title ?? "Pemutar video"}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) controls.close();
+        }}
+        onCancel={(e) => {
+          e.preventDefault();
+          controls.close();
+        }}
+        onClose={() => videoRef.current?.pause()}
+      >
+        <video ref={videoRef} className="vp-video" src={active?.src} poster={active?.poster} playsInline loop />
+        <button type="button" onClick={controls.close}>
+          Tutup
+        </button>
       </dialog>
     </VideoPlayerContext.Provider>
   );
