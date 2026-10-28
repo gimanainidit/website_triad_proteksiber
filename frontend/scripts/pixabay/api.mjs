@@ -6,6 +6,9 @@ const RATE_WINDOW_MS = 60_000;
 // Margin for clock skew between us and Pixabay, so a full window never counts as two.
 const RATE_MARGIN_MS = 1_000;
 
+export const MISSING_KEY_MESSAGE =
+  "PIXABAY_API_KEY is not set. Put PIXABAY_API_KEY=<your key> in frontend/.env.local (no VITE_ prefix, or the key would ship in the browser bundle).";
+
 const realSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
@@ -13,6 +16,8 @@ const realSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * @param {{ apiKey: string, fetch: typeof fetch, fs: import("./sync.mjs").Fs, now: () => number, sleep?: (ms: number) => Promise<void> }} deps
  */
 export function createPixabayClient({ apiKey, fetch, fs, now, sleep = realSleep }) {
+  if (!apiKey?.trim()) throw new Error(MISSING_KEY_MESSAGE);
+
   /** Timestamps of API requests still inside the rate window. */
   const sent = [];
 
@@ -29,6 +34,12 @@ export function createPixabayClient({ apiKey, fetch, fs, now, sleep = realSleep 
     await fs.mkdir(CACHE_DIR, { recursive: true });
     await fs.writeFile(cachePath, JSON.stringify({ fetchedAt: now(), hit }));
     return hit;
+  }
+
+  /** @returns {Promise<any[]>} search hits, for the contact sheet; not cached, as Pixabay allows for fresh queries */
+  async function search(kind, params) {
+    const body = await request(kind === "video" ? `${API}/videos/` : `${API}/`, params);
+    return body.hits;
   }
 
   /** The request URL holds the key, so nothing derived from it may reach an error message. */
@@ -67,5 +78,5 @@ export function createPixabayClient({ apiKey, fetch, fs, now, sleep = realSleep 
     }
   }
 
-  return { getHit };
+  return { getHit, search };
 }

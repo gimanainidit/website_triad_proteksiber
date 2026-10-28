@@ -32,15 +32,18 @@ export function createFakeFs(initial = {}) {
  * Fake of the Pixabay API plus its CDN. `hits` maps "<kind>:<id>" to the hit the
  * API returns; every other URL is treated as a file download.
  */
-export function createFakePixabay({ hits = {}, status = 200, headers = {} } = {}) {
+export function createFakePixabay({ hits = {}, searches = {}, status = 200, headers = {} } = {}) {
   const calls = [];
   const fetch = async (url) => {
     calls.push(String(url));
     const u = new URL(url);
     if (u.hostname === "pixabay.com" && u.pathname.startsWith("/api/")) {
       const kind = u.pathname === "/api/videos/" ? "video" : "image";
-      const hit = hits[`${kind}:${u.searchParams.get("id")}`];
       const rateHeaders = { "X-RateLimit-Limit": "100", "X-RateLimit-Remaining": "99", "X-RateLimit-Reset": "60", ...headers };
+      if (u.searchParams.has("q") && status === 200) {
+        return new Response(JSON.stringify(searches[kind] ?? { total: 0, totalHits: 0, hits: [] }), { status: 200, headers: rateHeaders });
+      }
+      const hit = hits[`${kind}:${u.searchParams.get("id")}`];
       if (status !== 200) return new Response("rate limited", { status, headers: rateHeaders });
       const body = { total: hit ? 1 : 0, totalHits: hit ? 1 : 0, hits: hit ? [hit] : [] };
       return new Response(JSON.stringify(body), { status: 200, headers: rateHeaders });
