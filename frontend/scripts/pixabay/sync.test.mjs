@@ -11,10 +11,10 @@ const heroLoop = {
   maxBytes: 6_500_000,
 };
 
-function setup({ entries = [heroLoop], fs = createFakeFs(), pixabay, apiKey = API_KEY, now = () => 1_000_000 } = {}) {
+function setup({ entries = [heroLoop], fs = createFakeFs(), pixabay, apiKey = API_KEY, now = () => 1_000_000, sleep } = {}) {
   const fake = pixabay ?? createFakePixabay({ hits: { "video:173102": video173102() } });
   const logs = [];
-  const run = () => syncAssets({ config: { entries }, apiKey, fetch: fake.fetch, fs, now, log: (l) => logs.push(l) });
+  const run = () => syncAssets({ config: { entries }, apiKey, fetch: fake.fetch, fs, now, sleep, log: (l) => logs.push(l) });
   return { fake, fs, logs, run };
 }
 
@@ -190,5 +190,35 @@ describe("image entries", () => {
     const { fs, run } = setup({ entries: [{ ...photo, maxBytes: 10 }], pixabay: imagePixabay() });
     await expect(run()).rejects.toThrow(/service-dc/);
     expect([...fs.files.keys()].filter((p) => p.startsWith("public/media/"))).toEqual([]);
+  });
+});
+
+describe("throttle", () => {
+  it("never sends more than 100 API requests within 60 seconds", async () => {
+    const ids = Array.from({ length: 101 }, (_, i) => 1000 + i);
+    const entries = ids.map((pixabayId) => ({ ...heroLoop, id: `clip-${pixabayId}`, pixabayId }));
+    const hits = Object.fromEntries(ids.map((id) => [`video:${id}`, { ...video173102(), id }]));
+    const pixabay = createFakePixabay({ hits });
+
+    let t = 5_000_000;
+    const apiTimes = [];
+    const timed = {
+      ...pixabay,
+      fetch: (url) => {
+        if (String(url).startsWith("https://pixabay.com/api/")) apiTimes.push(t);
+        return pixabay.fetch(url);
+      },
+    };
+    const sleep = async (ms) => {
+      t += ms;
+    };
+
+    await setup({ entries, pixabay: timed, now: () => t, sleep }).run();
+
+    expect(apiTimes).toHaveLength(101);
+    for (let i = 100; i < apiTimes.length; i++) {
+      expect(apiTimes[i] - apiTimes[i - 100]).toBeGreaterThanOrEqual(60_000);
+    }
+    expect(apiTimes[99] - apiTimes[0]).toBeLessThan(60_000);
   });
 });

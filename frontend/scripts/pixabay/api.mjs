@@ -1,12 +1,21 @@
 const API = "https://pixabay.com/api";
 const CACHE_DIR = ".cache/pixabay";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const RATE_LIMIT = 100;
+const RATE_WINDOW_MS = 60_000;
+// Margin for clock skew between us and Pixabay, so a full window never counts as two.
+const RATE_MARGIN_MS = 1_000;
+
+const realSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Pixabay API client. Pixabay requires responses to be cached for 24 hours.
- * @param {{ apiKey: string, fetch: typeof fetch, fs: import("./sync.mjs").Fs, now: () => number }} deps
+ * @param {{ apiKey: string, fetch: typeof fetch, fs: import("./sync.mjs").Fs, now: () => number, sleep?: (ms: number) => Promise<void> }} deps
  */
-export function createPixabayClient({ apiKey, fetch, fs, now }) {
+export function createPixabayClient({ apiKey, fetch, fs, now, sleep = realSleep }) {
+  /** Timestamps of API requests still inside the rate window. */
+  const sent = [];
+
   /** @returns {Promise<any | null>} the Pixabay hit for one id, null when Pixabay has none */
   async function getHit(kind, pixabayId) {
     const cachePath = `${CACHE_DIR}/${kind}-${pixabayId}.json`;
@@ -24,6 +33,8 @@ export function createPixabayClient({ apiKey, fetch, fs, now }) {
 
   /** The request URL holds the key, so nothing derived from it may reach an error message. */
   async function request(base, params) {
+    await waitForRateWindow();
+    sent.push(now());
     const redact = (text) => String(text).replaceAll(apiKey, "***");
     let res;
     try {
@@ -37,6 +48,14 @@ export function createPixabayClient({ apiKey, fetch, fs, now }) {
     }
     if (!res.ok) throw new Error(redact(`Pixabay API answered HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`));
     return res.json();
+  }
+
+  async function waitForRateWindow() {
+    while (sent.length && now() - sent[0] >= RATE_WINDOW_MS + RATE_MARGIN_MS) sent.shift();
+    if (sent.length >= RATE_LIMIT) {
+      await sleep(sent[0] + RATE_WINDOW_MS + RATE_MARGIN_MS - now());
+      await waitForRateWindow();
+    }
   }
 
   async function readCache(path) {

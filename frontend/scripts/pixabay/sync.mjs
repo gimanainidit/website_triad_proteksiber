@@ -25,12 +25,13 @@ export const MISSING_KEY_MESSAGE =
  *   fetch: typeof fetch,
  *   fs: Fs,
  *   now: () => number,
+ *   sleep?: (ms: number) => Promise<void>,
  *   log?: (line: string) => void,
  * }} deps
  */
-export async function syncAssets({ config, apiKey, fetch, fs, now, log = () => {} }) {
+export async function syncAssets({ config, apiKey, fetch, fs, now, sleep, log = () => {} }) {
   if (!apiKey?.trim()) throw new Error(MISSING_KEY_MESSAGE);
-  const api = createPixabayClient({ apiKey, fetch, fs, now });
+  const api = createPixabayClient({ apiKey, fetch, fs, now, sleep });
   const manifest = [];
   const downloaded = [];
   const reused = [];
