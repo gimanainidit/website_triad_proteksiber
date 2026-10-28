@@ -253,7 +253,7 @@ const AIGenerator = () => {
 
   if (!generationTypes) {
     return (
-      <div className="min-h-screen bg-background">
+      <div>
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-accent"></div>
         </div>
@@ -262,7 +262,7 @@ const AIGenerator = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="p-4">
       <div className="max-w-6xl mx-auto">
         
         {/* Header */}
@@ -277,8 +277,8 @@ const AIGenerator = () => {
           </Button>
         </div>
 
-        <Card className="shadow-xl border-border">
-          <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+        <Card className="overflow-hidden rounded-xl border-hairline shadow-none">
+          <CardHeader className="bg-navy-950 text-on-dark">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <Brain className="h-6 w-6" />
               AI Content Generator
@@ -397,7 +397,7 @@ const AIGenerator = () => {
                   <Button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-3 text-lg"
+                    className="w-full py-3 text-lg"
                   >
                     {loading ? 'Generating AI Content...' : 'Generate Content'}
                   </Button>
@@ -494,7 +494,8 @@ const AIGenerator = () => {
                   <Button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium py-3 text-lg"
+                    variant="secondary"
+                    className="w-full py-3 text-lg"
                   >
                     {loading ? 'Enhancing Resource...' : 'Enhance Resource'}
                   </Button>
@@ -558,7 +559,8 @@ const AIGenerator = () => {
                   <Button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-medium py-3 text-lg"
+                    variant="secondary"
+                    className="w-full py-3 text-lg"
                   >
                     {loading ? 'Membuat Quiz...' : 'Buat Quiz'}
                   </Button>

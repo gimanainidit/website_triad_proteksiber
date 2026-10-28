@@ -30,17 +30,17 @@ const App = () => (
           <Route element={<SiteLayout />}>
             <Route path="/" element={<Index />} />
             <Route path="/kredit" element={<Credits />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/resources/:id" element={<ResourceDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin/resources" element={<AdminRoute><AdminResources /></AdminRoute>} />
+            <Route path="/admin/upload" element={<AdminRoute><AdminUpload /></AdminRoute>} />
+            <Route path="/admin/templates" element={<AdminRoute><TemplateManager /></AdminRoute>} />
+            <Route path="/ai-generator" element={<AdminRoute><AIGenerator /></AdminRoute>} />
+            <Route path="*" element={<NotFound />} />
           </Route>
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/resources/:id" element={<ResourceDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin/resources" element={<AdminRoute><AdminResources /></AdminRoute>} />
-          <Route path="/admin/upload" element={<AdminRoute><AdminUpload /></AdminRoute>} />
-          <Route path="/admin/templates" element={<AdminRoute><TemplateManager /></AdminRoute>} />
-          <Route path="/ai-generator" element={<AdminRoute><AIGenerator /></AdminRoute>} />
-          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
