@@ -45,3 +45,15 @@ def test_migrations_bring_an_old_resources_table_up_to_the_model():
     early_schema = {"id", "created_at", "title", "slug", "description", "content", "tags",
                     "file_url", "file_size", "file_type", "category", "author_id", "published"}
     assert set(Resource.__table__.columns.keys()) == early_schema | added
+
+
+def test_online_migration_uses_the_installed_postgres_driver():
+    result = subprocess.run(
+        [sys.executable, "-m", "alembic", "upgrade", "head"], cwd=BACKEND,
+        env={**{k: v for k, v in os.environ.items() if k != "DATABASE_URL"},
+             "DATABASE_URL": "postgresql://user:pass@127.0.0.1:9/db?sslmode=require"},
+        capture_output=True, text=True, timeout=60,
+    )
+    assert result.returncode != 0  # nothing listens on port 9
+    assert "No module named" not in result.stderr, result.stderr[-300:]
+    assert "OperationalError" in result.stderr, result.stderr[-300:]

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
+from sqlalchemy.engine import make_url
 from sqlalchemy import pool
 
 from alembic import context
@@ -17,8 +18,10 @@ load_dotenv(Path(__file__).parents[1] / ".env")
 database_url = os.environ.get("DATABASE_URL")
 if not database_url:
     raise RuntimeError("Required environment variable DATABASE_URL is missing")
+# SQLAlchemy 2.1 maps postgresql:// to psycopg 3; requirements ship psycopg2.
+sync_url = make_url(database_url).set(drivername="postgresql+psycopg2")
 # configparser treats % as interpolation; URL-encoded passwords contain it.
-config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
+config.set_main_option("sqlalchemy.url", sync_url.render_as_string(hide_password=False).replace("%", "%%"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
