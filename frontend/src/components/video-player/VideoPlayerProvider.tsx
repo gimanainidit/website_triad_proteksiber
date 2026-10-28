@@ -9,6 +9,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
+import { useInRouterContext, useLocation } from "react-router-dom";
 import "./video-player.css";
 import { VideoPlayerContext, type ResolveVideo, type VideoPlayerControls, type VideoSource } from "./context";
 import { lockScroll } from "./scroll-lock";
@@ -21,9 +22,22 @@ interface Active extends VideoSource {
   id: string;
 }
 
+// Rendered only inside a Router: the player tests and any Router-less host must not throw.
+function CloseOnNavigate({ onNavigate }: { onNavigate: () => void }) {
+  const { key } = useLocation();
+  const previous = useRef(key);
+  useEffect(() => {
+    if (previous.current === key) return;
+    previous.current = key;
+    onNavigate();
+  }, [key, onNavigate]);
+  return null;
+}
+
 const Marker = () => <span className="vp-marker" aria-hidden="true" />;
 
 export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVideo; children: ReactNode }) {
+  const inRouter = useInRouterContext();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const resolveRef = useRef(resolve);
@@ -109,6 +123,7 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDialogElement>) => {
+    wake();
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const onButton = (e.target as HTMLElement).closest("button") !== null;
     switch (e.key.toLowerCase()) {
@@ -142,7 +157,8 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
     const frame = e.currentTarget.getBoundingClientRect();
     const outside =
       frame.width > 0 && (e.clientX < frame.left || e.clientX > frame.right || e.clientY < frame.top || e.clientY > frame.bottom);
-    if (outside) hideControls();
+    // Touch has no hover, so only a mouse can be "outside" or "leave".
+    if (outside && e.pointerType === "mouse") hideControls();
     else wake();
   };
 
@@ -188,6 +204,7 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
   return (
     <VideoPlayerContext.Provider value={controls}>
       {children}
+      {inRouter && <CloseOnNavigate onNavigate={controls.close} />}
       <dialog
         ref={dialogRef}
         className={idle ? "vp-dialog is-idle" : "vp-dialog"}
@@ -195,7 +212,10 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
         aria-label={active?.title ?? "Pemutar video"}
         onKeyDown={handleKeyDown}
         onPointerMove={handlePointerMove}
-        onPointerLeave={hideControls}
+        onPointerDown={wake}
+        onPointerLeave={(e) => {
+          if (e.pointerType === "mouse") hideControls();
+        }}
         onFocus={wake}
         onClick={(e) => {
           if (e.target === e.currentTarget) controls.close();
