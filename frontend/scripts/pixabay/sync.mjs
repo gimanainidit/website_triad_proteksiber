@@ -44,8 +44,8 @@ export async function syncAssets({ config, apiKey, fetch, fs, now, log = () => {
     const name = `pixabay-${entry.pixabayId}-${pick.rendition}`;
     const file = `${name}.${pick.ext}`;
     const poster = `${name}-poster.jpg`;
-    await save(`${MEDIA_DIR}/${file}`, pick.url);
-    await save(`${MEDIA_DIR}/${poster}`, pick.posterUrl);
+    await save(entry, `${MEDIA_DIR}/${file}`, pick.url, pick.size);
+    await save(entry, `${MEDIA_DIR}/${poster}`, pick.posterUrl);
 
     manifest.push({
       id: entry.id,
@@ -64,8 +64,15 @@ export async function syncAssets({ config, apiKey, fetch, fs, now, log = () => {
   }
   return { manifest, downloaded, reused };
 
-  async function save(path, url) {
+  /** A file counts as present when it has the size the API reported, or any content when the API reports none. */
+  async function save(entry, path, url, expectedSize) {
+    const onDisk = await fs.stat(path).then((s) => s.size, () => 0);
+    if (onDisk > 0 && (expectedSize === undefined || onDisk === expectedSize)) {
+      reused.push(path);
+      return;
+    }
     const res = await fetch(url);
+    if (!res.ok) throw new Error(`${entry.id}: download of ${path} failed with HTTP ${res.status}`);
     await fs.writeFile(path, Buffer.from(await res.arrayBuffer()));
     downloaded.push(path);
   }

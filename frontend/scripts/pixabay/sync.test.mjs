@@ -127,3 +127,26 @@ describe("api errors", () => {
     expect(error.message).not.toContain(API_KEY);
   });
 });
+
+describe("download reuse", () => {
+  const videoPath = "public/media/pixabay-173102-small.mp4";
+  const posterPath = "public/media/pixabay-173102-small-poster.jpg";
+
+  it("skips files already on disk with the size the API reports", async () => {
+    const fs = createFakeFs({ [videoPath]: Buffer.alloc(5_987_902), [posterPath]: Buffer.from("jpg") });
+    const { fake, run } = setup({ fs });
+    const { downloaded, reused } = await run();
+    expect(fake.downloadCalls).toEqual([]);
+    expect(downloaded).toEqual([]);
+    expect(reused).toEqual([videoPath, posterPath]);
+  });
+
+  it("downloads again when the size on disk differs (truncated file)", async () => {
+    const fs = createFakeFs({ [videoPath]: Buffer.alloc(1000), [posterPath]: Buffer.from("jpg") });
+    const { fake, run } = setup({ fs });
+    const { downloaded, reused } = await run();
+    expect(fake.downloadCalls).toEqual([expect.stringContaining("173102-848555581_small.mp4")]);
+    expect(downloaded).toEqual([videoPath]);
+    expect(reused).toEqual([posterPath]);
+  });
+});
