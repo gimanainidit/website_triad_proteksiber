@@ -13,7 +13,7 @@ Pelaku: **Agent** (Claude di VPS, tanpa sudo/GitHub/Docker) · **User** (kamu: d
 
 ## Progres
 
-Diperbarui 2026-10-28. **Posisi sekarang: situs live di https://eranusasiber.my.id (health 200). Berikutnya user menjalankan migrasi `0001` (T16) agar `/api/resources` berhenti 500, lalu T18.** T19 menunggu keputusan user.
+Diperbarui 2026-10-28. **Posisi sekarang: situs live dan berfungsi di https://eranusasiber.my.id (halaman publik, API, file). Berikutnya T18 (uji admin di browser), sisa T10 (push + hapus `emergent`), lalu T20 (matikan Vercel).** T19 menunggu keputusan user.
 
 | ID | Tiket | Pelaku | Blocker | Status | Bukti |
 |---|---|---|---|---|---|
@@ -26,13 +26,13 @@ Diperbarui 2026-10-28. **Posisi sekarang: situs live di https://eranusasiber.my.
 | T07 | Mode deploy shared host + CA Supabase | Agent | – | ✅ | `d8e881d`; 24 test hijau; `nginx -t` site lolos |
 | T08 | Bucket Storage `templates` | Agent | T03 | ✅ | Dibuat public 15 MB; uji upload, ambil URL, hapus |
 | T09 | Review semua commit sebelum push | Agent | T05–T08 | ✅ | 4 putaran review independen; putaran 4 atas `ba4f85d` bersih. Perbaikan: `3db00be`, `e6f7d1c`, `ba4f85d`. Risiko yang diterima: email mixed-case lama di DB dev; PDF draft tetap bisa diunduh lewat URL Supabase publik oleh yang sudah punya link. |
-| T10 | Push riwayat bersih, default branch `main`, hapus branch legacy | User | T09 | 🟡 | GitHub `main` = `4f90c7a`, default `main`, tag legacy ada, `conflict_140226_2128` terhapus. **Branch `emergent` masih ada.** `88da23b` belum di-push |
+| T10 | Push riwayat bersih, default branch `main`, hapus branch legacy | User | T09 | 🟡 | GitHub `main` = `4f90c7a`, default `main`, tag legacy ada, `conflict_140226_2128` terhapus. **Belum: hapus branch `emergent`, push commit lokal `88da23b`..HEAD** (migrasi + fix driver + PLAN; tidak mengubah image yang jalan) |
 | T11 | Cabut akses Emergent/Lovable di GitHub | User | – | ✅ | Lewat wizard (dikonfirmasi user, tidak bisa dicek agent tanpa token) |
 | T12 | CI hijau dan image di GHCR | Agent cek | T10 | ✅ | Run push `4f90c7a` success: actions/runs/40623078257 |
 | T13 | Tulis wizard deploy untuk T14–T17 | Agent | T07 | ✅ | `deploy/shared-host/wizard.sh` (12 stage), `bash -n` + shellcheck bersih; cek non-interaktif diuji ke API GitHub dan situs lokal |
 | T14 | DNS Cloudflare apex + www | Wizard | T13 | ✅ | Keduanya → 67.217.244.248 (DNS only) |
 | T15 | `setup-host.sh` di VPS | Wizard | T13 | ✅ | User `triad` uid 999 + grup docker; site `triad` aktif; listener hanya `127.0.0.1:8180` |
-| T16 | Isi env, login GHCR, `init_db.py`, superadmin, jalankan stack | Wizard | T12, T15 | 🟡 | Stack jalan, `/api/health` 200. `/api/resources` 500: tabel `resources` lama tidak punya 5 kolom model. Fix: migrasi Alembic `0001` (`88da23b`), **menunggu user menjalankannya di DB produksi** |
+| T16 | Isi env, login GHCR, `init_db.py`, superadmin, jalankan stack | Wizard | T12, T15 | ✅ | Stack jalan; 1 superadmin; migrasi Alembic `0001` dijalankan user (setelah fix driver `e900a6c`). `/api/resources` 200 (8 resource, 5 file Supabase HEAD 200), `/api/admin/resources` tanpa token 401 |
 | T17 | HTTPS dengan certbot | Wizard | T14, T16 | ✅ | Let's Encrypt `eranusasiber.my.id` + `www`, s.d. 2027-01-26; HTTP → 301 HTTPS. Situs lain sama seperti sebelum deploy (DuckDNS 404, CTF 502/502) |
 | T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | ⬜ | |
 | T19 | Nasib tabel n8n di schema `public` | User | – | ⛔ | |
@@ -41,6 +41,8 @@ Diperbarui 2026-10-28. **Posisi sekarang: situs live di https://eranusasiber.my.
 | T22 | Rilis otomatis dari GitHub Actions | Agent + User | T18 | ⬜ | Opsional |
 | T23 | Perbaiki 5 error TypeScript + typecheck di CI | Agent | – | ✅ | `04f714f`; ternyata bug: API tidak mengirim `published`, tombol Publish admin selalu mengirim `true`. `tsc` 0, CI `npm run typecheck` |
 | T24 | Admin melihat draft; publik tidak | Agent | – | ✅ | `8fab47e` + `e6f7d1c`: listing publik dan detail by id hanya published; `GET /api/admin/resources` untuk admin |
+| T25 | Bersihkan data uji di produksi | User | – | ⛔ | 8 resource published, termasuk `Test AI Guide`, `Test PPTX Conversion`, `Test Resource Document` dan duplikat judul; 3 tanpa file. Keputusan konten user |
+| T26 | Buang kolom `ai_review_score`, `ai_review_result`, `is_published` | Agent | T16 | ⬜ | Tidak dipakai kode; perlu migrasi `0002` + rilis image baru |
 
 ## Skill per jenis tiket
 
