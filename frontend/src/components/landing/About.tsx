@@ -11,7 +11,7 @@ export function About() {
         <MarkerRow position="top" />
         <SectionGrid className="pt-10 lg:pt-14">
           <Col span={12}>
-            <Eyebrow tone="link" className="reveal-fade mb-6">
+            <Eyebrow tone="link" className="reveal-fade mb-6 text-ink-strong">
               {about.eyebrow}
             </Eyebrow>
             <h2
@@ -29,7 +29,7 @@ export function About() {
               <LineMarker index={i} />
               <div className="reveal-fade" style={revealIndex(i + 2)}>
                 <h3 className="text-heading-4 mb-3 text-ink-strong">{pillar.title}</h3>
-                <p className="text-body-md text-steel">{pillar.text}</p>
+                <p className="text-body-md text-ink">{pillar.text}</p>
               </div>
             </Col>
           ))}

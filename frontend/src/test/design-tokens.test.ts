@@ -111,3 +111,32 @@ describe("fonts", () => {
     expect(css).toContain(`'${fontsource[kind as keyof typeof families]}/`);
   });
 });
+
+describe("text contrast, light theme", () => {
+  const light = (name: string) => {
+    const hex = (colorTokens.find((token) => token.name === name)?.value as Record<Theme, string>).light;
+    return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  };
+
+  // WCAG 2.x relative luminance and contrast ratio.
+  const luminance = (rgb: number[]) => {
+    const [r, g, b] = rgb.map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (foreground: string, background: string) => {
+    const [hi, lo] = [luminance(light(foreground)), luminance(light(background))].sort((a, b) => b - a);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+
+  test.each([
+    ["ink", "accent-soft"],
+    ["ink-strong", "accent-soft"],
+    ["steel", "canvas"],
+    ["link", "canvas"],
+    ["on-dark-muted", "navy-950"],
+    ["on-dark", "navy-950"],
+    ["ink", "canvas"],
+  ])("%s on %s is at least 4.5:1", (foreground, background) => {
+    expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5);
+  });
+});
