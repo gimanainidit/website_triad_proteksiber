@@ -54,7 +54,7 @@ const ResourceDetail = () => {
               <span className="text-sm text-steel">{resource.file_size}</span>
               <span className="text-sm text-steel">{resource.file_type}</span>
             </div>
-            <Button className="mt-4" expand={false} onClick={() => window.open(resource.file_url, "_blank")}>
+            <Button className="mt-4" expand={false} onClick={() => window.open(resource.file_url, "_blank", "noopener,noreferrer")}>
               <Download className="h-4 w-4" aria-hidden="true" /> Download
             </Button>
           </div>
