@@ -1,12 +1,11 @@
-# TRIAD VPS deployment — Neon PostgreSQL + Supabase cloud
+# TRIAD VPS deployment — Supabase Postgres + Storage
 
-This directory prepares production; it does not imply that a VPS has been installed.
-Frontend/API use one origin. Caddy routes `/api/*` to FastAPI and everything else
- to the React static build. Neon holds PostgreSQL data; Supabase holds uploaded files.
-No local PostgreSQL container is created. n8n uses a persistent Docker volume.
+This directory prepares production. Frontend/API use one origin: Caddy routes `/api/*`
+to FastAPI and everything else to the React static build. Supabase holds both the
+PostgreSQL data and uploaded files; no local PostgreSQL container is created.
 
-Target VPS: Ubuntu 24.04 LTS, `harai@172.104.190.115`, SSH port 22.
-Direct SSH from the current Codex environment returned connection refused; no server changes have been made.
+**The current VPS already runs nginx for other sites: use [shared-host mode](shared-host/README.md).**
+The rest of this guide describes the dedicated-VPS mode, where Caddy owns ports 80/443.
 
 ## Prerequisites
 

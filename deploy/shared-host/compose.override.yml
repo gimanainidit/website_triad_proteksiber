@@ -1,0 +1,15 @@
+# Shared-host mode: copy to /opt/triad/compose.override.yml (Compose loads it
+# automatically). The host's nginx owns 80/443 and terminates TLS; this stack
+# listens on loopback only. Requires Docker Compose >= 2.24.4 for !override.
+services:
+  gateway:
+    ports: !override
+      - "127.0.0.1:8180:80"
+    mem_limit: 64m
+  frontend:
+    mem_limit: 48m
+  backend:
+    mem_limit: 384m
+  n8n:
+    profiles: ["automation"]
+    mem_limit: 512m

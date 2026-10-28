@@ -25,6 +25,7 @@ Dokumen ini masih rencana. Belum ada kode, server, atau setelan GitHub yang diub
 | A0 kode: `alembic/env.py` membaca `DATABASE_URL`, `alembic.ini` dikosongkan, dan test `tests/test_alembic_config.py` ditambahkan | Selesai, commit lokal |
 | A1 + A3 dead code: artefak Emergent, starter Astro, klien Supabase frontend, 34 komponen/hook, 30 paket npm, dan dependency Python yang tidak dipakai dibuang; `requirements-dev.txt` dibuat | Selesai, commit lokal. Frontend build + test hijau, backend 15 test hijau. |
 | Rewrite riwayat git: `backend/.env` dan `frontend/.env` dihapus dari semua commit, dan semua nilai secret diganti `***REMOVED***` | Selesai di lokal. Scan ulang: 0 temuan. **Belum di-push** karena VPS tidak punya kredensial GitHub. |
+| B3 shared-host: `deploy/shared-host/` (compose override loopback 8180, nginx site, `setup-host.sh` idempoten + rollback nginx), CA Supabase di `backend/certs/`, CI menjalankan semua test | Selesai, commit lokal. 24 test hijau; `nginx -t` pada site lolos. Image belum di-build (VPS tanpa akses docker). |
 | Rotasi password DB | **Selesai** (dashboard, 2026-10-28). Password lama ditolak; `backend/.env` diverifikasi lewat `database.py` dengan TLS terverifikasi. |
 | Rotasi secret lain yang pernah ter-commit di `backend/.env` | **Belum.** Ini harus dikerjakan user (lihat A0 di bawah). |
 **Temuan saat verifikasi DB:**

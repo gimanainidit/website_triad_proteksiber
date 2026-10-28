@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r backend/requirements-dev.txt
-      - run: PYTHONPATH=backend python -m pytest tests/test_openai_services.py tests/test_vps_database.py tests/test_vps_release.py tests/test_optional_features.py tests/test_alembic_config.py -q
+      - run: PYTHONPATH=backend python -m pytest tests -q
   images:
     if: github.event_name != 'pull_request'
     needs: check
