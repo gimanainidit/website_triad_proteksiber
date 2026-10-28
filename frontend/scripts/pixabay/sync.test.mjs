@@ -45,3 +45,17 @@ describe("syncAssets", () => {
     expect(everything.filter((s) => s.includes(API_KEY))).toEqual([]);
   });
 });
+
+describe("rendition budget", () => {
+  it("steps down to the largest rendition that fits maxBytes", async () => {
+    const { run } = setup({ entries: [{ ...heroLoop, rendition: "large", maxBytes: 11_000_000 }] });
+    const { manifest } = await run();
+    expect(manifest[0].src).toBe("/media/pixabay-173102-medium.mp4");
+    expect(manifest[0]).toMatchObject({ width: 1280, height: 720 });
+  });
+
+  it("throws naming the id when no rendition fits", async () => {
+    const { run } = setup({ entries: [{ ...heroLoop, maxBytes: 1_000_000 }] });
+    await expect(run()).rejects.toThrow(/hero-loop/);
+  });
+});
