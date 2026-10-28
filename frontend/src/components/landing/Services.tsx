@@ -96,7 +96,7 @@ export function Services() {
             ))}
           </Tabs.List>
           {serviceCategories.map(({ category, services }) => (
-            <Tabs.Content key={category} value={tabValue(category)} className="mt-8 focus-visible:outline-none">
+            <Tabs.Content key={category} value={tabValue(category)} className="mt-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
               <CardRow>
                 {services.map((service, i) => (
                   <ServiceCard key={service.slug} service={service} number={i + 1} />
