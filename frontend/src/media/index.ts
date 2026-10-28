@@ -2,6 +2,7 @@ import manifest from "./manifest.json";
 
 export const MEDIA_IDS = [
   "hero-loop",
+  "hero-loop-mobile",
   "hero-full",
   "env-datacenter",
   "feature-pentest",

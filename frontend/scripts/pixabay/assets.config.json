@@ -9,6 +9,14 @@
       "maxBytes": 6500000
     },
     {
+      "id": "hero-loop-mobile",
+      "pixabayId": 173102,
+      "kind": "video",
+      "rendition": "tiny",
+      "role": "hero-loop-mobile",
+      "maxBytes": 3200000
+    },
+    {
       "id": "hero-full",
       "pixabayId": 173102,
       "kind": "video",

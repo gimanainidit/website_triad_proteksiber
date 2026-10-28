@@ -13,6 +13,19 @@
     "license": "Pixabay Content License"
   },
   {
+    "id": "hero-loop-mobile",
+    "kind": "video",
+    "src": "/media/pixabay-173102-tiny.mp4",
+    "poster": "/media/pixabay-173102-tiny-poster.jpg",
+    "width": 640,
+    "height": 360,
+    "duration": 28,
+    "pixabayId": 173102,
+    "pageURL": "https://pixabay.com/videos/id-173102/",
+    "user": "spacetrip",
+    "license": "Pixabay Content License"
+  },
+  {
     "id": "hero-full",
     "kind": "video",
     "src": "/media/pixabay-173102-medium.mp4",
