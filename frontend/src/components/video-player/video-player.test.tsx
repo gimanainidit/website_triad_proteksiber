@@ -127,3 +127,30 @@ describe("toggles", () => {
     play.mockRestore();
   });
 });
+
+describe("resume position", () => {
+  beforeEach(() => setup());
+
+  test("reopening the same id resumes where it was closed", () => {
+    act(() => player.open("a"));
+    video().currentTime = 12;
+    act(() => player.close());
+    act(() => player.open("a"));
+    expect(video().currentTime).toBe(12);
+  });
+
+  test("a different id starts at 0, and each id keeps its own position", () => {
+    act(() => player.open("a"));
+    video().currentTime = 12;
+    act(() => player.close());
+
+    act(() => player.open("b"));
+    expect(video().currentTime).toBe(0);
+    video().currentTime = 30;
+    act(() => player.open("a"));
+    expect(video().currentTime).toBe(12);
+
+    act(() => player.open("b"));
+    expect(video().currentTime).toBe(30);
+  });
+});

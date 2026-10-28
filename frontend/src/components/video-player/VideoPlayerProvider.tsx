@@ -10,15 +10,23 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
   const videoRef = useRef<HTMLVideoElement>(null);
   const resolveRef = useRef(resolve);
   resolveRef.current = resolve;
+  const positions = useRef(new Map<string, number>());
+  const shownId = useRef<string | null>(null);
   const [active, setActive] = useState<Active | null>(null);
   const [muted, setMuted] = useState(false);
   const [paused, setPaused] = useState(false);
+
+  const rememberPosition = () => {
+    if (shownId.current && videoRef.current) positions.current.set(shownId.current, videoRef.current.currentTime);
+  };
 
   const controls = useMemo<VideoPlayerControls>(
     () => ({
       open(id) {
         const source = resolveRef.current(id);
-        if (source) setActive({ id, ...source });
+        if (!source) return;
+        rememberPosition();
+        setActive({ id, ...source });
       },
       close() {
         dialogRef.current?.close();
@@ -40,6 +48,10 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
     const dialog = dialogRef.current;
     const video = videoRef.current;
     if (!active || !dialog || !video) return;
+    if (shownId.current !== active.id) {
+      video.currentTime = positions.current.get(active.id) ?? 0;
+      shownId.current = active.id;
+    }
     if (!dialog.open) dialog.showModal();
     video.play().catch(() => setPaused(true));
   }, [active]);
@@ -58,7 +70,10 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
           e.preventDefault();
           controls.close();
         }}
-        onClose={() => videoRef.current?.pause()}
+        onClose={() => {
+          rememberPosition();
+          videoRef.current?.pause();
+        }}
       >
         <video ref={videoRef} className="vp-video" src={active?.src} poster={active?.poster} playsInline
           loop
