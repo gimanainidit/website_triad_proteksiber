@@ -1,0 +1,68 @@
+import { LICENSE } from "./model.mjs";
+import { selectRendition } from "./select.mjs";
+
+const MEDIA_DIR = "public/media";
+const API = "https://pixabay.com/api";
+
+/**
+ * @typedef {{
+ *   readFile(path: string): Promise<string | Uint8Array>,
+ *   writeFile(path: string, data: Uint8Array | string): Promise<void>,
+ *   mkdir(path: string, opts?: { recursive: boolean }): Promise<unknown>,
+ *   stat(path: string): Promise<{ size: number }>,
+ * }} Fs
+ */
+
+/**
+ * Downloads the curated Pixabay files and returns the manifest describing them.
+ * Paths are relative to the working directory (the `frontend/` folder).
+ * @param {{
+ *   config: { entries: import("./model.mjs").ConfigEntry[] },
+ *   apiKey: string,
+ *   fetch: typeof fetch,
+ *   fs: Fs,
+ *   now: () => number,
+ *   log?: (line: string) => void,
+ * }} deps
+ */
+export async function syncAssets({ config, apiKey, fetch, fs, now, log = () => {} }) {
+  const manifest = [];
+  const downloaded = [];
+  const reused = [];
+  await fs.mkdir(MEDIA_DIR, { recursive: true });
+
+  for (const entry of config.entries) {
+    const base = entry.kind === "video" ? `${API}/videos/` : `${API}/`;
+    const res = await fetch(`${base}?${new URLSearchParams({ key: apiKey, id: String(entry.pixabayId) })}`);
+    const hit = (await res.json()).hits[0];
+    const pick = selectRendition(entry, hit);
+
+    const name = `pixabay-${entry.pixabayId}-${pick.rendition}`;
+    const file = `${name}.${pick.ext}`;
+    const poster = `${name}-poster.jpg`;
+    await save(`${MEDIA_DIR}/${file}`, pick.url);
+    await save(`${MEDIA_DIR}/${poster}`, pick.posterUrl);
+
+    manifest.push({
+      id: entry.id,
+      kind: entry.kind,
+      src: `/media/${file}`,
+      poster: `/media/${poster}`,
+      width: pick.width,
+      height: pick.height,
+      duration: pick.duration,
+      pixabayId: entry.pixabayId,
+      pageURL: hit.pageURL,
+      user: hit.user,
+      license: LICENSE,
+    });
+    log(`${entry.id}: ${file}`);
+  }
+  return { manifest, downloaded, reused };
+
+  async function save(path, url) {
+    const res = await fetch(url);
+    await fs.writeFile(path, Buffer.from(await res.arrayBuffer()));
+    downloaded.push(path);
+  }
+}
