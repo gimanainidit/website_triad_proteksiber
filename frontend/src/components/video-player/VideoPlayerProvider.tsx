@@ -1,6 +1,8 @@
-import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { formatTimecode } from "./timecode";
 import { VideoPlayerContext, type ResolveVideo, type VideoPlayerControls, type VideoSource } from "./context";
+
+const SEEK_STEP_SECONDS = 5;
 
 interface Active extends VideoSource {
   id: string;
@@ -55,6 +57,50 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
     syncTime();
   };
 
+  const seekBy = (delta: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    const end = Number.isFinite(video.duration) ? video.duration : Infinity;
+    video.currentTime = Math.min(Math.max(video.currentTime + delta, 0), end);
+    syncTime();
+  };
+
+  const toggleFullscreen = () => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const request = document.fullscreenElement === dialog ? document.exitFullscreen() : dialog.requestFullscreen?.();
+    Promise.resolve(request).catch(() => {});
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDialogElement>) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const onButton = (e.target as HTMLElement).closest("button") !== null;
+    switch (e.key.toLowerCase()) {
+      case " ":
+        if (onButton) return;
+        togglePlay();
+        break;
+      case "k":
+        togglePlay();
+        break;
+      case "m":
+        setMuted((m) => !m);
+        break;
+      case "arrowleft":
+        seekBy(-SEEK_STEP_SECONDS);
+        break;
+      case "arrowright":
+        seekBy(SEEK_STEP_SECONDS);
+        break;
+      case "f":
+        toggleFullscreen();
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+  };
+
   const togglePlay = () => {
     const video = videoRef.current;
     if (video) void (video.paused ? video.play() : video.pause());
@@ -69,7 +115,11 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
       shownId.current = active.id;
       syncTime();
     }
-    if (!dialog.open) dialog.showModal();
+    if (!dialog.open) {
+      dialog.showModal();
+      // showModal focuses the first control (Close), where Space would dismiss the player
+      dialog.focus();
+    }
     video.play().catch(() => setPaused(true));
   }, [active]);
 
@@ -82,6 +132,8 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
       <dialog
         ref={dialogRef}
         className="vp-dialog"
+        tabIndex={-1}
+        onKeyDown={handleKeyDown}
         aria-label={active?.title ?? "Pemutar video"}
         onClick={(e) => {
           if (e.target === e.currentTarget) controls.close();

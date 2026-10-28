@@ -205,3 +205,75 @@ describe("scrubber and timecodes", () => {
     expect(video().currentTime).toBe(0);
   });
 });
+
+describe("keyboard", () => {
+  beforeEach(() => {
+    setup();
+    act(() => player.open("a"));
+  });
+
+  const press = (key: string, target: Element = dialog()) => fireEvent.keyDown(target, { key });
+
+  test("focus lands on the dialog, not on Close, so Space cannot dismiss it by accident", () => {
+    expect(dialog()).toHaveFocus();
+  });
+
+  test("Space and K toggle play", () => {
+    press(" ");
+    expect(video().paused).toBe(true);
+    press("k");
+    expect(video().paused).toBe(false);
+    press("K");
+    expect(video().paused).toBe(true);
+  });
+
+  test("Space on a focused button leaves it to the button's own click", () => {
+    press(" ", screen.getByRole("button", { name: "Bisukan" }));
+    expect(video().paused).toBe(false);
+  });
+
+  test("M toggles mute", () => {
+    press("m");
+    expect(video().muted).toBe(true);
+    expect(screen.getByRole("button", { name: "Suara aktif" })).toBeInTheDocument();
+    press("M");
+    expect(video().muted).toBe(false);
+  });
+
+  test("arrow keys seek 5 seconds, clamped to the video", () => {
+    setDuration(100);
+    video().currentTime = 50;
+    press("ArrowRight");
+    expect(video().currentTime).toBe(55);
+    press("ArrowLeft");
+    press("ArrowLeft");
+    expect(video().currentTime).toBe(45);
+
+    video().currentTime = 2;
+    press("ArrowLeft");
+    expect(video().currentTime).toBe(0);
+
+    video().currentTime = 98;
+    press("ArrowRight");
+    expect(video().currentTime).toBe(100);
+  });
+
+  test("arrow keys on the scrubber seek 5 seconds instead of one slider step", () => {
+    setDuration(100);
+    video().currentTime = 50;
+    press("ArrowRight", screen.getByRole("slider", { name: "Posisi video" }));
+    expect(video().currentTime).toBe(55);
+  });
+
+  test("F requests fullscreen on the dialog", () => {
+    const requestFullscreen = vi.fn(() => Promise.resolve());
+    dialog().requestFullscreen = requestFullscreen;
+    press("f");
+    expect(requestFullscreen).toHaveBeenCalledTimes(1);
+  });
+
+  test("modified keys are ignored", () => {
+    fireEvent.keyDown(dialog(), { key: "m", ctrlKey: true });
+    expect(video().muted).toBe(false);
+  });
+});
