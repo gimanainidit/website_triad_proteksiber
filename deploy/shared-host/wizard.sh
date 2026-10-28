@@ -210,7 +210,8 @@ DOMAIN=eranusasiber.my.id
 LOCAL_ENV="$REPO_DIR/backend/.env"
 BASELINE=$(mktemp)
 ROOT_ENV_TMP=""
-trap 'rm -f "$BASELINE" "$ROOT_ENV_TMP"' EXIT
+askpass=""
+trap 'rm -f "$BASELINE" "$ROOT_ENV_TMP" "$askpass"' EXIT
 
 as_triad() { sudo -u triad -H bash -c "cd $DEPLOY_DIR && $1"; }
 compose() { as_triad "docker compose --env-file production.env $1"; }
