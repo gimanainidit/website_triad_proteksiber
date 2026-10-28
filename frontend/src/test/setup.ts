@@ -44,3 +44,17 @@ HTMLMediaElement.prototype.pause = function pause(this: HTMLMediaElement) {
   }
 };
 HTMLMediaElement.prototype.load = function load() {};
+
+// Default for components that observe visibility; tests that need control stub their own with vi.stubGlobal.
+if (typeof window.IntersectionObserver === "undefined") {
+  class IdleIntersectionObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return [];
+    }
+  }
+  Object.defineProperty(window, "IntersectionObserver", { writable: true, configurable: true, value: IdleIntersectionObserver });
+}
+window.scrollTo = (() => {}) as typeof window.scrollTo;
