@@ -286,11 +286,11 @@ describe("loading state", () => {
       video().dispatchEvent(new Event("canplay"));
     });
 
-  test("shows Memuat… until canplay", () => {
+  test("shows Memuatâ€¦ until canplay", () => {
     act(() => player.open("a"));
-    expect(screen.getByText("Memuat…")).toBeInTheDocument();
+    expect(screen.getByText("Memuatâ€¦")).toBeInTheDocument();
     canPlay();
-    expect(screen.queryByText("Memuat…")).not.toBeInTheDocument();
+    expect(screen.queryByText("Memuatâ€¦")).not.toBeInTheDocument();
   });
 
   test("a video that is already ready does not flash it again, a new video does", () => {
@@ -298,10 +298,10 @@ describe("loading state", () => {
     canPlay();
     act(() => player.close());
     act(() => player.open("a"));
-    expect(screen.queryByText("Memuat…")).not.toBeInTheDocument();
+    expect(screen.queryByText("Memuatâ€¦")).not.toBeInTheDocument();
 
     act(() => player.open("b"));
-    expect(screen.getByText("Memuat…")).toBeInTheDocument();
+    expect(screen.getByText("Memuatâ€¦")).toBeInTheDocument();
   });
 });
 

@@ -1,7 +1,18 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
+import "./video-player.css";
+import { VideoPlayerContext, type ResolveVideo, type VideoPlayerControls, type VideoSource } from "./context";
 import { lockScroll } from "./scroll-lock";
 import { formatTimecode } from "./timecode";
-import { VideoPlayerContext, type ResolveVideo, type VideoPlayerControls, type VideoSource } from "./context";
 
 const SEEK_STEP_SECONDS = 5;
 const IDLE_MS = 2500;
@@ -9,6 +20,8 @@ const IDLE_MS = 2500;
 interface Active extends VideoSource {
   id: string;
 }
+
+const Marker = () => <span className="vp-marker" aria-hidden="true" />;
 
 export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVideo; children: ReactNode }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -42,16 +55,12 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
     setIdle(true);
   };
 
-  const rememberPosition = () => {
-    if (shownId.current && videoRef.current) positions.current.set(shownId.current, videoRef.current.currentTime);
-  };
-
   const controls = useMemo<VideoPlayerControls>(
     () => ({
       open(id) {
         const source = resolveRef.current(id);
         if (!source) return;
-        rememberPosition();
+        if (shownId.current && videoRef.current) positions.current.set(shownId.current, videoRef.current.currentTime);
         setActive({ id, ...source });
       },
       close() {
@@ -85,6 +94,11 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
     const end = Number.isFinite(video.duration) ? video.duration : Infinity;
     video.currentTime = Math.min(Math.max(video.currentTime + delta, 0), end);
     syncTime();
+  };
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (video) void (video.paused ? video.play() : video.pause());
   };
 
   const toggleFullscreen = () => {
@@ -123,9 +137,22 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
     e.preventDefault();
   };
 
-  const togglePlay = () => {
-    const video = videoRef.current;
-    if (video) void (video.paused ? video.play() : video.pause());
+  const handlePointerMove = (e: PointerEvent<HTMLDialogElement>) => {
+    // Over the ::backdrop the target is the dialog itself and no pointerleave fires, so compare against the frame.
+    const frame = e.currentTarget.getBoundingClientRect();
+    const outside =
+      frame.width > 0 && (e.clientX < frame.left || e.clientX > frame.right || e.clientY < frame.top || e.clientY > frame.bottom);
+    if (outside) hideControls();
+    else wake();
+  };
+
+  const handleClose = () => {
+    if (shownId.current && videoRef.current) positions.current.set(shownId.current, videoRef.current.currentTime);
+    videoRef.current?.pause();
+    window.clearTimeout(idleTimer.current);
+    setIdle(false);
+    releaseScroll.current?.();
+    releaseScroll.current = null;
   };
 
   useLayoutEffect(() => {
@@ -146,7 +173,6 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
     video.play().catch(() => setPaused(true));
   }, [active]);
 
-  const loading = active !== null && readySrc !== active.src;
   useEffect(
     () => () => {
       window.clearTimeout(idleTimer.current);
@@ -155,15 +181,7 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
     [],
   );
 
-  const handlePointerMove = (e: PointerEvent<HTMLDialogElement>) => {
-    // Over the ::backdrop the target is the dialog itself and no pointerleave fires, so compare against the frame.
-    const frame = e.currentTarget.getBoundingClientRect();
-    const outside =
-      frame.width > 0 && (e.clientX < frame.left || e.clientX > frame.right || e.clientY < frame.top || e.clientY > frame.bottom);
-    if (outside) hideControls();
-    else wake();
-  };
-
+  const loading = active !== null && readySrc !== active.src;
   const elapsed = formatTimecode(time.current);
   const progress = time.duration > 0 ? Math.min(time.current / time.duration, 1) : 0;
 
@@ -174,11 +192,11 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
         ref={dialogRef}
         className={idle ? "vp-dialog is-idle" : "vp-dialog"}
         tabIndex={-1}
+        aria-label={active?.title ?? "Pemutar video"}
         onKeyDown={handleKeyDown}
         onPointerMove={handlePointerMove}
         onPointerLeave={hideControls}
         onFocus={wake}
-        aria-label={active?.title ?? "Pemutar video"}
         onClick={(e) => {
           if (e.target === e.currentTarget) controls.close();
         }}
@@ -186,16 +204,14 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
           e.preventDefault();
           controls.close();
         }}
-        onClose={() => {
-          rememberPosition();
-          videoRef.current?.pause();
-          window.clearTimeout(idleTimer.current);
-          setIdle(false);
-          releaseScroll.current?.();
-          releaseScroll.current = null;
-        }}
+        onClose={handleClose}
       >
-        <video ref={videoRef} className="vp-video" src={active?.src} poster={active?.poster} playsInline
+        <video
+          ref={videoRef}
+          className="vp-video"
+          src={active?.src}
+          poster={active?.poster}
+          playsInline
           loop
           onPlay={() => {
             playing.current = true;
@@ -212,27 +228,62 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
           onLoadedMetadata={syncTime}
           onDurationChange={syncTime}
         />
-        <input
-          type="range"
-          min={0}
-          max={1000}
-          aria-label="Posisi video"
-          aria-valuetext={elapsed}
-          value={Math.round(progress * 1000)}
-          onChange={(e) => seekToFraction(Number(e.target.value) / 1000)}
-        />
-        <span>{elapsed}</span>
-        <span>{formatTimecode(time.duration)}</span>
-        <button type="button" onClick={() => setMuted((m) => !m)}>
-          {muted ? "Suara aktif" : "Bisukan"}
-        </button>
-        <button type="button" onClick={togglePlay}>
-          {paused ? "Lanjutkan" : "Jeda"}
-        </button>
-        <span role="status">{loading && "Memuat…"}</span>
-        <button type="button" onClick={controls.close}>
-          Tutup
-        </button>
+        <div className="vp-ui">
+          <div className="vp-cell vp-top vp-col-1">
+            <Marker />
+          </div>
+          <div className="vp-cell vp-top vp-col-5">
+            <Marker />
+          </div>
+          <div className="vp-cell vp-top vp-col-9">
+            <Marker />
+          </div>
+          <div className="vp-cell vp-top vp-col-12">
+            <Marker />
+            <button type="button" className="vp-btn" onClick={controls.close}>
+              Tutup
+            </button>
+          </div>
+
+          <input
+            type="range"
+            className="vp-scrub"
+            min={0}
+            max={1000}
+            aria-label="Posisi video"
+            aria-valuetext={elapsed}
+            value={Math.round(progress * 1000)}
+            style={{ "--p": `${progress * 100}%` } as CSSProperties}
+            onChange={(e) => seekToFraction(Number(e.target.value) / 1000)}
+          />
+
+          <div className="vp-cell vp-bottom vp-col-1">
+            <div className="vp-meta">
+              <span className="vp-text vp-elapsed">{elapsed}</span>
+              {active?.title && <span className="vp-text vp-title">{active.title}</span>}
+            </div>
+            <Marker />
+          </div>
+          <div className="vp-cell vp-bottom vp-col-5">
+            <button type="button" className="vp-btn" onClick={() => setMuted((m) => !m)}>
+              {muted ? "Suara aktif" : "Bisukan"}
+            </button>
+            <Marker />
+          </div>
+          <div className="vp-cell vp-bottom vp-col-9">
+            <span role="status" className="vp-loading">
+              {loading && "Memuatâ€¦"}
+            </span>
+            <button type="button" className="vp-btn" onClick={togglePlay}>
+              {paused ? "Lanjutkan" : "Jeda"}
+            </button>
+            <Marker />
+          </div>
+          <div className="vp-cell vp-bottom vp-col-12">
+            <span className="vp-text vp-duration">{formatTimecode(time.duration)}</span>
+            <Marker />
+          </div>
+        </div>
       </dialog>
     </VideoPlayerContext.Provider>
   );
