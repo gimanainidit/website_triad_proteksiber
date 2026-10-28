@@ -154,3 +154,54 @@ describe("resume position", () => {
     expect(video().currentTime).toBe(30);
   });
 });
+
+function setDuration(seconds: number) {
+  Object.defineProperty(video(), "duration", { configurable: true, value: seconds });
+  act(() => {
+    video().dispatchEvent(new Event("loadedmetadata"));
+  });
+}
+
+function playTo(seconds: number) {
+  video().currentTime = seconds;
+  act(() => {
+    video().dispatchEvent(new Event("timeupdate"));
+  });
+}
+
+describe("scrubber and timecodes", () => {
+  beforeEach(() => {
+    setup();
+    act(() => player.open("a"));
+  });
+
+  const scrubber = () => screen.getByRole("slider", { name: "Posisi video" }) as HTMLInputElement;
+
+  test("shows HH:MM:SS elapsed and duration from media events", () => {
+    expect(screen.getAllByText("00:00:00")).toHaveLength(2);
+    setDuration(3725);
+    expect(screen.getByText("01:02:05")).toBeInTheDocument();
+    playTo(65);
+    expect(screen.getByText("00:01:05")).toBeInTheDocument();
+  });
+
+  test("the scrubber is a 0..1000 range that tracks playback", () => {
+    expect(scrubber()).toHaveAttribute("min", "0");
+    expect(scrubber()).toHaveAttribute("max", "1000");
+    setDuration(100);
+    playTo(65);
+    expect(scrubber().value).toBe("650");
+  });
+
+  test("moving the scrubber seeks proportionally", () => {
+    setDuration(88.6);
+    fireEvent.change(scrubber(), { target: { value: "250" } });
+    expect(video().currentTime).toBeCloseTo(22.15);
+    expect(screen.getByText("00:00:22")).toBeInTheDocument();
+  });
+
+  test("the scrubber does nothing before the duration is known", () => {
+    fireEvent.change(scrubber(), { target: { value: "250" } });
+    expect(video().currentTime).toBe(0);
+  });
+});
