@@ -59,3 +59,11 @@ describe("rendition budget", () => {
     await expect(run()).rejects.toThrow(/hero-loop/);
   });
 });
+
+describe("api key", () => {
+  it.each([null, "", "   "])("refuses %j and says where to set PIXABAY_API_KEY", async (apiKey) => {
+    const { fake, run } = setup({ apiKey });
+    await expect(run()).rejects.toThrow(/PIXABAY_API_KEY.*frontend\/\.env\.local.*no VITE_ prefix/s);
+    expect(fake.calls).toEqual([]);
+  });
+});

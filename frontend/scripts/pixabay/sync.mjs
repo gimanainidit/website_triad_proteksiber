@@ -4,6 +4,9 @@ import { selectRendition } from "./select.mjs";
 const MEDIA_DIR = "public/media";
 const API = "https://pixabay.com/api";
 
+export const MISSING_KEY_MESSAGE =
+  "PIXABAY_API_KEY is not set. Put PIXABAY_API_KEY=<your key> in frontend/.env.local (no VITE_ prefix, or the key would ship in the browser bundle).";
+
 /**
  * @typedef {{
  *   readFile(path: string): Promise<string | Uint8Array>,
@@ -26,6 +29,7 @@ const API = "https://pixabay.com/api";
  * }} deps
  */
 export async function syncAssets({ config, apiKey, fetch, fs, now, log = () => {} }) {
+  if (!apiKey?.trim()) throw new Error(MISSING_KEY_MESSAGE);
   const manifest = [];
   const downloaded = [];
   const reused = [];
