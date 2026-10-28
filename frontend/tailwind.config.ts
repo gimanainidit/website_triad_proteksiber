@@ -1,13 +1,16 @@
 import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 
-// Hex design system variables cannot take Tailwind's alpha shorthand (bg-navy-950/60) as-is, so alpha goes through color-mix.
+// Hex design system variables cannot take Tailwind's alpha shorthand (bg-navy-950/60) as-is, so a numeric alpha goes through color-mix.
+// A bare class passes "var(--tw-bg-opacity)", and color-mix with that makes browsers without color-mix (Safari < 16.2, Chrome < 111, Firefox < 113) drop the declaration.
+const NUMERIC_ALPHA = /^\d*\.?\d+$/;
+
 const ds =
   (variable: string) =>
   ({ opacityValue }: { opacityValue?: string }) =>
-    opacityValue === undefined
-      ? `var(--${variable})`
-      : `color-mix(in srgb, var(--${variable}) calc(${opacityValue} * 100%), transparent)`;
+    opacityValue !== undefined && NUMERIC_ALPHA.test(opacityValue)
+      ? `color-mix(in srgb, var(--${variable}) calc(${opacityValue} * 100%), transparent)`
+      : `var(--${variable})`;
 
 export default {
   darkMode: ["class"],
