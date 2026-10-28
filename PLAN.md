@@ -34,7 +34,7 @@ Diperbarui 2026-10-28. **Posisi sekarang: situs live dan berfungsi di https://er
 | T15 | `setup-host.sh` di VPS | Wizard | T13 | ✅ | User `triad` uid 999 + grup docker; site `triad` aktif; listener hanya `127.0.0.1:8180` |
 | T16 | Isi env, login GHCR, `init_db.py`, superadmin, jalankan stack | Wizard | T12, T15 | ✅ | Stack jalan; 1 superadmin; migrasi Alembic `0001` dijalankan user (setelah fix driver `e900a6c`). `/api/resources` 200 (8 resource, 5 file Supabase HEAD 200), `/api/admin/resources` tanpa token 401 |
 | T17 | HTTPS dengan certbot | Wizard | T14, T16 | ✅ | Let's Encrypt `eranusasiber.my.id` + `www`, s.d. 2027-01-26; HTTP → 301 HTTPS. Situs lain sama seperti sebelum deploy (DuckDNS 404, CTF 502/502) |
-| T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | 🟡 | Bug login (kembali ke `/login`) diperbaiki di `8bfd698` dan dirilis; bundle live = `index-DS1RrEXX.js` = build lokal `8bfd698`. Menunggu uji ulang user: login, upload PDF, template, Publish/Unpublish |
+| T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | 🟡 | Login OK sejak `8bfd698`. `/admin/upload` kosong (Radix `SelectItem value=""`) diperbaiki di `a27f678`, live (bundle `index-CKyMQ4jx.js`). Menunggu uji user: upload PDF, template, Publish/Unpublish. Rilis berikutnya: `bash deploy/shared-host/ship.sh` |
 | T19 | Nasib tabel n8n di schema `public` | User | – | ⛔ | |
 | T20 | Matikan Vercel + canonical/og ke domain baru | Agent + User | T18 | ⬜ | |
 | T21 | Hapus cache commit lama di GitHub | User | T10 | ⬜ | Opsional |
