@@ -13,7 +13,7 @@ Pelaku: **Agent** (Claude di VPS, tanpa sudo/GitHub/Docker) · **User** (kamu: d
 
 ## Progres
 
-Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T18 dan T20 lulus, Vercel mati. Sisa: keputusan T19, serta tiket opsional T21, T22, T26.** T19 menunggu keputusan user.
+Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T18 dan T20 lulus, Vercel mati. Sisa: tiket opsional T21, T22, T26; webhook n8n wajib diamankan sebelum n8n dinyalakan.**
 
 | ID | Tiket | Pelaku | Blocker | Status | Bukti |
 |---|---|---|---|---|---|
@@ -35,7 +35,7 @@ Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T1
 | T16 | Isi env, login GHCR, `init_db.py`, superadmin, jalankan stack | Wizard | T12, T15 | ✅ | Stack jalan; 1 superadmin; migrasi Alembic `0001` dijalankan user (setelah fix driver `e900a6c`). `/api/resources` 200 (8 resource, 5 file Supabase HEAD 200), `/api/admin/resources` tanpa token 401 |
 | T17 | HTTPS dengan certbot | Wizard | T14, T16 | ✅ | Let's Encrypt `eranusasiber.my.id` + `www`, s.d. 2027-01-26; HTTP → 301 HTTPS. Situs lain sama seperti sebelum deploy (DuckDNS 404, CTF 502/502) |
 | T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | ✅ | Login OK (`8bfd698`), halaman upload OK (`a27f678`). Upload PDF 2,1 MB 2026-10-28 04:17 UTC: tampil publik, file Supabase 200 `application/pdf`. Unpublish bekerja (8 resource lama tersembunyi). Upload template `.pptx` 2026-10-28 06:12 UTC: 1 baris `templates` + 1 objek di bucket `templates` |
-| T19 | Nasib tabel n8n di schema `public` | User | – | ⛔ | |
+| T19 | Nasib tabel n8n di schema `public` | User | – | ✅ | Keputusan user 2026-10-28: dibiarkan, workflow n8n akan dibangun ulang. Handover untuk tim n8n: [docs/n8n-handover.md](docs/n8n-handover.md) |
 | T20 | Matikan Vercel + canonical/og ke domain baru | Agent + User | T18 | ✅ | `6b5c917` dirilis (CI sukses). Domain dan www menyajikan canonical/og/twitter/JSON-LD ke `eranusasiber.my.id`, social card 200 `image/png`. `triad-proteksiber-web.vercel.app` 404 `DEPLOYMENT_NOT_FOUND` (2026-10-28) |
 | T21 | Hapus cache commit lama di GitHub | User | T10 | ⬜ | Opsional |
 | T22 | Rilis otomatis dari GitHub Actions | Agent + User | T18 | ⬜ | Opsional |
@@ -146,7 +146,7 @@ Halaman admin (`ResourcesNew.tsx`) memuat `/api/resources` yang default-nya hany
 **Selesai bila:** request anonim dengan `published=false` tidak mengembalikan draft, admin melihat draft, dan tombol Publish/Unpublish mengubah status yang tampil.
 
 ### T19 · Tabel n8n di `public` ⛔
-Schema `public` memuat ±50 tabel n8n (3 workflow, terakhir diubah 2026-02-22). Instance n8n di hf.space tidak bisa konek lagi sejak T02. **Keputusan user:** hapus tabel n8n, atau pindahkan ke schema `n8n` (kalau masih mau dipakai). Tabel CMS (`users`, dll.) tidak bentrok dengan tabel n8n (`user`), jadi ini tidak memblokir T16.
+Schema `public` memuat ±50 tabel n8n (3 workflow, terakhir diubah 2026-02-22). Instance n8n di hf.space tidak bisa konek lagi sejak T02. **Keputusan user (2026-10-28):** tabel dibiarkan; n8n baru memakai SQLite atau schema `n8n` terpisah. Lihat `docs/n8n-handover.md`. Tabel CMS (`users`, dll.) tidak bentrok dengan tabel n8n (`user`), jadi ini tidak memblokir T16.
 
 **Selesai bila:** keputusan tercatat di sini, lalu dijalankan sebagai migrasi lewat Supabase connector setelah dump/backup.
 
