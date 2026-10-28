@@ -1,11 +1,9 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { serviceCategories } from "@/components/ServicesSection";
+import { Button } from "@/components/ds";
+import { serviceCategories } from "@/content/services";
 
 const Services = () => {
   const location = useLocation();
@@ -20,20 +18,18 @@ const Services = () => {
   }, [location.hash]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <a href="#main-content" className="skip-to-content">Skip to content</a>
-      <Header />
-      <main id="main-content">
-        <section className="bg-hero-gradient text-dark-foreground py-16">
+    <div>
+      <div>
+        <section className="bg-navy-950 py-16 text-on-dark">
           <div className="max-w-7xl mx-auto px-6">
             <motion.h1
-              className="text-4xl md:text-5xl font-serif font-black mb-4"
+              className="text-heading-1 mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               Layanan Kami
             </motion.h1>
-            <p className="text-dark-foreground/70 text-lg max-w-2xl">
+            <p className="max-w-2xl text-subtitle text-on-dark-muted">
               Dua pilar layanan utama untuk melindungi dan memperkuat postur keamanan siber organisasi Anda.
             </p>
           </div>
@@ -49,9 +45,9 @@ const Services = () => {
                   viewport={{ once: true }}
                   className="mb-10"
                 >
-                  <h2 className="text-3xl font-serif font-black text-foreground mb-2">{cat.category}</h2>
-                  <p className="text-muted-foreground">{cat.description}</p>
-                  <div className="h-1 w-20 bg-accent rounded-full mt-4" />
+                  <h2 className="text-heading-3 mb-2 text-ink-strong">{cat.category}</h2>
+                  <p className="text-steel">{cat.description}</p>
+                  <div className="mt-4 h-1 w-20 bg-shield" />
                 </motion.div>
 
                 <div className="space-y-20">
@@ -66,52 +62,49 @@ const Services = () => {
                       transition={{ duration: 0.5 }}
                     >
                       <div className="flex items-center gap-4 mb-6">
-                        <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
-                          <svc.icon className="w-6 h-6 text-accent" />
+                        <div className="w-12 h-12 rounded-lg bg-soft flex items-center justify-center">
+                          <svc.icon className="w-6 h-6 text-shield" aria-hidden="true" />
                         </div>
-                        <h3 className="text-2xl md:text-3xl font-serif font-black text-foreground">
+                        <h3 className="text-heading-4 text-ink-strong">
                           {svc.title}
                         </h3>
                       </div>
 
                       <div className="space-y-6">
                         <div>
-                          <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">Overview</h4>
-                          <p className="text-foreground/80 leading-relaxed">{svc.overview}</p>
+                          <h4 className="mb-2 text-eyebrow text-steel">Overview</h4>
+                          <p className="leading-relaxed text-ink">{svc.overview}</p>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">Scope</h4>
+                          <h4 className="mb-2 text-eyebrow text-steel">Scope</h4>
                           <ul className="space-y-2">
                             {svc.scope.map((s) => (
-                              <li key={s} className="flex items-start gap-2 text-foreground/80">
-                                <span className="text-accent mt-1">■</span> {s}
+                              <li key={s} className="flex items-start gap-2 text-ink">
+                                <span className="mt-1 text-shield" aria-hidden="true">■</span> {s}
                               </li>
                             ))}
                           </ul>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">Deliverables</h4>
+                          <h4 className="mb-2 text-eyebrow text-steel">Deliverables</h4>
                           <ul className="space-y-2">
                             {svc.deliverables.map((d) => (
-                              <li key={d} className="flex items-start gap-2 text-foreground/80">
-                                <span className="text-accent mt-1">✓</span> {d}
+                              <li key={d} className="flex items-start gap-2 text-ink">
+                                <span className="mt-1 text-shield" aria-hidden="true">✓</span> {d}
                               </li>
                             ))}
                           </ul>
                         </div>
 
-                        <Link
-                          to="/contact"
-                          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-accent-foreground font-bold glow-hover mt-4"
-                        >
-                          Konsultasi Layanan Ini <ArrowRight size={16} />
-                        </Link>
+                        <Button asChild className="mt-4">
+                          <Link to="/contact">Konsultasi Layanan Ini</Link>
+                        </Button>
                       </div>
 
                       {i < cat.services.length - 1 && (
-                        <div className="mt-12 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+                        <div className="mt-12 h-px bg-hairline" />
                       )}
                     </motion.article>
                   ))}
@@ -120,8 +113,7 @@ const Services = () => {
             ))}
           </div>
         </section>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };

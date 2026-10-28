@@ -1,28 +1,22 @@
-import Header from "@/components/Header";
-import HeroSection from "@/components/HeroSection";
-import ServicesSection from "@/components/ServicesSection";
-import AboutSection from "@/components/AboutSection";
-import TeamSection from "@/components/TeamSection";
-import CTASection from "@/components/CTASection";
-import Footer from "@/components/Footer";
+import { About } from "@/components/landing/About";
+import { CtaBanner } from "@/components/landing/CtaBanner";
+import { Environment } from "@/components/landing/Environment";
+import { FeatureVideos } from "@/components/landing/FeatureVideos";
+import { Hero } from "@/components/landing/Hero";
+import { Services } from "@/components/landing/Services";
+import { Team } from "@/components/landing/Team";
 
-const Index = () => {
-  return (
-    <div className="min-h-screen bg-background">
-      <a href="#main-content" className="skip-to-content">
-        Skip to content
-      </a>
-      <Header />
-      <main id="main-content">
-        <HeroSection />
-        <ServicesSection />
-        <AboutSection />
-        <TeamSection />
-        <CTASection />
-      </main>
-      <Footer />
-    </div>
-  );
-};
+// No bottom padding: CtaBanner carries its own mb-16 above the footer stripe.
+const Index = () => (
+  <div className="flex flex-col gap-16 pt-4 lg:gap-24 lg:pt-6">
+    <Hero />
+    <Environment />
+    <Services />
+    <FeatureVideos />
+    <About />
+    <Team />
+    <CtaBanner />
+  </div>
+);
 
 export default Index;

@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import type { Resource } from '@/types/resource'
 import { ResourceService } from '@/services/resourceService'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ds'
 import { Download } from 'lucide-react'
 
 const ResourceDetail = () => {
@@ -30,41 +28,39 @@ const ResourceDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-accent" />
+      <div className="flex items-center justify-center px-4 py-24">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary" />
       </div>
     )
   }
 
   if (!resource) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Header />
-        <p className="text-center text-lg">Resource tidak ditemukan.</p>
+      <div className="flex items-center justify-center px-4 py-24">
+        <h1 className="text-center text-heading-5 text-ink-strong">Resource tidak ditemukan.</h1>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="px-4 py-12">
+    <div>
+      <div className="px-4 py-12">
         <div className="max-w-5xl mx-auto space-y-6">
           <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">{resource.category}</p>
-            <h1 className="text-3xl font-serif font-bold text-card-foreground">{resource.title}</h1>
-            <p className="text-muted-foreground">{resource.description}</p>
+            <p className="text-eyebrow text-steel">{resource.category}</p>
+            <h1 className="text-heading-3 text-ink-strong">{resource.title}</h1>
+            <p className="text-steel">{resource.description}</p>
             <div className="flex items-center gap-3 mt-4">
-              <span className="text-sm text-muted-foreground">{resource.file_size}</span>
-              <span className="text-sm text-muted-foreground">{resource.file_type}</span>
+              <span className="text-sm text-steel">{resource.file_size}</span>
+              <span className="text-sm text-steel">{resource.file_type}</span>
             </div>
-            <Button className="mt-4" onClick={() => window.open(resource.file_url, '_blank')}> 
-              <Download className="h-4 w-4 mr-2" /> Download
+            <Button className="mt-4" expand={false} onClick={() => window.open(resource.file_url, "_blank", "noopener,noreferrer")}>
+              <Download className="h-4 w-4" aria-hidden="true" /> Download
             </Button>
           </div>
 
           {resource.file_url ? (
-            <div className="border border-border rounded-lg overflow-hidden">
+            <div className="overflow-hidden rounded-xl border border-hairline">
               <iframe
                 src={resource.file_url}
                 title={resource.title}
@@ -72,16 +68,15 @@ const ResourceDetail = () => {
               />
             </div>
           ) : (
-            <div className="p-6 bg-card border border-border rounded-lg">
-              <p className="text-muted-foreground text-sm">
+            <div className="rounded-xl border border-hairline bg-canvas p-6">
+              <p className="text-sm text-steel">
                 Tidak ada file untuk preview. Ini mungkin AI-generated content.
               </p>
               <pre className="whitespace-pre-wrap text-xs mt-3">{resource.content}</pre>
             </div>
           )}
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   )
 }

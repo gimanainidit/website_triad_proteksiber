@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/contexts/auth-context'
 
@@ -33,10 +33,10 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl border border-border">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-          <CardTitle>Admin Login</CardTitle>
+    <div className="flex items-center justify-center px-4 py-16">
+      <Card className="w-full max-w-md overflow-hidden rounded-xl border-hairline shadow-none">
+        <CardHeader className="bg-navy-950 text-on-dark">
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">Admin Login</h1>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>

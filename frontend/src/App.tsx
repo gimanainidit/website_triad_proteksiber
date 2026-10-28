@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import Credits from "./pages/Credits";
+import { SiteLayout } from "./components/site";
 import Contact from "./pages/Contact";
 import Services from "./pages/Services";
 import Resources from "./pages/Resources";
@@ -25,17 +27,20 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/resources/:id" element={<ResourceDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin/resources" element={<AdminRoute><AdminResources /></AdminRoute>} />
-          <Route path="/admin/upload" element={<AdminRoute><AdminUpload /></AdminRoute>} />
-          <Route path="/admin/templates" element={<AdminRoute><TemplateManager /></AdminRoute>} />
-          <Route path="/ai-generator" element={<AdminRoute><AIGenerator /></AdminRoute>} />
-          <Route path="*" element={<NotFound />} />
+          <Route element={<SiteLayout />}>
+            <Route path="/" element={<Index />} />
+            <Route path="/kredit" element={<Credits />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/resources/:id" element={<ResourceDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin/resources" element={<AdminRoute><AdminResources /></AdminRoute>} />
+            <Route path="/admin/upload" element={<AdminRoute><AdminUpload /></AdminRoute>} />
+            <Route path="/admin/templates" element={<AdminRoute><TemplateManager /></AdminRoute>} />
+            <Route path="/ai-generator" element={<AdminRoute><AIGenerator /></AdminRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

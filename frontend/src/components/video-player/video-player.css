@@ -1,0 +1,312 @@
+.vp-dialog {
+  padding: 0;
+  border: 0;
+  margin: auto;
+  max-width: none;
+  max-height: none;
+  width: min(calc(90vh * 16 / 9), calc(100vw - 64px));
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  color: var(--on-dark);
+  box-shadow: var(--shadow-4);
+  outline: none;
+
+  opacity: 0;
+  transform: scale(0.98);
+  transition:
+    opacity 0.4s ease-out,
+    transform 0.4s ease-out,
+    overlay 0.4s,
+    display 0.4s;
+  transition-behavior: allow-discrete;
+}
+
+.vp-dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .vp-dialog[open] {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+.vp-dialog::backdrop {
+  background: rgb(2 18 34 / 0.95);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition:
+    opacity 0.4s ease-out,
+    overlay 0.4s,
+    display 0.4s;
+  transition-behavior: allow-discrete;
+}
+
+.vp-dialog[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .vp-dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+.vp-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+/* Controls layer: 4 columns on phones, 12 from 640px. Rows are top, scrubber, bottom. */
+.vp-ui {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: auto 1fr auto;
+  column-gap: 8px;
+  padding: 16px;
+  transition: opacity 1s;
+}
+
+.vp-dialog.is-idle .vp-ui {
+  opacity: 0;
+}
+
+/* Keyboard users must never lose the control they are on. */
+.vp-dialog.is-idle:has(:focus-visible) .vp-ui {
+  opacity: 1;
+}
+
+.vp-dialog.is-idle {
+  cursor: none;
+}
+
+.vp-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.vp-top {
+  grid-row: 1;
+}
+
+.vp-bottom {
+  grid-row: 3;
+  align-self: end;
+}
+
+/* Phones: the bottom controls flow as a wrapping row so each button sizes to its label. */
+.vp-bottom-row {
+  grid-row: 3;
+  grid-column: 1 / -1;
+  align-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.vp-bottom-row > .vp-cell {
+  flex: none;
+  max-width: 100%;
+}
+
+.vp-col-1 {
+  grid-column: 1;
+}
+.vp-col-5 {
+  grid-column: 2;
+}
+.vp-col-9 {
+  grid-column: 3;
+}
+.vp-col-12 {
+  grid-column: 4;
+}
+
+@media (min-width: 640px) {
+  .vp-bottom-row {
+    display: contents;
+  }
+  .vp-ui {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 14px;
+    padding: 22px;
+  }
+  .vp-col-1 {
+    grid-column: 1 / span 3;
+  }
+  .vp-col-5 {
+    grid-column: 5 / span 3;
+  }
+  .vp-col-9 {
+    grid-column: 9 / span 3;
+  }
+  .vp-col-12 {
+    grid-column: 12 / span 1;
+  }
+}
+
+/* Phones: a 44px touch target plus the scrubber needs the height a 64px side margin would take away from the 16:9 frame. */
+@media (max-width: 639px) {
+  .vp-dialog {
+    width: min(calc(90vh * 16 / 9), calc(100vw - 16px));
+  }
+  .vp-ui {
+    padding: 12px;
+  }
+}
+
+/* Only lines and plain text blend. Buttons stay solid so they never vanish on a bright frame. */
+.vp-marker {
+  flex: none;
+  width: 14px;
+  height: 1px;
+  background: #dee8eb;
+  mix-blend-mode: difference;
+}
+
+.vp-text,
+.vp-btn,
+.vp-loading {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.vp-text {
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+.vp-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.vp-elapsed {
+  flex: none;
+  opacity: 0.6;
+}
+
+.vp-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  .vp-title {
+    display: none;
+  }
+}
+
+.vp-btn {
+  max-width: 100%;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 8px;
+  background: rgb(2 18 34 / 0.6);
+  backdrop-filter: blur(7px);
+  color: var(--on-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.vp-btn:hover {
+  background: rgb(2 18 34 / 0.85);
+}
+
+@media (pointer: coarse) {
+  .vp-btn {
+    min-height: 44px;
+    padding: 0 14px;
+  }
+}
+
+.vp-loading {
+  color: var(--on-dark-muted);
+}
+
+.vp-btn:focus-visible,
+.vp-scrub:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Scrubber: a 1px line with a 14x3 thumb, inside a 40px tall hit area. */
+.vp-scrub {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  align-self: center;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.vp-scrub::-webkit-slider-runnable-track {
+  height: 1px;
+  background: linear-gradient(to right, #fff var(--p, 0%), rgb(255 255 255 / 0.2) 0);
+}
+
+.vp-scrub::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 3px;
+  margin-top: -1px;
+  border: 0;
+  border-radius: 1px;
+  background: #fff;
+}
+
+.vp-scrub::-moz-range-track {
+  height: 1px;
+  background: rgb(255 255 255 / 0.2);
+}
+
+.vp-scrub::-moz-range-progress {
+  height: 1px;
+  background: #fff;
+}
+
+.vp-scrub::-moz-range-thumb {
+  width: 14px;
+  height: 3px;
+  border: 0;
+  border-radius: 1px;
+  background: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vp-dialog,
+  .vp-dialog::backdrop,
+  .vp-ui,
+  .vp-btn {
+    transition: none;
+  }
+}

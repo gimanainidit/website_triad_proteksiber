@@ -1,0 +1,44 @@
+/* Elements animate when an ancestor (usually the useReveal host) gets data-visible="true". */
+
+.reveal-fade,
+.reveal-fade-only {
+  opacity: 0;
+}
+
+.reveal-fade {
+  transform: translateY(16px);
+}
+
+[data-visible="true"] .reveal-fade,
+[data-visible="true"] .reveal-fade-only {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dur-enter, 600ms) ease-out,
+    transform var(--dur-enter, 600ms) var(--ease-out-cubic, cubic-bezier(0.33, 1, 0.68, 1));
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+
+.reveal-line {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+[data-visible="true"] .reveal-line {
+  transform: scaleX(1);
+  transition: transform 400ms ease-in-out;
+  transition-delay: calc(var(--i, 0) * 100ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-fade,
+  .reveal-fade-only,
+  .reveal-line,
+  [data-visible="true"] .reveal-fade,
+  [data-visible="true"] .reveal-fade-only,
+  [data-visible="true"] .reveal-line {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
