@@ -13,27 +13,27 @@ Pelaku: **Agent** (Claude di VPS, tanpa sudo/GitHub/Docker) · **User** (kamu: d
 
 ## Progres
 
-Diperbarui 2026-10-28. **Posisi sekarang: kerja agent untuk deploy selesai; berikutnya user menjalankan `bash deploy/shared-host/wizard.sh` (T04, T10, T11, T12, T14–T17 berurutan).** T19 menunggu keputusan user.
+Diperbarui 2026-10-28. **Posisi sekarang: situs live di https://eranusasiber.my.id (health 200). Berikutnya user menjalankan migrasi `0001` (T16) agar `/api/resources` berhenti 500, lalu T18.** T19 menunggu keputusan user.
 
 | ID | Tiket | Pelaku | Blocker | Status | Bukti |
 |---|---|---|---|---|---|
 | T01 | Connection string DB keluar dari `alembic.ini` | Agent | – | ✅ | `5e575be`, `tests/test_alembic_config.py` |
 | T02 | Rotasi password DB `postgres` | User | – | ✅ | Password lama ditolak; `backend/.env` konek lewat `database.py` dengan TLS terverifikasi |
 | T03 | Rotasi `SUPABASE_SERVICE_KEY` | User | – | ✅ | Key baru membaca Storage; key lama dari riwayat publik → 403 |
-| T04 | Revoke `EMERGENT_LLM_KEY` + API key n8n hf.space | User | – | ⬜ | |
+| T04 | Revoke `EMERGENT_LLM_KEY` + API key n8n hf.space | User | – | ✅ | Lewat wizard 2026-10-28 (dikonfirmasi user, tidak bisa dicek agent) |
 | T05 | Hapus secret dari seluruh riwayat git (lokal) | Agent | T01 | ✅ | `git filter-repo`; scan semua ref: 0 temuan |
 | T06 | Buang dead code + jejak Emergent/Lovable | Agent | – | ✅ | `c6c918a`; frontend build/test hijau |
 | T07 | Mode deploy shared host + CA Supabase | Agent | – | ✅ | `d8e881d`; 24 test hijau; `nginx -t` site lolos |
 | T08 | Bucket Storage `templates` | Agent | T03 | ✅ | Dibuat public 15 MB; uji upload, ambil URL, hapus |
 | T09 | Review semua commit sebelum push | Agent | T05–T08 | ✅ | 4 putaran review independen; putaran 4 atas `ba4f85d` bersih. Perbaikan: `3db00be`, `e6f7d1c`, `ba4f85d`. Risiko yang diterima: email mixed-case lama di DB dev; PDF draft tetap bisa diunduh lewat URL Supabase publik oleh yang sudah punya link. |
-| T10 | Push riwayat bersih, default branch `main`, hapus branch legacy | User | T09 | ⬜ | |
-| T11 | Cabut akses Emergent/Lovable di GitHub | User | – | ⬜ | |
-| T12 | CI hijau dan image di GHCR | Agent cek | T10 | ⬜ | |
+| T10 | Push riwayat bersih, default branch `main`, hapus branch legacy | User | T09 | 🟡 | GitHub `main` = `4f90c7a`, default `main`, tag legacy ada, `conflict_140226_2128` terhapus. **Branch `emergent` masih ada.** `88da23b` belum di-push |
+| T11 | Cabut akses Emergent/Lovable di GitHub | User | – | ✅ | Lewat wizard (dikonfirmasi user, tidak bisa dicek agent tanpa token) |
+| T12 | CI hijau dan image di GHCR | Agent cek | T10 | ✅ | Run push `4f90c7a` success: actions/runs/40623078257 |
 | T13 | Tulis wizard deploy untuk T14–T17 | Agent | T07 | ✅ | `deploy/shared-host/wizard.sh` (12 stage), `bash -n` + shellcheck bersih; cek non-interaktif diuji ke API GitHub dan situs lokal |
-| T14 | DNS Cloudflare apex + www | Wizard | T13 | ⬜ | |
-| T15 | `setup-host.sh` di VPS | Wizard | T13 | ⬜ | |
-| T16 | Isi env, login GHCR, `init_db.py`, superadmin, jalankan stack | Wizard | T12, T15 | ⬜ | `backend/create_admin.py` (`2fb82dd`) menyediakan login pertama |
-| T17 | HTTPS dengan certbot | Wizard | T14, T16 | ⬜ | |
+| T14 | DNS Cloudflare apex + www | Wizard | T13 | ✅ | Keduanya → 67.217.244.248 (DNS only) |
+| T15 | `setup-host.sh` di VPS | Wizard | T13 | ✅ | User `triad` uid 999 + grup docker; site `triad` aktif; listener hanya `127.0.0.1:8180` |
+| T16 | Isi env, login GHCR, `init_db.py`, superadmin, jalankan stack | Wizard | T12, T15 | 🟡 | Stack jalan, `/api/health` 200. `/api/resources` 500: tabel `resources` lama tidak punya 5 kolom model. Fix: migrasi Alembic `0001` (`88da23b`), **menunggu user menjalankannya di DB produksi** |
+| T17 | HTTPS dengan certbot | Wizard | T14, T16 | ✅ | Let's Encrypt `eranusasiber.my.id` + `www`, s.d. 2027-01-26; HTTP → 301 HTTPS. Situs lain sama seperti sebelum deploy (DuckDNS 404, CTF 502/502) |
 | T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | ⬜ | |
 | T19 | Nasib tabel n8n di schema `public` | User | – | ⛔ | |
 | T20 | Matikan Vercel + canonical/og ke domain baru | Agent + User | T18 | ⬜ | |
