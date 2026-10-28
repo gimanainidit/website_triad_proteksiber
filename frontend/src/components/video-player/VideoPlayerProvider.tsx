@@ -3,6 +3,7 @@ import { formatTimecode } from "./timecode";
 import { VideoPlayerContext, type ResolveVideo, type VideoPlayerControls, type VideoSource } from "./context";
 
 const SEEK_STEP_SECONDS = 5;
+const IDLE_MS = 2500;
 
 interface Active extends VideoSource {
   id: string;
@@ -15,11 +16,29 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
   resolveRef.current = resolve;
   const positions = useRef(new Map<string, number>());
   const shownId = useRef<string | null>(null);
+  const idleTimer = useRef<number>();
+  const playing = useRef(false);
+  const [idle, setIdle] = useState(false);
   const [active, setActive] = useState<Active | null>(null);
   const [muted, setMuted] = useState(false);
   const [paused, setPaused] = useState(false);
   const [readySrc, setReadySrc] = useState<string | null>(null);
   const [time, setTime] = useState({ current: 0, duration: 0 });
+
+  const armIdle = () => {
+    window.clearTimeout(idleTimer.current);
+    if (playing.current) idleTimer.current = window.setTimeout(() => setIdle(true), IDLE_MS);
+  };
+
+  const wake = () => {
+    setIdle(false);
+    armIdle();
+  };
+
+  const hideControls = () => {
+    window.clearTimeout(idleTimer.current);
+    setIdle(true);
+  };
 
   const rememberPosition = () => {
     if (shownId.current && videoRef.current) positions.current.set(shownId.current, videoRef.current.currentTime);
@@ -133,9 +152,12 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
       {children}
       <dialog
         ref={dialogRef}
-        className="vp-dialog"
+        className={idle ? "vp-dialog is-idle" : "vp-dialog"}
         tabIndex={-1}
         onKeyDown={handleKeyDown}
+        onPointerMove={wake}
+        onPointerLeave={hideControls}
+        onFocus={wake}
         aria-label={active?.title ?? "Pemutar video"}
         onClick={(e) => {
           if (e.target === e.currentTarget) controls.close();
@@ -147,12 +169,22 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
         onClose={() => {
           rememberPosition();
           videoRef.current?.pause();
+          window.clearTimeout(idleTimer.current);
+          setIdle(false);
         }}
       >
         <video ref={videoRef} className="vp-video" src={active?.src} poster={active?.poster} playsInline
           loop
-          onPlay={() => setPaused(false)}
-          onPause={() => setPaused(true)}
+          onPlay={() => {
+            playing.current = true;
+            setPaused(false);
+            armIdle();
+          }}
+          onPause={() => {
+            playing.current = false;
+            setPaused(true);
+            wake();
+          }}
           onCanPlay={() => setReadySrc(active?.src ?? null)}
           onTimeUpdate={syncTime}
           onLoadedMetadata={syncTime}

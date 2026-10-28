@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { VideoPlayerProvider, useVideoPlayer, type VideoPlayerControls } from ".";
 
 const sources: Record<string, { src: string; poster?: string; title?: string }> = {
@@ -302,5 +302,66 @@ describe("loading state", () => {
 
     act(() => player.open("b"));
     expect(screen.getByText("Memuat…")).toBeInTheDocument();
+  });
+});
+
+describe("auto-hiding controls", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    setup();
+    act(() => player.open("a"));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  const wait = (ms: number) => act(() => void vi.advanceTimersByTime(ms));
+
+  test("goes idle after 2.5 s without activity while playing", () => {
+    wait(2499);
+    expect(dialog()).not.toHaveClass("is-idle");
+    wait(1);
+    expect(dialog()).toHaveClass("is-idle");
+  });
+
+  test("pointer movement wakes the controls and restarts the countdown", () => {
+    wait(2500);
+    fireEvent.pointerMove(video());
+    expect(dialog()).not.toHaveClass("is-idle");
+
+    wait(2000);
+    fireEvent.pointerMove(video());
+    wait(2000);
+    expect(dialog()).not.toHaveClass("is-idle");
+    wait(500);
+    expect(dialog()).toHaveClass("is-idle");
+  });
+
+  test("focus moving into the dialog wakes the controls", () => {
+    wait(2500);
+    fireEvent.focusIn(screen.getByRole("button", { name: "Tutup" }));
+    expect(dialog()).not.toHaveClass("is-idle");
+  });
+
+  test("the pointer leaving hides them at once", () => {
+    fireEvent.pointerLeave(dialog());
+    expect(dialog()).toHaveClass("is-idle");
+    fireEvent.pointerMove(video());
+    expect(dialog()).not.toHaveClass("is-idle");
+  });
+
+  test("a paused video keeps its controls visible, and playing again restarts the countdown", () => {
+    fireEvent.click(screen.getByRole("button", { name: "Jeda" }));
+    wait(10_000);
+    expect(dialog()).not.toHaveClass("is-idle");
+
+    fireEvent.click(screen.getByRole("button", { name: "Lanjutkan" }));
+    wait(2500);
+    expect(dialog()).toHaveClass("is-idle");
+  });
+
+  test("closing resets idle so the next open starts with controls visible", () => {
+    wait(2500);
+    act(() => player.close());
+    act(() => player.open("a"));
+    expect(dialog()).not.toHaveClass("is-idle");
   });
 });
