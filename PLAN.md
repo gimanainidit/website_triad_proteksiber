@@ -13,7 +13,7 @@ Pelaku: **Agent** (Claude di VPS, tanpa sudo/GitHub/Docker) · **User** (kamu: d
 
 ## Progres
 
-Diperbarui 2026-10-28. **Posisi sekarang: situs live dan T18 lulus (login, upload PDF, publish/unpublish, upload template). Berikutnya: rilis T20 lalu user menghapus project Vercel.** T19 menunggu keputusan user.
+Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T18 dan T20 lulus, Vercel mati. Sisa: keputusan T19 dan T25, serta tiket opsional T21, T22, T26.** T19 menunggu keputusan user.
 
 | ID | Tiket | Pelaku | Blocker | Status | Bukti |
 |---|---|---|---|---|---|
@@ -36,7 +36,7 @@ Diperbarui 2026-10-28. **Posisi sekarang: situs live dan T18 lulus (login, uploa
 | T17 | HTTPS dengan certbot | Wizard | T14, T16 | ✅ | Let's Encrypt `eranusasiber.my.id` + `www`, s.d. 2027-01-26; HTTP → 301 HTTPS. Situs lain sama seperti sebelum deploy (DuckDNS 404, CTF 502/502) |
 | T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | ✅ | Login OK (`8bfd698`), halaman upload OK (`a27f678`). Upload PDF 2,1 MB 2026-10-28 04:17 UTC: tampil publik, file Supabase 200 `application/pdf`. Unpublish bekerja (8 resource lama tersembunyi). Upload template `.pptx` 2026-10-28 06:12 UTC: 1 baris `templates` + 1 objek di bucket `templates` |
 | T19 | Nasib tabel n8n di schema `public` | User | – | ⛔ | |
-| T20 | Matikan Vercel + canonical/og ke domain baru | Agent + User | T18 | 🟡 | Kode: canonical/og/twitter/JSON-LD ke `eranusasiber.my.id` + test `site-metadata.test.ts`, README bebas Vercel. **Belum: rilis (`ship.sh`) dan user menghapus project Vercel** |
+| T20 | Matikan Vercel + canonical/og ke domain baru | Agent + User | T18 | ✅ | `6b5c917` dirilis (CI sukses). Domain dan www menyajikan canonical/og/twitter/JSON-LD ke `eranusasiber.my.id`, social card 200 `image/png`. `triad-proteksiber-web.vercel.app` 404 `DEPLOYMENT_NOT_FOUND` (2026-10-28) |
 | T21 | Hapus cache commit lama di GitHub | User | T10 | ⬜ | Opsional |
 | T22 | Rilis otomatis dari GitHub Actions | Agent + User | T18 | ⬜ | Opsional |
 | T23 | Perbaiki 5 error TypeScript + typecheck di CI | Agent | – | ✅ | `04f714f`; ternyata bug: API tidak mengirim `published`, tombol Publish admin selalu mengirim `true`. `tsc` 0, CI `npm run typecheck` |
