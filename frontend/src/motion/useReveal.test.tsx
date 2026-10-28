@@ -26,6 +26,7 @@ class FakeIntersectionObserver {
   }
 
   trigger(isIntersecting: boolean) {
+    if (this.disconnected) return;
     this.callback(
       this.observed.map((target) => ({ isIntersecting, target }) as IntersectionObserverEntry),
       this as unknown as IntersectionObserver,
@@ -88,5 +89,23 @@ describe("useReveal", () => {
 
     expect(getByTestId("host").dataset.visible).toBe("true");
     expect(observers()).toHaveLength(0);
+  });
+
+  it("disconnects the observer on unmount", () => {
+    const { unmount } = render(<Host />);
+    unmount();
+
+    expect(observers()[0].disconnected).toBe(true);
+  });
+
+  it("ignores a second intersection event after revealing", () => {
+    const { getByTestId } = render(<Host />);
+    const el = getByTestId("host");
+    act(() => observers()[0].trigger(true));
+    delete el.dataset.visible;
+
+    act(() => observers()[0].trigger(true));
+
+    expect(el.dataset.visible).toBeUndefined();
   });
 });
