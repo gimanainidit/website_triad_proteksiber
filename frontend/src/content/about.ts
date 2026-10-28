@@ -10,7 +10,6 @@ export const about = {
   eyebrow: "TENTANG KAMI",
   statement: MISSION,
   pillars: [
-    { title: "Misi Kami", text: MISSION },
     {
       title: "Visi Kami",
       text: "Menjadi mitra keamanan siber terpercaya di Indonesia yang dikenal karena keahlian teknis, integritas, dan komitmen terhadap keunggulan dalam perlindungan digital.",
