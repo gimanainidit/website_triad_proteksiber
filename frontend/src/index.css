@@ -1,7 +1,9 @@
-@import '@fontsource/merriweather/700.css';
-@import '@fontsource/merriweather/900.css';
+@import '@fontsource/dm-serif-display/400.css';
 @import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
 
 @tailwind base;
 @tailwind components;
@@ -9,7 +11,8 @@
 
 @layer base {
   :root {
-    --background: 210 20% 97%;
+    /* shadcn names, HSL triplets. Values come from docs/design-system/tokens.json. */
+    --background: 220 20% 97%;
     --foreground: 213 24% 22%;
 
     --card: 0 0% 100%;
@@ -18,13 +21,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: 213 24% 22%;
 
-    --primary: 236 43% 30%;
+    --primary: 236.3 42.5% 30%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 20% 97%;
+    --secondary: 220 20% 97%;
     --secondary-foreground: 213 24% 22%;
 
-    --muted: 210 20% 97%;
+    --muted: 220 20% 97%;
     --muted-foreground: 220 9% 46%;
 
     --accent: 207 78% 43%;
@@ -33,51 +36,108 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 216 12% 90%;
-    --input: 216 12% 90%;
+    --border: 214 14% 90%;
+    --input: 214 14% 90%;
     --ring: 207 78% 51%;
 
     --radius: 0.5rem;
 
-    --dark: 222 47% 11%;
+    --dark: 222 46% 11%;
     --dark-foreground: 0 0% 100%;
-    --dark-muted: 220 9% 64%;
+    --dark-muted: 221 9% 64%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 236 43% 30%;
+    --sidebar-primary: 236.3 42.5% 30%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 207 78% 51%;
 
-    --font-serif: 'Merriweather', Georgia, serif;
-    --font-sans: 'Inter', system-ui, sans-serif;
+    /* Design system names, plain hex. */
+    --navy-950: #021222;
+    --navy-900: #0b1830;
+    --protx-navy: #202d68;
+    --electric-blue: #078be8;
+    --light-gray: #f2f5fa;
+    --shield-blue: #0096fa;
+    --link: #046ee6;
+    --primary-deep: #22265a;
+    --on-primary: #ffffff;
+    --accent-soft: #e6f3fe;
+    --accent-soft-border: #bfdcf7;
+    --canvas: #ffffff;
+    --surface-raised: #f6f7f9;
+    --surface-code: var(--navy-900);
+    --hairline: #e2e5e9;
+    --hairline-strong: #c4cad3;
+    --ink-strong: #021222;
+    --ink: #2b3746;
+    --steel: #6b7280;
+    --muted-ink: #9ba0ab;
+    --on-dark: #ffffff;
+    --on-dark-muted: #9ba0ab;
+    --on-destructive: #ffffff;
+
+    --stripe-1: var(--navy-950);
+    --stripe-2: #2c306d;
+    --stripe-3: #046ee6;
+    --stripe-4: var(--shield-blue);
+    --stripe-5: #e6f3fe;
+
+    --shadow-1: 0 1px 2px 0 rgba(2, 18, 34, 0.05);
+    --shadow-2: 0 4px 12px 0 rgba(2, 18, 34, 0.06);
+    --shadow-3: 0 12px 24px -4px rgba(2, 18, 34, 0.10);
+    --shadow-4: 0 16px 48px -8px rgba(2, 18, 34, 0.16);
+
+    --dur-state: 200ms;
+    --dur-expand: 300ms;
+    --dur-enter: 600ms;
+    --ease-out-cubic: cubic-bezier(.33, 1, .68, 1);
+
+    --font-serif: "DM Serif Display", Georgia, "Times New Roman", serif;
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
 
     --gradient-hero: linear-gradient(135deg, hsl(236, 43%, 30%) 0%, hsl(207, 78%, 51%) 100%);
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 20% 97%;
-    --card: 222 47% 14%;
-    --card-foreground: 210 20% 97%;
-    --popover: 222 47% 14%;
-    --popover-foreground: 210 20% 97%;
-    --primary: 207 78% 51%;
-    --primary-foreground: 0 0% 100%;
+    --background: 222 46% 11%;
+    --foreground: 220 20% 97%;
+    --card: 222 46% 14%;
+    --card-foreground: 220 20% 97%;
+    --popover: 222 46% 14%;
+    --popover-foreground: 220 20% 97%;
+    --primary: 204 100% 49%;
+    --primary-foreground: 222 46% 11%;
     --secondary: 222 47% 18%;
-    --secondary-foreground: 210 20% 97%;
+    --secondary-foreground: 220 20% 97%;
     --muted: 222 47% 18%;
-    --muted-foreground: 220 9% 65%;
-    --accent: 236 43% 30%;
+    --muted-foreground: 221 9% 64%;
+    --accent: 207 78% 51%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 97%;
+    --destructive-foreground: 220 20% 97%;
     --border: 222 47% 20%;
     --input: 222 47% 20%;
     --ring: 207 78% 51%;
+
+    --primary-deep: #5aa9f5;
+    --on-primary: #0f1729;
+    --link: #5aa9f5;
+    --accent-soft: #12294a;
+    --accent-soft-border: #1f3d66;
+    --canvas: #131d34;
+    --surface-raised: #182543;
+    --hairline: #1b294b;
+    --hairline-strong: #2a3a5e;
+    --ink-strong: #ffffff;
+    --ink: #f6f7f9;
+    --steel: #9ba0ab;
+    --muted-ink: #6b7280;
+    --on-destructive: #f6f7f9;
   }
 }
 
@@ -89,8 +149,88 @@
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
   }
-  h1, h2, h3, h4 {
+}
+
+/* Type scale from the design system. Colour is not set here: the classes sit on light and navy grounds alike, so they inherit it. */
+@layer components {
+  .text-hero-display,
+  .text-display-lg,
+  .text-stat-display,
+  .text-heading-1 {
     font-family: var(--font-serif);
+    font-weight: 400;
+  }
+
+  .text-hero-display {
+    font-size: 36px;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+  }
+  .text-display-lg {
+    font-size: 36px;
+    line-height: 1.1;
+    letter-spacing: -1px;
+  }
+  .text-stat-display {
+    font-size: 56px;
+    line-height: 1.1;
+    letter-spacing: -1px;
+  }
+  .text-heading-1 {
+    font-size: 36px;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+  }
+
+  @screen sm {
+    .text-hero-display { font-size: 48px; }
+    .text-display-lg { font-size: 48px; }
+    .text-heading-1 { font-size: 52px; }
+  }
+  @screen md {
+    .text-hero-display { font-size: 60px; }
+    .text-display-lg { font-size: 60px; }
+  }
+  @screen lg {
+    .text-hero-display { font-size: 72px; }
+    .text-display-lg { font-size: 72px; }
+  }
+  @screen xl {
+    .text-hero-display { font-size: 84px; }
+  }
+
+  .text-heading-2,
+  .text-heading-3,
+  .text-heading-4,
+  .text-heading-5 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+  }
+  .text-heading-2 { font-size: 36px; line-height: 1.2; letter-spacing: -0.5px; }
+  .text-heading-3 { font-size: 28px; line-height: 1.25; }
+  .text-heading-4 { font-size: 22px; line-height: 1.3; }
+  .text-heading-5 { font-size: 18px; line-height: 1.4; }
+
+  .text-subtitle { font-family: var(--font-sans); font-size: 18px; line-height: 1.5; }
+  .text-body-md { font-family: var(--font-sans); font-size: 16px; line-height: 1.55; }
+  .text-body-sm { font-family: var(--font-sans); font-size: 14px; line-height: 1.5; }
+  .text-caption { font-family: var(--font-sans); font-size: 13px; line-height: 1.4; }
+
+  .text-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .text-tagline {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 3.9px;
+    text-transform: uppercase;
   }
 }
 
@@ -103,12 +243,6 @@
   }
   .text-dark-muted {
     color: hsl(var(--dark-muted));
-  }
-  .font-serif {
-    font-family: var(--font-serif);
-  }
-  .font-sans {
-    font-family: var(--font-sans);
   }
   .bg-hero-gradient {
     background: var(--gradient-hero);
@@ -158,6 +292,14 @@
 .animate-line-draw {
   stroke-dasharray: 1000;
   animation: line-draw 3s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-float-slow,
+  .animate-pulse-glow {
+    animation: none;
+  }
 }
 
 /* Skip to content */

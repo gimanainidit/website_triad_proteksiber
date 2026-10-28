@@ -1,4 +1,13 @@
 import type { Config } from "tailwindcss";
+import animate from "tailwindcss-animate";
+
+// Hex design system variables cannot take Tailwind's alpha shorthand (bg-navy-950/60) as-is, so alpha goes through color-mix.
+const ds =
+  (variable: string) =>
+  ({ opacityValue }: { opacityValue?: string }) =>
+    opacityValue === undefined
+      ? `var(--${variable})`
+      : `color-mix(in srgb, var(--${variable}) calc(${opacityValue} * 100%), transparent)`;
 
 export default {
   darkMode: ["class"],
@@ -14,8 +23,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ["Merriweather", "Georgia", "serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)"],
+        sans: ["var(--font-sans)"],
+        mono: ["var(--font-mono)"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -26,6 +36,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          deep: ds("primary-deep"),
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -56,6 +67,21 @@ export default {
           foreground: "hsl(var(--dark-foreground))",
           muted: "hsl(var(--dark-muted))",
         },
+        navy: { 950: ds("navy-950"), 900: ds("navy-900") },
+        protx: ds("protx-navy"),
+        electric: ds("electric-blue"),
+        "light-gray": ds("light-gray"),
+        shield: ds("shield-blue"),
+        link: ds("link"),
+        soft: { DEFAULT: ds("accent-soft"), border: ds("accent-soft-border") },
+        canvas: ds("canvas"),
+        raised: ds("surface-raised"),
+        code: ds("surface-code"),
+        hairline: { DEFAULT: ds("hairline"), strong: ds("hairline-strong") },
+        ink: { DEFAULT: ds("ink"), strong: ds("ink-strong") },
+        steel: ds("steel"),
+        "muted-ink": ds("muted-ink"),
+        "on-dark": { DEFAULT: ds("on-dark"), muted: ds("on-dark-muted") },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -71,6 +97,22 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "0.75rem",
+        "2xl": "1rem",
+      },
+      boxShadow: {
+        "ds-1": "var(--shadow-1)",
+        "ds-2": "var(--shadow-2)",
+        "ds-3": "var(--shadow-3)",
+        "ds-4": "var(--shadow-4)",
+      },
+      transitionDuration: {
+        state: "var(--dur-state)",
+        expand: "var(--dur-expand)",
+        enter: "var(--dur-enter)",
+      },
+      transitionTimingFunction: {
+        "out-cubic": "var(--ease-out-cubic)",
       },
       keyframes: {
         "accordion-down": {
@@ -108,5 +150,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animate],
 } satisfies Config;
