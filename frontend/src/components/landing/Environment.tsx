@@ -19,11 +19,11 @@ export function Environment() {
       >
         <MarkerRow position="top" />
         <SectionGrid className="gap-y-10 pt-16 lg:pt-32">
-          <Col start={1} span={3}>
+          <Col start={1} span={4}>
             <div className="reveal-fade" style={revealIndex(0)}>
               <Eyebrow>{environment.eyebrow}</Eyebrow>
             </div>
-            <h2 className="text-heading-1 reveal-fade mt-4 font-serif text-ink-strong" style={revealIndex(1)}>
+            <h2 className="reveal-fade mt-4 font-serif text-[36px] leading-[1.15] tracking-[-0.5px] text-ink-strong xl:text-[44px]" style={revealIndex(1)}>
               {environment.heading}
             </h2>
             <p className="text-body-md reveal-fade mt-4 text-steel" style={revealIndex(2)}>
