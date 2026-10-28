@@ -37,3 +37,11 @@ const assets = manifest as MediaAsset[];
 export function allMedia(): MediaAsset[] {
   return assets;
 }
+
+const byId = new Map(assets.map((asset) => [asset.id, asset]));
+
+export function media(id: MediaId): MediaAsset {
+  const asset = byId.get(id);
+  if (!asset) throw new Error(`Media "${id}" is not in manifest.json. Run npm run assets:pixabay.`);
+  return asset;
+}
