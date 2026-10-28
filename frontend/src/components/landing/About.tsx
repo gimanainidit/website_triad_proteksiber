@@ -17,7 +17,7 @@ export function About() {
             <h2
               id="about-statement"
               style={revealIndex(1)}
-              className="reveal-fade text-display-lg max-w-5xl font-serif text-ink-strong"
+              className="reveal-fade text-heading-1 max-w-4xl font-serif text-ink-strong"
             >
               {about.statement}
             </h2>
