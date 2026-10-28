@@ -1,6 +1,9 @@
-import { fireEvent, screen, within } from "@testing-library/react";
-import { describe, expect, test } from "vitest";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { describe, expect, test, vi } from "vitest";
 
+import { VideoPlayerProvider } from "@/components/video-player";
+import { resolveVideo } from "@/media";
 import { renderWithProviders } from "@/test/render";
 import { FeatureVideos } from "./FeatureVideos";
 
@@ -36,5 +39,25 @@ describe("playing the video", () => {
     fireEvent.click(screen.getByRole("button", { name: "Putar video PENETRATION TESTING & RED TEAMING" }));
 
     expect(screen.getByRole("dialog", { name: "Penetration Testing" })).toBeInTheDocument();
+  });
+});
+
+describe("visible play button", () => {
+  test("the second card's Putar video button opens feature-iso", () => {
+    const resolve = vi.fn(resolveVideo);
+    render(
+      <MemoryRouter>
+        <VideoPlayerProvider resolve={resolve}>
+          <FeatureVideos />
+        </VideoPlayerProvider>
+      </MemoryRouter>,
+    );
+    const second = screen.getByRole("article", { name: /Kesiapan sertifikasi/ });
+
+    fireEvent.click(within(second).getByRole("button", { name: "Putar video" }));
+
+    expect(resolve).toHaveBeenCalledWith("feature-iso");
+    expect(resolve).not.toHaveBeenCalledWith("feature-pentest");
+    expect(screen.getByRole("dialog", { name: "Audit ISMS ISO 27001" })).toBeInTheDocument();
   });
 });

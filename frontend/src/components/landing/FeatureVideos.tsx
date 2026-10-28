@@ -44,9 +44,20 @@ function FeatureCard({ feature }: { feature: Feature }) {
 
       <div className="pointer-events-none absolute inset-0 z-[1] flex flex-col justify-end gap-6 p-[18px] md:justify-center lg:p-[22px]">
         <h2 id={headingId}>{feature.heading}</h2>
-        <Button asChild variant="secondary" className="pointer-events-auto">
-          <Link to={feature.cta.to}>{feature.cta.label}</Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button asChild variant="secondary" className="pointer-events-auto border-white/30 text-on-dark">
+            <Link to={feature.cta.to}>{feature.cta.label}</Link>
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            className="pointer-events-auto border-white/30 text-on-dark"
+            onClick={() => open(feature.mediaId)}
+          >
+            Putar video
+          </Button>
+        </div>
       </div>
     </Card>
   );
