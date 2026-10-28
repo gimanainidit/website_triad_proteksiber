@@ -102,6 +102,22 @@
   align-self: end;
 }
 
+/* Phones: the bottom controls flow as a wrapping row so each button sizes to its label. */
+.vp-bottom-row {
+  grid-row: 3;
+  grid-column: 1 / -1;
+  align-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.vp-bottom-row > .vp-cell {
+  flex: none;
+  max-width: 100%;
+}
+
 .vp-col-1 {
   grid-column: 1;
 }
@@ -116,6 +132,9 @@
 }
 
 @media (min-width: 640px) {
+  .vp-bottom-row {
+    display: contents;
+  }
   .vp-ui {
     grid-template-columns: repeat(12, minmax(0, 1fr));
     column-gap: 14px;
@@ -132,6 +151,16 @@
   }
   .vp-col-12 {
     grid-column: 12 / span 1;
+  }
+}
+
+/* Phones: a 44px touch target plus the scrubber needs the height a 64px side margin would take away from the 16:9 frame. */
+@media (max-width: 639px) {
+  .vp-dialog {
+    width: min(calc(90vh * 16 / 9), calc(100vw - 16px));
+  }
+  .vp-ui {
+    padding: 12px;
   }
 }
 
@@ -203,6 +232,13 @@
 
 .vp-btn:hover {
   background: rgb(2 18 34 / 0.85);
+}
+
+@media (pointer: coarse) {
+  .vp-btn {
+    min-height: 44px;
+    padding: 0 14px;
+  }
 }
 
 .vp-loading {
