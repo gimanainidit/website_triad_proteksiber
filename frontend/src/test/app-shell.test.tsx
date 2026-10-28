@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { beforeAll, describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 
 import App from "@/App";
 
@@ -9,13 +9,6 @@ function renderAt(path: string) {
 }
 
 describe("site shell routing", () => {
-  // The landing sections still on framer-motion use whileInView; jsdom has no IntersectionObserver.
-  beforeAll(() => {
-    vi.stubGlobal("IntersectionObserver", class { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } });
-    window.scrollTo = vi.fn();
-    HTMLCanvasElement.prototype.getContext = vi.fn(() => null) as never;
-  });
-
   test.each(["/", "/kredit"])("%s renders one nav, one main, one footer and the skip link", (path) => {
     renderAt(path);
     expect(screen.getAllByRole("banner")).toHaveLength(1);
