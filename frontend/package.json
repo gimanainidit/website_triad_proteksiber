@@ -12,7 +12,9 @@
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "assets:pixabay": "node --env-file-if-exists=.env.local scripts/pixabay/cli.mjs sync",
+    "assets:search": "node --env-file-if-exists=.env.local scripts/pixabay/cli.mjs search"
   },
   "dependencies": {
     "@fontsource/dm-serif-display": "^5.3.0",
