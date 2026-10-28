@@ -14,7 +14,7 @@ describe("Index landing page", () => {
 
   test("renders the sections in design order", () => {
     renderWithProviders(<Index />);
-    const headings = Array.from(document.querySelectorAll("h1, h2")).map((h) => h.textContent ?? "");
+    const headings = Array.from(document.querySelectorAll("h1, h2"));
     const expected = [
       "Lindungi Bisnis Anda dari Ancaman Siber.",
       "Dirancang untuk sistem yang tidak boleh berhenti.",
