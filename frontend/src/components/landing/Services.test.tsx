@@ -9,6 +9,13 @@ import { Services } from "./Services";
 const selectTab = (name: string) => fireEvent.mouseDown(screen.getByRole("tab", { name }), { button: 0 });
 
 describe("Services", () => {
+  test("the focusable tab panel keeps a visible focus indicator", () => {
+    renderWithProviders(<Services />);
+    const panel = screen.getByRole("tabpanel");
+    expect(panel).not.toHaveClass("focus-visible:outline-none");
+    expect(panel).toHaveClass("focus-visible:outline-2", "focus-visible:outline-ring", "focus-visible:outline-offset-2");
+  });
+
   test("renders the section header and the two tab triggers", () => {
     renderWithProviders(<Services />);
     expect(screen.getByRole("heading", { level: 2, name: "Solusi Keamanan Siber Komprehensif" })).toBeInTheDocument();

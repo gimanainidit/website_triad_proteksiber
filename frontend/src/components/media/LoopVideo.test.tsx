@@ -74,6 +74,7 @@ describe("LoopVideo", () => {
     vi.unstubAllGlobals();
     Reflect.deleteProperty(navigator, "connection");
     Reflect.deleteProperty(document, "hidden");
+    Reflect.deleteProperty(document, "readyState");
   });
 
   it("is a decorative, muted, looping video showing the manifest poster", () => {
@@ -87,10 +88,36 @@ describe("LoopVideo", () => {
     expect(video.playsInline).toBe(true);
   });
 
-  it("attaches src immediately when eager", () => {
+  it("attaches src immediately when eager and the page has already loaded", () => {
     const { video } = renderLoop({ eager: true });
 
     expect(video).toHaveAttribute("src", media("hero-loop").src);
+    expect(video).toHaveAttribute("preload", "metadata");
+  });
+
+  it("when eager, waits for the window load event so the poster stays the LCP", () => {
+    Object.defineProperty(document, "readyState", { value: "loading", configurable: true });
+    const { video } = renderLoop({ eager: true });
+    expect(video).not.toHaveAttribute("src");
+    expect(video).toHaveAttribute("preload", "metadata");
+
+    act(() => {
+      window.dispatchEvent(new Event("load"));
+    });
+
+    expect(video).toHaveAttribute("src", media("hero-loop").src);
+  });
+
+  it("when eager, never attaches on load under reduced motion", () => {
+    Object.defineProperty(document, "readyState", { value: "loading", configurable: true });
+    stubMatchMedia(["(prefers-reduced-motion: reduce)"]);
+    const { video } = renderLoop({ eager: true });
+
+    act(() => {
+      window.dispatchEvent(new Event("load"));
+    });
+
+    expect(video).not.toHaveAttribute("src");
   });
 
   it("holds back src until the observer reports it near the viewport", () => {

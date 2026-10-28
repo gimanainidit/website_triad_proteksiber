@@ -81,6 +81,11 @@
   opacity: 0;
 }
 
+/* Keyboard users must never lose the control they are on. */
+.vp-dialog.is-idle:has(:focus-visible) .vp-ui {
+  opacity: 1;
+}
+
 .vp-dialog.is-idle {
   cursor: none;
 }

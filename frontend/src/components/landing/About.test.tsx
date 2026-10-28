@@ -40,3 +40,12 @@ describe("About", () => {
     expect(container.querySelector("a a")).toBeNull();
   });
 });
+
+describe("About contrast on the soft card", () => {
+  test("pillar copy is ink and the eyebrow is ink-strong, not the sub-4.5:1 steel and link", () => {
+    renderWithProviders(<About />);
+    expect(screen.getByText(/mitra keamanan siber terpercaya di Indonesia/)).toHaveClass("text-ink");
+    expect(screen.getByText("TENTANG KAMI")).toHaveClass("text-ink-strong");
+    expect(screen.getByText("TENTANG KAMI")).not.toHaveClass("text-link");
+  });
+});

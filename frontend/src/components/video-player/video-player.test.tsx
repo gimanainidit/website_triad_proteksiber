@@ -1,5 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
+import { MemoryRouter, useNavigate } from "react-router-dom";
 import { VideoPlayerProvider, useVideoPlayer, type VideoPlayerControls } from ".";
 
 const sources: Record<string, { src: string; poster?: string; title?: string }> = {
@@ -308,7 +309,13 @@ describe("loading state", () => {
 describe("auto-hiding controls", () => {
   beforeAll(() => {
     // jsdom has no PointerEvent, so clientX/Y would be dropped from fireEvent
-    window.PointerEvent ??= class PointerEvent extends MouseEvent {} as typeof window.PointerEvent;
+    window.PointerEvent ??= class PointerEvent extends MouseEvent {
+      pointerType: string;
+      constructor(type: string, init: PointerEventInit = {}) {
+        super(type, init);
+        this.pointerType = init.pointerType ?? "";
+      }
+    } as typeof window.PointerEvent;
   });
   beforeEach(() => {
     vi.useFakeTimers();
@@ -345,10 +352,35 @@ describe("auto-hiding controls", () => {
     expect(dialog()).not.toHaveClass("is-idle");
   });
 
-  test("the pointer leaving hides them at once", () => {
-    fireEvent.pointerLeave(dialog());
+  test("a mouse leaving hides them at once", () => {
+    fireEvent.pointerLeave(dialog(), { pointerType: "mouse" });
     expect(dialog()).toHaveClass("is-idle");
-    fireEvent.pointerMove(video());
+    fireEvent.pointerMove(video(), { pointerType: "mouse" });
+    expect(dialog()).not.toHaveClass("is-idle");
+  });
+
+  test("a touch pointer leaving after a tap does not hide them", () => {
+    fireEvent.pointerLeave(dialog(), { pointerType: "touch" });
+    expect(dialog()).not.toHaveClass("is-idle");
+  });
+
+  test("a touch pointerdown brings idle controls back", () => {
+    wait(2500);
+    expect(dialog()).toHaveClass("is-idle");
+    fireEvent.pointerDown(video(), { pointerType: "touch" });
+    expect(dialog()).not.toHaveClass("is-idle");
+  });
+
+  test("a touch pointer outside the frame does not hide them", () => {
+    dialog().getBoundingClientRect = () => ({ left: 100, top: 50, right: 900, bottom: 500, width: 800, height: 450 }) as DOMRect;
+    fireEvent.pointerMove(dialog(), { clientX: 20, clientY: 200, pointerType: "touch" });
+    expect(dialog()).not.toHaveClass("is-idle");
+  });
+
+  test.each(["m", "ArrowRight"])("pressing %s while idle wakes the controls", (key) => {
+    wait(2500);
+    expect(dialog()).toHaveClass("is-idle");
+    fireEvent.keyDown(dialog(), { key });
     expect(dialog()).not.toHaveClass("is-idle");
   });
 
@@ -356,7 +388,7 @@ describe("auto-hiding controls", () => {
     dialog().getBoundingClientRect = () => ({ left: 100, top: 50, right: 900, bottom: 500, width: 800, height: 450 }) as DOMRect;
     fireEvent.pointerMove(video(), { clientX: 500, clientY: 200 });
     expect(dialog()).not.toHaveClass("is-idle");
-    fireEvent.pointerMove(dialog(), { clientX: 20, clientY: 200 });
+    fireEvent.pointerMove(dialog(), { clientX: 20, clientY: 200, pointerType: "mouse" });
     expect(dialog()).toHaveClass("is-idle");
   });
 
@@ -410,5 +442,41 @@ describe("body scroll lock", () => {
     act(() => player.open("a"));
     cleanup();
     expect(document.documentElement.style.overflow).toBe("");
+  });
+});
+
+describe("browser navigation", () => {
+  let navigate: ReturnType<typeof useNavigate>;
+  function Nav() {
+    navigate = useNavigate();
+    return null;
+  }
+
+  test("closes the open dialog when the route changes", () => {
+    render(
+      <MemoryRouter>
+        <VideoPlayerProvider resolve={(id) => sources[id]}>
+          <Probe />
+          <Nav />
+        </VideoPlayerProvider>
+      </MemoryRouter>,
+    );
+    act(() => player.open("a"));
+    expect(dialog().open).toBe(true);
+
+    act(() => navigate("/layanan"));
+    expect(dialog().open).toBe(false);
+  });
+
+  test("stays open while the route is unchanged", () => {
+    render(
+      <MemoryRouter>
+        <VideoPlayerProvider resolve={(id) => sources[id]}>
+          <Probe />
+        </VideoPlayerProvider>
+      </MemoryRouter>,
+    );
+    act(() => player.open("a"));
+    expect(dialog().open).toBe(true);
   });
 });
