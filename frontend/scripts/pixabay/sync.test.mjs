@@ -103,3 +103,27 @@ describe("api cache", () => {
     expect(String(fs.files.get(cached[0]))).not.toContain(API_KEY);
   });
 });
+
+describe("api errors", () => {
+  it("stops on HTTP 429 and reports X-RateLimit-Reset", async () => {
+    const pixabay = createFakePixabay({ status: 429, headers: { "X-RateLimit-Reset": "37" } });
+    const { fs, run } = setup({ pixabay });
+    await expect(run()).rejects.toThrow(/429.*X-RateLimit-Reset: 37/s);
+    expect(fs.writes).toEqual([]);
+  });
+
+  it("names the id when Pixabay has no such hit", async () => {
+    const { run } = setup({ pixabay: createFakePixabay({ hits: {} }) });
+    await expect(run()).rejects.toThrow(/hero-loop.*173102/s);
+  });
+
+  it("never leaks the key in an error from a failing request", async () => {
+    const fetch = async (url) => {
+      throw new Error(`connect ECONNREFUSED ${url}`);
+    };
+    const run = syncAssets({ config: { entries: [heroLoop] }, apiKey: API_KEY, fetch, fs: createFakeFs(), now: () => 0 });
+    const error = await run.catch((e) => e);
+    expect(error.message).toMatch(/ECONNREFUSED/);
+    expect(error.message).not.toContain(API_KEY);
+  });
+});

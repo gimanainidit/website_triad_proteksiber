@@ -38,6 +38,7 @@ export async function syncAssets({ config, apiKey, fetch, fs, now, log = () => {
 
   for (const entry of config.entries) {
     const hit = await api.getHit(entry.kind, entry.pixabayId);
+    if (!hit) throw new Error(`${entry.id}: Pixabay has no ${entry.kind} with id ${entry.pixabayId}`);
     const pick = selectRendition(entry, hit);
 
     const name = `pixabay-${entry.pixabayId}-${pick.rendition}`;
