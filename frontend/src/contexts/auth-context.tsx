@@ -30,8 +30,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const loadProfile = async () => {
-    if (!token) {
+  // Takes the token explicitly: right after login, the `token` state in this closure is still the old one.
+  const loadProfile = async (activeToken: string | null) => {
+    if (!activeToken) {
       setUser(null)
       setLoading(false)
       return
@@ -50,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   useEffect(() => {
-    loadProfile()
+    loadProfile(token)
   }, [token])
 
   const login = async (email: string, password: string) => {
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const data = await response.json()
     localStorage.setItem('triad-token', data.access_token)
     setToken(data.access_token)
-    await loadProfile()
+    await loadProfile(data.access_token)
   }
 
   const logout = () => {
