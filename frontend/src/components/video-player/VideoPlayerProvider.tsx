@@ -11,6 +11,8 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
   const resolveRef = useRef(resolve);
   resolveRef.current = resolve;
   const [active, setActive] = useState<Active | null>(null);
+  const [muted, setMuted] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   const controls = useMemo<VideoPlayerControls>(
     () => ({
@@ -26,11 +28,20 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
   );
 
   useLayoutEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted;
+  }, [muted, active]);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (video) void (video.paused ? video.play() : video.pause());
+  };
+
+  useLayoutEffect(() => {
     const dialog = dialogRef.current;
     const video = videoRef.current;
     if (!active || !dialog || !video) return;
     if (!dialog.open) dialog.showModal();
-    void video.play();
+    video.play().catch(() => setPaused(true));
   }, [active]);
 
   return (
@@ -49,7 +60,17 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
         }}
         onClose={() => videoRef.current?.pause()}
       >
-        <video ref={videoRef} className="vp-video" src={active?.src} poster={active?.poster} playsInline loop />
+        <video ref={videoRef} className="vp-video" src={active?.src} poster={active?.poster} playsInline
+          loop
+          onPlay={() => setPaused(false)}
+          onPause={() => setPaused(true)}
+        />
+        <button type="button" onClick={() => setMuted((m) => !m)}>
+          {muted ? "Suara aktif" : "Bisukan"}
+        </button>
+        <button type="button" onClick={togglePlay}>
+          {paused ? "Lanjutkan" : "Jeda"}
+        </button>
         <button type="button" onClick={controls.close}>
           Tutup
         </button>

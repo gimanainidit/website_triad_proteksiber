@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { VideoPlayerProvider, useVideoPlayer, type VideoPlayerControls } from ".";
 
 const sources: Record<string, { src: string; poster?: string; title?: string }> = {
@@ -77,5 +77,53 @@ describe("ways to close", () => {
   test("the cancel event (Escape) closes", () => {
     fireEvent(dialog(), new Event("cancel", { cancelable: true }));
     expect(dialog().open).toBe(false);
+  });
+});
+
+describe("toggles", () => {
+  beforeEach(() => setup());
+
+  test("mute button flips between Bisukan and Suara aktif", () => {
+    act(() => player.open("a"));
+    fireEvent.click(screen.getByRole("button", { name: "Bisukan" }));
+    expect(video().muted).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Suara aktif" }));
+    expect(video().muted).toBe(false);
+    expect(screen.getByRole("button", { name: "Bisukan" })).toBeInTheDocument();
+  });
+
+  test("mute is global across videos", () => {
+    act(() => player.open("a"));
+    fireEvent.click(screen.getByRole("button", { name: "Bisukan" }));
+    act(() => player.close());
+    act(() => player.open("b"));
+    expect(video().getAttribute("src")).toBe("/media/b.mp4");
+    expect(video().muted).toBe(true);
+    expect(screen.getByRole("button", { name: "Suara aktif" })).toBeInTheDocument();
+  });
+
+  test("play button follows the video's pause and play events", () => {
+    act(() => player.open("a"));
+    expect(screen.getByRole("button", { name: "Jeda" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Jeda" }));
+    expect(video().paused).toBe(true);
+    expect(screen.getByRole("button", { name: "Lanjutkan" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Lanjutkan" }));
+    expect(video().paused).toBe(false);
+    expect(screen.getByRole("button", { name: "Jeda" })).toBeInTheDocument();
+
+    act(() => {
+      video().dispatchEvent(new Event("pause"));
+    });
+    expect(screen.getByRole("button", { name: "Lanjutkan" })).toBeInTheDocument();
+  });
+
+  test("a blocked autoplay shows Lanjutkan", async () => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, "play").mockRejectedValueOnce(new DOMException("blocked", "NotAllowedError"));
+    act(() => player.open("a"));
+    await screen.findByRole("button", { name: "Lanjutkan" });
+    play.mockRestore();
   });
 });
