@@ -68,7 +68,7 @@ export function Hero() {
               {HERO.subtitle}
             </p>
             <div className="pointer-events-auto mt-8 flex flex-wrap items-center gap-3 reveal-fade" style={revealIndex(3)}>
-              <Button asChild>
+              <Button asChild className="bg-shield text-navy-950 active:bg-shield/85">
                 <Link to={HERO.contactHref}>{HERO.contactLabel}</Link>
               </Button>
               <Button asChild variant="secondary" className="border-white/30 text-on-dark">
