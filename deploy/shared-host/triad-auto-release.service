@@ -1,0 +1,11 @@
+[Unit]
+Description=Release the newest green TRIAD build
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# A hung image pull would otherwise hold .deploy.lock and stop every later release.
+TimeoutStartSec=15min
+User=triad
+ExecStart=/opt/triad/auto-release.sh

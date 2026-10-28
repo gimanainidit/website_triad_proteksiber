@@ -7,6 +7,11 @@ sha=${2:?commit required}
 [[ "$sha" =~ ^[a-f0-9]{40}$ ]] || exit 2
 exec 9>.deploy.lock
 flock 9
+if grep -qx "FRONTEND_IMAGE=ghcr.io/$repo-frontend:$sha" production.env \
+  && grep -qx "BACKEND_IMAGE=ghcr.io/$repo-backend:$sha" production.env; then
+  printf '%s\n' "Release $sha is already running; nothing to do."
+  exit 0
+fi
 cp production.env production.env.previous
 rollback() {
   cp production.env.previous production.env

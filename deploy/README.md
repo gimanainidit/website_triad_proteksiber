@@ -89,15 +89,19 @@ Future column changes need reviewed Alembic migrations. Image rollback does not 
 
 ## Automatic releases
 
-Set GitHub repository variable `VPS_DEPLOY_ENABLED=true` only after first installation.
-Create GitHub environment `production`. Configure secrets there:
-`VPS_HOST`, `VPS_USER`, `VPS_PORT` (default 22), `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS`.
-Use a dedicated deployment SSH key. Verify the server host-key fingerprint against
-the provider console before entering its known_hosts line; do not blindly trust ssh-keyscan.
-
-A push to main runs checks, builds/pushes image tags, then calls `/opt/triad/release.sh`.
-The script serializes deployments, retains prior image references, waits for health
-and requests `/api/resources`. On failure it restores previous image references.
+A push to main runs checks and builds/pushes image tags. The VPS pulls, GitHub never
+logs in: `triad-auto-release.timer` (installed by `shared-host/setup-host.sh`) asks the
+public GitHub API every 2 minutes for the newest successful `vps.yml` run on main and
+calls `/opt/triad/release.sh` once per new commit. No SSH key or secret lives in GitHub.
+`release.sh` serializes deployments, skips a commit that is already running, retains
+prior image references, waits for health and requests `/api/resources`. On failure it
+restores previous image references, and the timer does not retry that commit.
+Pause with `touch /opt/triad/auto-release.paused`; logs: `journalctl -u triad-auto-release`.
+On a dedicated VPS without `setup-host.sh`, install `shared-host/auto-release.sh` to
+`/opt/triad/` and the two `shared-host/triad-auto-release.*` units to `/etc/systemd/system/`,
+then `systemctl enable --now triad-auto-release.timer`.
+`release.sh` does nothing for the commit already running; to restart that release use
+`docker compose --env-file production.env up -d --wait` in `/opt/triad`.
 First bootstrap is manual: automatic deployment does not install Docker, create
 secrets, initialize n8n, or manage database migrations.
 

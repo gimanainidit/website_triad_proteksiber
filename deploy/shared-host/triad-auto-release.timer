@@ -1,0 +1,9 @@
+[Unit]
+Description=Check for a new green TRIAD build every 2 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+
+[Install]
+WantedBy=timers.target

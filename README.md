@@ -15,4 +15,4 @@ Production runs the frontend and backend as containers on the VPS; see
 
 ## Production VPS
 
-See [VPS deployment guide](deploy/README.md) for containers, managed Neon/Supabase, pre-domain setup, GitHub Actions, and rollback. The workflow keeps VPS deployment disabled until installation and SSH secrets are configured.
+See [VPS deployment guide](deploy/README.md) for containers, managed Neon/Supabase, pre-domain setup, GitHub Actions, and rollback. Every green push to main is released by a timer on the VPS.

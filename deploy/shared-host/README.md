@@ -32,7 +32,9 @@ certificate with its own root CA, shipped in the backend image at
 5. `sudo certbot --nginx -d eranusasiber.my.id -d www.eranusasiber.my.id`, then
    `curl -I https://eranusasiber.my.id/api/health`.
 
-To release a new commit: `bash deploy/shared-host/ship.sh` (push, wait for CI, run release.sh).
+To release a new commit, push to main (or `bash deploy/shared-host/ship.sh` to push and watch CI).
+`triad-auto-release.timer` releases each green commit once, within ~2 minutes.
+Pause: `touch /opt/triad/auto-release.paused`. Log: `journalctl -u triad-auto-release`.
 Releases and rollback use `/opt/triad/release.sh` unchanged; Compose picks up
 `compose.override.yml` from the same directory. Never run `docker compose down -v`.
 

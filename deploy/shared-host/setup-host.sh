@@ -10,9 +10,11 @@ here=$(cd "$(dirname "$0")" && pwd)
 deploy_src=$(dirname "$here")
 dir=/opt/triad
 nginx_dir=/etc/nginx
+systemd_dir=/etc/systemd/system
 if [[ $EUID -ne 0 ]]; then  # directory overrides exist for the unprivileged tests only
   dir=${TRIAD_DEPLOY_DIR:-$dir}
   nginx_dir=${NGINX_DIR:-$nginx_dir}
+  systemd_dir=${SYSTEMD_DIR:-$systemd_dir}
 fi
 user=triad
 site="$nginx_dir/sites-available/triad"
@@ -46,6 +48,7 @@ usermod -aG docker "$user"  # docker group is root-equivalent: this user only
 mkdir -p "$dir"
 install -m 644 "$deploy_src/compose.yml" "$deploy_src/Caddyfile" "$here/compose.override.yml" "$dir/"
 install -m 700 "$deploy_src/release.sh" "$dir/release.sh"
+install -m 700 "$here/auto-release.sh" "$dir/auto-release.sh"
 for name in production backend n8n; do
   target="$dir/$name.env"
   [[ -e "$target" ]] && continue
@@ -76,8 +79,14 @@ if [[ "$old_target" != "$site" ]] || $created_site; then
   systemctl reload nginx
 fi
 
+mkdir -p "$systemd_dir"
+install -m 644 "$here/triad-auto-release.service" "$here/triad-auto-release.timer" "$systemd_dir/"
+systemctl daemon-reload
+systemctl enable --now triad-auto-release.timer
+
 cat <<EOF
-Done. Next, as user $user in $dir:
+Done. Every green push to main is now released within ~2 minutes
+(pause: touch $dir/auto-release.paused; log: journalctl -u triad-auto-release). Next, as user $user in $dir:
   1. Fill backend.env (DATABASE_URL, SUPABASE_*, JWT_SECRET_KEY) and image tags in production.env.
   2. docker login ghcr.io, then: docker compose --env-file production.env up -d --wait
   3. sudo certbot --nginx -d eranusasiber.my.id -d www.eranusasiber.my.id

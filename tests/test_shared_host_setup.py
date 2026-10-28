@@ -22,7 +22,8 @@ def fake_host(tmp_path, nginx_test_fails=False):
     (nginx / "sites-available").mkdir(parents=True)
     (nginx / "sites-enabled").mkdir()
     env = dict(os.environ, PATH=f"{bin_dir}:{os.environ['PATH']}",
-               TRIAD_DEPLOY_DIR=str(tmp_path / "opt-triad"), NGINX_DIR=str(nginx))
+               TRIAD_DEPLOY_DIR=str(tmp_path / "opt-triad"), NGINX_DIR=str(nginx),
+               SYSTEMD_DIR=str(tmp_path / "systemd"))
     return env, calls, nginx
 
 
@@ -42,6 +43,16 @@ def test_installs_stack_files_and_private_env_files(tmp_path):
     assert "SITE_ADDRESS=:80\n" in (deploy / "production.env").read_text()
     assert (nginx / "sites-enabled/triad").resolve() == nginx / "sites-available/triad"
     assert "systemctl reload nginx" in calls.read_text()
+
+
+def test_installs_and_starts_the_auto_release_timer(tmp_path):
+    env, calls, _ = fake_host(tmp_path)
+    assert run(env).returncode == 0
+    assert (tmp_path / "opt-triad/auto-release.sh").stat().st_mode & 0o777 == 0o700
+    for unit in ("triad-auto-release.service", "triad-auto-release.timer"):
+        assert (tmp_path / "systemd" / unit).is_file()
+    log = calls.read_text()
+    assert log.index("systemctl daemon-reload") < log.index("systemctl enable --now triad-auto-release.timer")
 
 
 def test_rerun_keeps_existing_secrets(tmp_path):

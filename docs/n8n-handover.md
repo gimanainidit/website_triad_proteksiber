@@ -11,7 +11,7 @@ Status ringkas: **n8n mati.** Tabel n8n lama di Supabase dibiarkan (keputusan us
 | Hosting | VPS Debian bersama (shared host) | nginx host (TLS certbot) → `127.0.0.1:8180` → Caddy → `frontend:80` / `backend:8001` |
 | Database CMS | Supabase Postgres, project `nnxyouxuxvxrvggklqvf`, schema `public` | Lewat transaction pooler (port 6543), TLS dengan CA `backend/certs/supabase-prod-ca-2021.crt` |
 | File | Supabase Storage, bucket publik `resources` dan `templates` | |
-| Rilis | `bash deploy/shared-host/ship.sh` | push → tunggu CI (image GHCR) → `release.sh` di `/opt/triad` |
+| Rilis | push ke `main` | CI build image GHCR → timer `triad-auto-release` di VPS menjalankan `release.sh` (≤2 menit). `ship.sh` = push + pantau CI |
 | Rencana kerja | `PLAN.md` | Tabel Progres adalah satu-satunya sumber status |
 
 Tabel CMS: `users`, `resources`, `templates`, `admin_sessions`, `audit_logs`, `alembic_version`. Skema CMS hanya berubah lewat Alembic (`backend/alembic/versions/`).
@@ -76,7 +76,7 @@ Service `n8n` sudah ada di `deploy/compose.yml` (image dipin dengan digest, port
 
 - **Webhook konten sudah diamankan (2026-10-28):** wajib header `X-N8N-Secret`, hasil selalu draft. Endpoint ini tetap terjangkau dari internet lewat Caddy `/api/*` (dengan secret). Kalau workflow hanya memanggilnya dari jaringan Docker, boleh dipertimbangkan memblok path ini di Caddy.
 - Konten dari n8n tidak pernah tampil publik tanpa admin menekan Publish. Kalau tim ingin auto-publish, itu keputusan user dan wajib dicatat di `PLAN.md`.
-- Semua perubahan backend pakai TDD (test merah dulu) di `tests/`, lalu dirilis lewat `ship.sh`. Lihat bagian Seam di `PLAN.md`.
+- Semua perubahan backend pakai TDD (test merah dulu) di `tests/`, lalu push ke `main` (rilis otomatis setelah CI hijau). Lihat bagian Seam di `PLAN.md`.
 - Jangan simpan secret di workflow JSON, repo, atau variabel `VITE_*`. Simpan di credential n8n atau di file env server.
 
 ## 6. Kontak dan keputusan yang sudah diambil

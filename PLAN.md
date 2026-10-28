@@ -13,7 +13,7 @@ Pelaku: **Agent** (Claude di VPS, tanpa sudo/GitHub/Docker) · **User** (kamu: d
 
 ## Progres
 
-Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T18 dan T20 lulus, Vercel mati. T27 (webhook n8n) dirilis. Sisa: tiket opsional T21, T22, T26.**
+Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T18 dan T20 lulus, Vercel mati. T27 (webhook n8n) dirilis. Sisa: aktifkan T22 (rilis otomatis), kirim T21, opsional T26.**
 
 | ID | Tiket | Pelaku | Blocker | Status | Bukti |
 |---|---|---|---|---|---|
@@ -37,8 +37,8 @@ Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T1
 | T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | ✅ | Login OK (`8bfd698`), halaman upload OK (`a27f678`). Upload PDF 2,1 MB 2026-10-28 04:17 UTC: tampil publik, file Supabase 200 `application/pdf`. Unpublish bekerja (8 resource lama tersembunyi). Upload template `.pptx` 2026-10-28 06:12 UTC: 1 baris `templates` + 1 objek di bucket `templates` |
 | T19 | Nasib tabel n8n di schema `public` | User | – | ✅ | Keputusan user 2026-10-28: dibiarkan, workflow n8n akan dibangun ulang. Handover untuk tim n8n: [docs/n8n-handover.md](docs/n8n-handover.md) |
 | T20 | Matikan Vercel + canonical/og ke domain baru | Agent + User | T18 | ✅ | `6b5c917` dirilis (CI sukses). Domain dan www menyajikan canonical/og/twitter/JSON-LD ke `eranusasiber.my.id`, social card 200 `image/png`. `triad-proteksiber-web.vercel.app` 404 `DEPLOYMENT_NOT_FOUND` (2026-10-28) |
-| T21 | Hapus cache commit lama di GitHub | User | T10 | ⬜ | Opsional |
-| T22 | Rilis otomatis dari GitHub Actions | Agent + User | T18 | ⬜ | Opsional |
+| T21 | Hapus cache commit lama di GitHub | User | T10 | 🟡 | Draf permintaan siap di `.audit/t21-github-support.md` (lokal, tidak di-commit): PR #1 `32c0ca8`, PR #2 `ba45806` masih bisa dibuka di GitHub per 2026-10-28. **Belum: user mengirim ke GitHub Support** |
+| T22 | Rilis otomatis (pull dari VPS) | Agent + User | T18 | 🟡 | Timer `triad-auto-release` (tiap 2 menit) + `auto-release.sh`; job deploy SSH di CI dihapus; `release.sh` idempoten. 48 test hijau, review independen (1 temuan medium diperbaiki). **Belum: user menjalankan `setup-host.sh` lalu push, dan rilis otomatis pertama dicek** |
 | T23 | Perbaiki 5 error TypeScript + typecheck di CI | Agent | – | ✅ | `04f714f`; ternyata bug: API tidak mengirim `published`, tombol Publish admin selalu mengirim `true`. `tsc` 0, CI `npm run typecheck` |
 | T24 | Admin melihat draft; publik tidak | Agent | – | ✅ | `8fab47e` + `e6f7d1c`: listing publik dan detail by id hanya published; `GET /api/admin/resources` untuk admin |
 | T25 | Bersihkan data uji di produksi | User | – | ✅ | 8 resource lama di-unpublish oleh user. Keputusan user 2026-10-28: dibiarkan sebagai draft (tidak dihapus). File PDF-nya tetap bisa diunduh lewat URL Supabase publik oleh siapa pun yang sudah punya link-nya (risiko diterima) |
@@ -157,14 +157,14 @@ Pakai `tdd` untuk perubahan `frontend/index.html`: `canonical`, `og:url`, `og:im
 **Selesai bila:** `git grep vercel` kosong di luar PLAN ini, dan `triad-proteksiber-web.vercel.app` tidak lagi melayani situs.
 
 ### T21 · Cache GitHub (opsional)
-Ajukan ke GitHub Support (Sensitive data removal) untuk ref `refs/pull/1` dan `refs/pull/2` serta cached views. Semua secret yang bocor sudah dirotasi, jadi risikonya rendah.
+Ajukan ke GitHub Support (Sensitive data removal) untuk ref `refs/pull/1` dan `refs/pull/2` serta cached views. Semua secret yang bocor sudah dirotasi, jadi risikonya rendah. Teks siap tempel ada di `.audit/t21-github-support.md`.
 
 **Selesai bila:** Support mengonfirmasi, atau tiket ditutup karena dianggap tidak perlu.
 
-### T22 · Rilis otomatis (opsional)
-Buat SSH key khusus untuk user `triad`, dibatasi di `authorized_keys` dengan `restrict,command="/opt/triad/ssh-release.sh"`. Wrapper ini memvalidasi `<repo> <sha>` dengan regex yang sama seperti `release.sh`. Isi secret di environment `production` GitHub, lalu set `VPS_DEPLOY_ENABLED=true`. Ingat fail2ban `maxretry 4`: uji koneksi sekali saja.
+### T22 · Rilis otomatis
+Desain awal (SSH forced-command dari GitHub Actions) diganti 2026-10-28: sshd di host ini memakai `AllowUsers usersaya ctfuser`, jadi user `triad` tidak bisa login, dan desain pull tidak butuh key SSH di GitHub. VPS bertanya ke API publik GitHub tiap 2 menit: run `vps.yml` sukses terbaru di `main` (event push). Commit baru dirilis lewat `release.sh` sekali saja. Commit yang gagal atau di-rollback manual tidak diulang. Jeda: `touch /opt/triad/auto-release.paused`. Log: `journalctl -u triad-auto-release`.
 
-**Selesai bila:** satu push ke `main` ter-deploy otomatis, dan satu smoke check gagal yang disengaja memicu rollback (sudah dites di `tests/test_vps_release.py`, cek ulang di host).
+**Selesai bila:** satu push ke `main` ter-deploy otomatis tanpa `release.sh` manual. Rollback saat smoke check gagal sudah dites di `tests/test_vps_release.py`.
 
 ### T23 · Error TypeScript
 `npx tsc -p tsconfig.app.json --noEmit` di `frontend/` melaporkan 5 error yang sudah ada sejak sebelum perubahan ini:
