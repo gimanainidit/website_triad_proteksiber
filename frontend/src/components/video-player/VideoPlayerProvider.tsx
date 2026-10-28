@@ -257,31 +257,33 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
             onChange={(e) => seekToFraction(Number(e.target.value) / 1000)}
           />
 
-          <div className="vp-cell vp-bottom vp-col-1">
-            <div className="vp-meta">
-              <span className="vp-text vp-elapsed">{elapsed}</span>
-              {active?.title && <span className="vp-text vp-title">{active.title}</span>}
+          <div className="vp-bottom-row">
+            <div className="vp-cell vp-bottom vp-col-1">
+              <div className="vp-meta">
+                <span className="vp-text vp-elapsed">{elapsed}</span>
+                {active?.title && <span className="vp-text vp-title">{active.title}</span>}
+              </div>
+              <Marker />
             </div>
-            <Marker />
-          </div>
-          <div className="vp-cell vp-bottom vp-col-5">
-            <button type="button" className="vp-btn" onClick={() => setMuted((m) => !m)}>
-              {muted ? "Suara aktif" : "Bisukan"}
-            </button>
-            <Marker />
-          </div>
-          <div className="vp-cell vp-bottom vp-col-9">
-            <span role="status" className="vp-loading">
-              {loading && "Memuat…"}
-            </span>
-            <button type="button" className="vp-btn" onClick={togglePlay}>
-              {paused ? "Lanjutkan" : "Jeda"}
-            </button>
-            <Marker />
-          </div>
-          <div className="vp-cell vp-bottom vp-col-12">
-            <span className="vp-text vp-duration">{formatTimecode(time.duration)}</span>
-            <Marker />
+            <div className="vp-cell vp-bottom vp-col-5">
+              <button type="button" className="vp-btn" onClick={() => setMuted((m) => !m)}>
+                {muted ? "Suara aktif" : "Bisukan"}
+              </button>
+              <Marker />
+            </div>
+            <div className="vp-cell vp-bottom vp-col-9">
+              <span role="status" className="vp-loading">
+                {loading && "Memuat…"}
+              </span>
+              <button type="button" className="vp-btn" onClick={togglePlay}>
+                {paused ? "Lanjutkan" : "Jeda"}
+              </button>
+              <Marker />
+            </div>
+            <div className="vp-cell vp-bottom vp-col-12">
+              <span className="vp-text vp-duration">{formatTimecode(time.duration)}</span>
+              <Marker />
+            </div>
           </div>
         </div>
       </dialog>

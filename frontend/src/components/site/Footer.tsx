@@ -17,10 +17,16 @@ export function Footer() {
   return (
     <footer className="bg-navy-950 py-16 text-sm leading-normal text-on-dark-muted">
       <div className="container">
-        <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1.4fr]">
           <div>
-            {/* Directly on navy-950, where the reversed artwork is legible. */}
-            <img src={logo} alt="TRIAD PRO-TX SIBER" width={180} height={180} className="h-auto w-[180px]" />
+            {/* Directly on navy-950, where the reversed artwork is legible. The PNG has a wide transparent frame: at 234px the artwork itself is the 180px design minimum, and the negative margins trim the frame from the layout box. */}
+            <img
+              src={logo}
+              alt="TRIAD PRO-TX SIBER"
+              width={234}
+              height={234}
+              className="-mb-[46px] -ml-[25px] -mr-[29px] -mt-[45px] h-auto w-[234px] max-w-none"
+            />
             <p className="mt-4 max-w-xs">Solusi keamanan siber enterprise-grade untuk organisasi Indonesia.</p>
             <p className="text-tagline mt-4 text-shield">SATU AKSI SEJUTA PROTEKSI</p>
           </div>
@@ -43,7 +49,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li className="flex items-center gap-2">
                 <Mail aria-hidden="true" className="size-4 shrink-0 text-shield" />
-                <a href="mailto:triad-proteksiber@pm.me" className={linkClass}>
+                <a href="mailto:triad-proteksiber@pm.me" className={`${linkClass} whitespace-nowrap`}>
                   triad-proteksiber@pm.me
                 </a>
               </li>

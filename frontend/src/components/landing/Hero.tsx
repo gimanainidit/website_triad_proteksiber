@@ -7,7 +7,9 @@ import { HERO } from "@/content/hero";
 import { formatTimecode, media } from "@/media";
 import { revealIndex, useReveal } from "@/motion";
 
-const SCRIM = "bg-gradient-to-r from-navy-950/80 via-navy-950/40 to-transparent";
+// Mobile text spans the full width, so the scrim rises from the bottom. From md the text sits left, so it fades out by 70% of the width.
+const SCRIM =
+  "bg-gradient-to-t from-navy-950/90 via-navy-950/60 to-navy-950/20 md:bg-gradient-to-r md:from-navy-950/90 md:via-navy-950/55 md:via-40% md:to-transparent md:to-70%";
 const DOT_MESH = {
   backgroundImage: "radial-gradient(var(--shield-blue) 1px, transparent 1.5px)",
   backgroundSize: "32px 32px",
@@ -66,7 +68,7 @@ export function Hero() {
               {HERO.subtitle}
             </p>
             <div className="pointer-events-auto mt-8 flex flex-wrap items-center gap-3 reveal-fade" style={revealIndex(3)}>
-              <Button asChild>
+              <Button asChild className="bg-shield text-navy-950 active:bg-shield/85">
                 <Link to={HERO.contactHref}>{HERO.contactLabel}</Link>
               </Button>
               <Button asChild variant="secondary" className="border-white/30 text-on-dark">

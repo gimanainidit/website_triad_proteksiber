@@ -49,10 +49,10 @@ export function Team() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`LinkedIn profile of ${member.name}`}
-                className="inline-flex min-h-11 items-center gap-1 rounded-sm text-sm font-medium text-link focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                className="inline-flex min-h-11 items-center gap-1 rounded-sm text-sm font-medium text-steel focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
                 <MaskReveal>LinkedIn</MaskReveal>
-                <ArrowUpRight aria-hidden="true" className="size-4" />
+                <ArrowUpRight aria-hidden="true" className="size-4 text-link" />
               </a>
             </div>
           </article>

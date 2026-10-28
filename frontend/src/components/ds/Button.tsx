@@ -19,7 +19,7 @@ const buttonVariants = cva(
       },
       size: {
         md: "min-h-11 px-5 py-2.5 text-sm leading-[1.3] lg:min-h-10",
-        sm: "h-6 px-2 font-mono text-[11px] font-medium uppercase leading-none tracking-[1px]",
+        sm: "h-6 px-2 [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:px-[14px] font-mono text-[11px] font-medium uppercase leading-none tracking-[1px]",
       },
       expand: {
         true: "transition-[background-color,border-color,color,padding-right] duration-expand",

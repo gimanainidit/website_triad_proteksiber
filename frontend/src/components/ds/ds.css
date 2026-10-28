@@ -20,43 +20,49 @@
 }
 
 .ds-mask-reveal {
+  position: relative;
   display: inline-block;
-  mask-image: linear-gradient(to right, transparent var(--mask-edge), black 0%);
-  transition: --mask-edge 400ms ease-in-out;
+  white-space: nowrap;
 }
 
-.group:hover .ds-mask-reveal,
-.group:focus-visible .ds-mask-reveal {
+.ds-mask-reveal__overlay {
+  position: absolute;
+  inset: 0;
+  mask-image: linear-gradient(to right, transparent var(--mask-edge), black 0%);
+  transition: --mask-edge 400ms ease-in-out;
+  pointer-events: none;
+}
+
+.group:hover .ds-mask-reveal__overlay,
+.group:focus-visible .ds-mask-reveal__overlay {
   --mask-edge: -1%;
 }
 
 /* Kept apart: a browser without :has() would drop a shared selector list, hover included. */
-.group:has(:focus-visible) .ds-mask-reveal {
+.group:has(:focus-visible) .ds-mask-reveal__overlay {
   --mask-edge: -1%;
 }
 
 @supports not (mask-image: linear-gradient(black, black)) {
-  .ds-mask-reveal {
+  .ds-mask-reveal__overlay {
     mask-image: none;
     clip-path: inset(0 100% 0 0);
     transition: clip-path 400ms ease-in-out;
   }
 
-  .group:hover .ds-mask-reveal,
-  .group:focus-visible .ds-mask-reveal {
+  .group:hover .ds-mask-reveal__overlay,
+  .group:focus-visible .ds-mask-reveal__overlay {
     clip-path: inset(0);
   }
 
-  .group:has(:focus-visible) .ds-mask-reveal {
+  .group:has(:focus-visible) .ds-mask-reveal__overlay {
     clip-path: inset(0);
   }
 }
 
-/* Nothing to hover on touch, and no motion under reduced motion: show the text outright. Keep this block last. */
+/* Nothing to hover on touch, and no motion under reduced motion: the base label already says everything, so drop the wipe. Keep this block last. */
 @media (hover: none), (prefers-reduced-motion: reduce) {
-  .ds-mask-reveal {
-    mask-image: none;
-    clip-path: none;
-    transition: none;
+  .ds-mask-reveal__overlay {
+    display: none;
   }
 }
