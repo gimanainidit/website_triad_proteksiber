@@ -1,6 +1,7 @@
 """Alembic takes its database URL from the environment, never from the repository."""
 import configparser
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -31,3 +32,16 @@ def test_alembic_refuses_to_run_without_database_url():
     result = run_alembic(DATABASE_URL="")  # empty also blocks backend/.env
     assert result.returncode != 0
     assert "DATABASE_URL" in result.stderr
+
+
+def test_migrations_bring_an_old_resources_table_up_to_the_model():
+    result = run_alembic(DATABASE_URL="postgresql://user:pass@example.invalid/db?sslmode=require")
+    assert result.returncode == 0, result.stderr
+    sql = result.stdout
+    import sys
+    sys.path.insert(0, str(BACKEND))
+    from models import Resource
+    added = set(re.findall(r"ALTER TABLE resources ADD COLUMN IF NOT EXISTS (\w+)", sql))
+    early_schema = {"id", "created_at", "title", "slug", "description", "content", "tags",
+                    "file_url", "file_size", "file_type", "category", "author_id", "published"}
+    assert set(Resource.__table__.columns.keys()) == early_schema | added
