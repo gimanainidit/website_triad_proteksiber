@@ -277,3 +277,30 @@ describe("keyboard", () => {
     expect(video().muted).toBe(false);
   });
 });
+
+describe("loading state", () => {
+  beforeEach(() => setup());
+
+  const canPlay = () =>
+    act(() => {
+      video().dispatchEvent(new Event("canplay"));
+    });
+
+  test("shows Memuat… until canplay", () => {
+    act(() => player.open("a"));
+    expect(screen.getByText("Memuat…")).toBeInTheDocument();
+    canPlay();
+    expect(screen.queryByText("Memuat…")).not.toBeInTheDocument();
+  });
+
+  test("a video that is already ready does not flash it again, a new video does", () => {
+    act(() => player.open("a"));
+    canPlay();
+    act(() => player.close());
+    act(() => player.open("a"));
+    expect(screen.queryByText("Memuat…")).not.toBeInTheDocument();
+
+    act(() => player.open("b"));
+    expect(screen.getByText("Memuat…")).toBeInTheDocument();
+  });
+});

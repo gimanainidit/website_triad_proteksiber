@@ -18,6 +18,7 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
   const [active, setActive] = useState<Active | null>(null);
   const [muted, setMuted] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [readySrc, setReadySrc] = useState<string | null>(null);
   const [time, setTime] = useState({ current: 0, duration: 0 });
 
   const rememberPosition = () => {
@@ -123,6 +124,7 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
     video.play().catch(() => setPaused(true));
   }, [active]);
 
+  const loading = active !== null && readySrc !== active.src;
   const elapsed = formatTimecode(time.current);
   const progress = time.duration > 0 ? Math.min(time.current / time.duration, 1) : 0;
 
@@ -151,6 +153,7 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
           loop
           onPlay={() => setPaused(false)}
           onPause={() => setPaused(true)}
+          onCanPlay={() => setReadySrc(active?.src ?? null)}
           onTimeUpdate={syncTime}
           onLoadedMetadata={syncTime}
           onDurationChange={syncTime}
@@ -172,6 +175,7 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
         <button type="button" onClick={togglePlay}>
           {paused ? "Lanjutkan" : "Jeda"}
         </button>
+        <span role="status">{loading && "Memuat…"}</span>
         <button type="button" onClick={controls.close}>
           Tutup
         </button>
