@@ -15,3 +15,20 @@ def format_file_size(size_bytes: int) -> str:
         size_bytes /= 1024.0
         i += 1
     return f"{size_bytes:.1f} {size_names[i]}"
+
+
+def resource_payload(resource) -> dict:
+    return {
+        "id": str(resource.id),
+        "title": resource.title,
+        "slug": resource.slug,
+        "description": resource.description,
+        "category": resource.category,
+        "tags": resource.tags,
+        "file_url": resource.file_url,
+        "file_size": resource.file_size,
+        "file_type": resource.file_type,
+        "created_at": resource.created_at.isoformat(),
+        "content": resource.content,
+        "published": resource.published,
+    }

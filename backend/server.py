@@ -18,7 +18,7 @@ from ai_service import AIContentGenerator
 from n8n_service import N8NIntegration
 from optional_features import ai_configured, n8n_configured, require_ai, require_n8n
 from storage import supabase
-from utils import create_slug, format_file_size
+from utils import create_slug, format_file_size, resource_payload
 from dependencies import require_roles
 from routes.auth import router as auth_router
 from routes.admin import router as admin_router
@@ -56,23 +56,6 @@ async def shutdown_db():
         await ai_generator.close()
     await engine.dispose()
 
-def resource_payload(resource: Resource) -> dict:
-    return {
-        "id": str(resource.id),
-        "title": resource.title,
-        "slug": resource.slug,
-        "description": resource.description,
-        "category": resource.category,
-        "tags": resource.tags,
-        "file_url": resource.file_url,
-        "file_size": resource.file_size,
-        "file_type": resource.file_type,
-        "created_at": resource.created_at.isoformat(),
-        "content": resource.content,
-        "published": resource.published,
-    }
-
-
 # API Endpoints
 @api_router.get("/health")
 async def health_check():
@@ -83,11 +66,10 @@ async def health_check():
 @api_router.get("/resources")
 async def get_resources(
     category: Optional[str] = None,
-    published: bool = True,
     db: AsyncSession = Depends(get_db)
 ):
     """Get all published resources, optionally filtered by category"""
-    query = select(Resource).where(Resource.published == published)
+    query = select(Resource).where(Resource.published == True)
     if category:
         query = query.where(Resource.category == category)
     

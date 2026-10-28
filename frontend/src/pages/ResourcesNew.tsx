@@ -35,7 +35,7 @@ const ResourcesNew = () => {
   const loadResources = async () => {
     try {
       setLoading(true)
-      const data = await ResourceService.getAllResources()
+      const data = await ResourceService.getAdminResources()
       setResources(data)
     } catch (error) {
       console.error('Error loading resources:', error)

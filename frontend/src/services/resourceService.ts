@@ -20,6 +20,10 @@ export class ResourceService {
     return apiFetch(path)
   }
 
+  static async getAdminResources(): Promise<Resource[]> {
+    return apiFetch('/admin/resources')
+  }
+
   static async getResource(id: string): Promise<Resource> {
     return apiFetch(`/resources/${id}`)
   }

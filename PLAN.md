@@ -40,7 +40,7 @@ Diperbarui 2026-10-28. **Posisi sekarang: kerja agent untuk deploy selesai; beri
 | T21 | Hapus cache commit lama di GitHub | User | T10 | ⬜ | Opsional |
 | T22 | Rilis otomatis dari GitHub Actions | Agent + User | T18 | ⬜ | Opsional |
 | T23 | Perbaiki 5 error TypeScript + typecheck di CI | Agent | – | ✅ | `04f714f`; ternyata bug: API tidak mengirim `published`, tombol Publish admin selalu mengirim `true`. `tsc` 0, CI `npm run typecheck` |
-| T24 | Admin melihat draft; publik tidak | Agent | – | ⬜ | Temuan saat T23 |
+| T24 | Admin melihat draft; publik tidak | Agent | – | ✅ | `tests/test_resource_visibility.py` merah (anonim dapat `Draft`) lalu hijau; `GET /api/admin/resources` baru |
 
 ## Skill per jenis tiket
 

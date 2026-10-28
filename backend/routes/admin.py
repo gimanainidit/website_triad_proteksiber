@@ -15,7 +15,7 @@ from services.template_service import TemplateService
 from services.ai_review_service import AIReviewService
 from optional_features import require_ai
 from services.n8n_proxy_service import N8NProxyService
-from utils import create_slug, format_file_size
+from utils import create_slug, format_file_size, resource_payload
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 admin_guard = require_roles(UserRole.ADMIN, UserRole.SUPERADMIN)
@@ -202,6 +202,12 @@ async def delete_resource(
     await db.delete(resource)
     await db.commit()
     return {"message": "Resource deleted"}
+
+
+@router.get("/resources")
+async def list_all_resources(db: AsyncSession = Depends(get_db), current_user: User = Depends(admin_guard)):
+    result = await db.execute(select(Resource).order_by(Resource.created_at.desc()))
+    return [resource_payload(resource) for resource in result.scalars().all()]
 
 
 @router.get("/templates")
