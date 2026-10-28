@@ -99,8 +99,6 @@
     --font-serif: "DM Serif Display", Georgia, "Times New Roman", serif;
     --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
-
-    --gradient-hero: linear-gradient(135deg, hsl(236, 43%, 30%) 0%, hsl(207, 78%, 51%) 100%);
   }
 
   .dark {
@@ -231,74 +229,6 @@
     font-weight: 600;
     letter-spacing: 3.9px;
     text-transform: uppercase;
-  }
-}
-
-@layer utilities {
-  .bg-dark {
-    background-color: hsl(var(--dark));
-  }
-  .text-dark-foreground {
-    color: hsl(var(--dark-foreground));
-  }
-  .text-dark-muted {
-    color: hsl(var(--dark-muted));
-  }
-  .bg-hero-gradient {
-    background: var(--gradient-hero);
-  }
-  .glow-hover {
-    @apply transition-all duration-300;
-  }
-  .glow-hover:hover {
-    box-shadow: 0 0 20px hsl(207 78% 51% / 0.4), 0 0 40px hsl(207 78% 51% / 0.1);
-  }
-}
-
-/* Animated network mesh */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-}
-
-@keyframes float-slow {
-  0%, 100% { transform: translate(0, 0); }
-  33% { transform: translate(10px, -15px); }
-  66% { transform: translate(-8px, 10px); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.7; }
-}
-
-@keyframes line-draw {
-  0% { stroke-dashoffset: 1000; }
-  100% { stroke-dashoffset: 0; }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-float-slow {
-  animation: float-slow 8s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-.animate-line-draw {
-  stroke-dasharray: 1000;
-  animation: line-draw 3s ease-out forwards;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-float,
-  .animate-float-slow,
-  .animate-pulse-glow {
-    animation: none;
   }
 }
 
