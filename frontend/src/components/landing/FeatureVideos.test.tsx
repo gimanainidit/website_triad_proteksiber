@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 
 import { renderWithProviders } from "@/test/render";
@@ -14,5 +14,27 @@ describe("FeatureVideos", () => {
       "Kesiapan sertifikasi, dari gap assessment hingga audit.",
     ]);
     expect(screen.getAllByRole("article")).toHaveLength(2);
+  });
+});
+
+const cards = () => screen.getAllByRole("article");
+
+describe("Pelajari links", () => {
+  test("each card links to its service section", () => {
+    renderWithProviders(<FeatureVideos />);
+
+    const targets = cards().map((card) => within(card).getByRole("link", { name: "Pelajari" }).getAttribute("href"));
+    expect(targets).toEqual(["/services#penetration-testing", "/services#iso-27001-audit"]);
+  });
+});
+
+describe("playing the video", () => {
+  test("the full-card video button opens the player dialog", () => {
+    renderWithProviders(<FeatureVideos />);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Putar video PENETRATION TESTING & RED TEAMING" }));
+
+    expect(screen.getByRole("dialog", { name: "Penetration Testing" })).toBeInTheDocument();
   });
 });
