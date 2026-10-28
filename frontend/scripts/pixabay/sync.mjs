@@ -1,5 +1,5 @@
 import { createPixabayClient } from "./api.mjs";
-import { LICENSE } from "./model.mjs";
+import { LICENSE, validateConfig } from "./model.mjs";
 import { selectRendition } from "./select.mjs";
 
 const MEDIA_DIR = "public/media";
@@ -31,6 +31,7 @@ export const MISSING_KEY_MESSAGE =
  */
 export async function syncAssets({ config, apiKey, fetch, fs, now, sleep, log = () => {} }) {
   if (!apiKey?.trim()) throw new Error(MISSING_KEY_MESSAGE);
+  validateConfig(config);
   const api = createPixabayClient({ apiKey, fetch, fs, now, sleep });
   const manifest = [];
   const downloaded = [];

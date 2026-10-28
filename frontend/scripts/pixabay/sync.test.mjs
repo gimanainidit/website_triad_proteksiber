@@ -222,3 +222,22 @@ describe("throttle", () => {
     expect(apiTimes[99] - apiTimes[0]).toBeLessThan(60_000);
   });
 });
+
+describe("config validation", () => {
+  it.each([
+    ["a rendition the kind does not have", { ...heroLoop, rendition: "webformat" }, /hero-loop.*rendition/s],
+    ["a non-integer pixabayId", { ...heroLoop, pixabayId: "173102" }, /hero-loop.*pixabayId/s],
+    ["a missing maxBytes", { ...heroLoop, maxBytes: undefined }, /hero-loop.*maxBytes/s],
+    ["an unknown kind", { ...heroLoop, kind: "audio" }, /hero-loop.*kind/s],
+  ])("rejects %s before any request", async (_name, entry, message) => {
+    const { fake, run } = setup({ entries: [entry] });
+    await expect(run()).rejects.toThrow(message);
+    expect(fake.calls).toEqual([]);
+  });
+
+  it("rejects two entries sharing a MediaId", async () => {
+    const { fake, run } = setup({ entries: [heroLoop, { ...heroLoop, rendition: "tiny" }] });
+    await expect(run()).rejects.toThrow(/hero-loop.*duplicate/si);
+    expect(fake.calls).toEqual([]);
+  });
+});
