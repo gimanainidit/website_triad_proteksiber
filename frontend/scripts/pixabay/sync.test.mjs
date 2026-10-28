@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { syncAssets } from "./sync.mjs";
-import { API_KEY, createFakeFs, createFakePixabay, video173102 } from "./testkit.mjs";
+import { API_KEY, createFakeFs, createFakePixabay, imageHit, video173102 } from "./testkit.mjs";
 
 const heroLoop = {
   id: "hero-loop",
@@ -148,5 +148,47 @@ describe("download reuse", () => {
     expect(fake.downloadCalls).toEqual([expect.stringContaining("173102-848555581_small.mp4")]);
     expect(downloaded).toEqual([videoPath]);
     expect(reused).toEqual([posterPath]);
+  });
+});
+
+describe("image entries", () => {
+  const photo = { id: "service-dc", pixabayId: 2160321, kind: "image", rendition: "large", role: "service", maxBytes: 2_000_000 };
+  const imagePixabay = () => createFakePixabay({ hits: { "image:2160321": imageHit() } });
+
+  it("downloads largeImageURL locally and describes it without video fields", async () => {
+    const hit = imageHit();
+    const { fake, fs, run } = setup({ entries: [photo], pixabay: imagePixabay() });
+    const { manifest } = await run();
+
+    expect(fake.downloadCalls).toEqual([hit.largeImageURL]);
+    expect(fake.apiCalls[0]).toMatch(/^https:\/\/pixabay\.com\/api\/\?/);
+    expect(manifest).toEqual([
+      {
+        id: "service-dc",
+        kind: "image",
+        src: "/media/pixabay-2160321-large.jpg",
+        width: 1280,
+        height: 448,
+        pixabayId: 2160321,
+        pageURL: hit.pageURL,
+        user: "Schäferle",
+        license: "Pixabay Content License",
+      },
+    ]);
+    expect([...fs.files.keys()].filter((p) => p.startsWith("public/media/"))).toEqual(["public/media/pixabay-2160321-large.jpg"]);
+  });
+
+  it("downloads webformatURL for the webformat rendition", async () => {
+    const hit = imageHit();
+    const { fake, run } = setup({ entries: [{ ...photo, rendition: "webformat" }], pixabay: imagePixabay() });
+    const { manifest } = await run();
+    expect(fake.downloadCalls).toEqual([hit.webformatURL]);
+    expect(manifest[0]).toMatchObject({ src: "/media/pixabay-2160321-webformat.jpg", width: 640, height: 224 });
+  });
+
+  it("rejects a downloaded image over maxBytes, naming the id, and writes nothing", async () => {
+    const { fs, run } = setup({ entries: [{ ...photo, maxBytes: 10 }], pixabay: imagePixabay() });
+    await expect(run()).rejects.toThrow(/service-dc/);
+    expect([...fs.files.keys()].filter((p) => p.startsWith("public/media/"))).toEqual([]);
   });
 });
