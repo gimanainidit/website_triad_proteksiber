@@ -1,0 +1,14 @@
+/* Styles Tailwind cannot express. Component-level utilities live in the .tsx files. */
+
+.ds-shield-stripe {
+  height: 12px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--stripe-1) 0%,
+    var(--stripe-2) 28%,
+    var(--stripe-3) 55%,
+    var(--stripe-4) 78%,
+    var(--stripe-5) 100%
+  );
+}
