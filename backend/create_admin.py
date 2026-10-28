@@ -14,6 +14,7 @@ from models import User, UserRole
 
 
 async def upsert_admin(db, email: str, password: str) -> User:
+    email = email.strip().lower()
     user = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
     if user is None:
         user = User(email=email)
@@ -39,5 +40,7 @@ if __name__ == "__main__":
     password = getpass.getpass("Password: ") if sys.stdin.isatty() else sys.stdin.readline().rstrip("\n")
     if len(password) < 12:
         sys.exit("Password must be at least 12 characters")
+    if len(password.encode()) > 72:
+        sys.exit("Password must be at most 72 bytes (bcrypt limit)")
     asyncio.run(main(sys.argv[1], password))
     print(f"Superadmin {sys.argv[1]} is ready.")

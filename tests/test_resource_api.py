@@ -1,4 +1,4 @@
-"""Resource payloads tell the admin page whether each resource is published."""
+"""Resource payloads carry published state; anonymous callers never get a draft by id."""
 import os
 from pathlib import Path
 import subprocess
@@ -20,6 +20,10 @@ from fastapi.testclient import TestClient
 from models import Resource
 from server import app
 from database import get_db
+from routes.admin import admin_guard
+
+async def admin():
+    return MagicMock()
 
 draft = Resource(id=uuid.uuid4(), title="Draft", slug="draft", published=False,
                  created_at=datetime(2026, 10, 28, tzinfo=timezone.utc))
@@ -36,10 +40,10 @@ async def database():
 
 app.dependency_overrides[get_db] = database
 with TestClient(app) as client:
-    listed = client.get("/api/resources", params={"published": "false"}).json()
+    app.dependency_overrides[admin_guard] = admin
+    listed = client.get("/api/admin/resources").json()
     assert [r["published"] for r in listed] == [False], listed
-    single = client.get(f"/api/resources/{draft.id}").json()
-    assert single["published"] is False, single
+    assert client.get(f"/api/resources/{draft.id}").status_code == 404
 '''
     result = subprocess.run([sys.executable, "-c", script], env=env, cwd=root,
                             text=True, capture_output=True, timeout=30)

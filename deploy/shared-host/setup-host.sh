@@ -60,6 +60,8 @@ if [[ ! -e "$site" ]]; then
   created_site=true
 elif ! cmp -s "$here/nginx-triad.conf" "$site"; then
   echo "Keeping $site: it differs from the template (certbot or a manual edit)." >&2
+  echo "Merge any template change below by hand, then nginx -t and reload:" >&2
+  diff -u "$here/nginx-triad.conf" "$site" >&2 || true
 fi
 old_target=""
 [[ -L "$link" ]] && old_target=$(readlink "$link")

@@ -86,7 +86,7 @@ async def get_resource(resource_id: str, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Resource).where(Resource.id == resource_id))
     resource = result.scalar_one_or_none()
     
-    if not resource:
+    if not resource or not resource.published:
         raise HTTPException(status_code=404, detail="Resource not found")
     
     return resource_payload(resource)

@@ -209,7 +209,8 @@ DEPLOY_DIR=/opt/triad
 DOMAIN=eranusasiber.my.id
 LOCAL_ENV="$REPO_DIR/backend/.env"
 BASELINE=$(mktemp)
-trap 'rm -f "$BASELINE"' EXIT
+ROOT_ENV_TMP=""
+trap 'rm -f "$BASELINE" "$ROOT_ENV_TMP"' EXIT
 
 as_triad() { sudo -u triad -H bash -c "cd $DEPLOY_DIR && $1"; }
 compose() { as_triad "docker compose --env-file production.env $1"; }
@@ -224,8 +225,20 @@ other_sites() {
 }
 # Edit a root-owned env file through a private copy, then install it back.
 # shellcheck disable=SC2024  # the redirect target is our own temp file
-open_root_env() { ENV_FILE=$(mktemp); sudo cat "$1" > "$ENV_FILE"; }
-close_root_env() { sudo install -m 600 -o triad -g triad "$ENV_FILE" "$1"; rm -f "$ENV_FILE"; ENV_FILE=.env; }
+open_root_env() { ROOT_ENV_TMP=$(mktemp); ENV_FILE=$ROOT_ENV_TMP; sudo cat "$1" > "$ENV_FILE"; }
+close_root_env() {
+  sudo install -m 600 -o triad -g triad "$ENV_FILE" "$1"
+  rm -f "$ROOT_ENV_TMP"; ROOT_ENV_TMP=""; ENV_FILE="$DEPLOY_DIR/*.env"
+}
+# Compose env files cannot hold a single quote inside a quoted value.
+ask_env_secret() {
+  while :; do
+    ask_secret "$1" "$2"
+    if [[ "${!1}" == *"'"* ]]; then warn "Nilai tidak boleh mengandung tanda kutip '. URL-encode password (%27)."
+    elif [[ "${!1}" == *:PASSWORD@* ]]; then warn "Masih placeholder PASSWORD; isi URL asli."
+    else return 0; fi
+  done
+}
 
 banner "TRIAD deploy ke VPS bersama ($DOMAIN)"
 
@@ -249,9 +262,11 @@ pause "Enter kalau sudah bersih."
 
 stage "Push riwayat bersih (T10)"
 SHA=$(git rev-parse main)
+PUSHED_SHA=""
 say "main lokal: $(git log -1 --format='%h %s' main)"
 git remote get-url origin >/dev/null 2>&1 || git remote add origin "https://github.com/$GH_REPO.git"
-if [[ "$(api "/branches/main" | json 'd["commit"]["sha"]')" == "$SHA" ]]; then
+if [[ "$(api "/branches/main" | json 'd["commit"]["sha"]' || true)" == "$SHA" ]]; then
+  PUSHED_SHA=$SHA
   note "GitHub main sudah sama dengan lokal; lewati push."
 else
   open_url "https://github.com/settings/personal-access-tokens/new"
@@ -264,6 +279,7 @@ else
     GIT_ASKPASS="$askpass" GITHUB_PUSH_TOKEN="$GITHUB_PUSH_TOKEN" GIT_TERMINAL_PROMPT=0 \
       git push --force origin main refs/tags/legacy/emergent-2026-10-11
     rm -f "$askpass"
+    PUSHED_SHA=$SHA
   else
     SKIPPED+=("push riwayat bersih (T10)")
   fi
@@ -272,10 +288,10 @@ fi
 stage "Default branch main, hapus branch legacy (T10)"
 open_url "https://github.com/$GH_REPO/settings"
 step "Default branch: klik ikon ⇄, pilih main, Update, lalu konfirmasi."
-until [[ "$(api "" | json 'd["default_branch"]')" == main ]]; do
+until [[ "$(api "" | json 'd["default_branch"]' || true)" == main ]]; do
   pause "Default branch belum main menurut API GitHub. Enter untuk cek lagi."
 done
-remaining=$(api "/branches" | json '" ".join(b["name"] for b in d if b["name"] != "main")')
+remaining=$(api "/branches" | json '" ".join(b["name"] for b in d if b["name"] != "main")' || true)
 if [[ -n "$remaining" ]] && confirm "Hapus branch remote: $remaining ?"; then
   open_url "https://github.com/$GH_REPO/branches"
   step "Hapus branch tersebut lewat ikon tempat sampah (atau git push origin --delete ...)."
@@ -283,11 +299,13 @@ if [[ -n "$remaining" ]] && confirm "Hapus branch remote: $remaining ?"; then
 fi
 
 stage "Tunggu CI dan image (T12)"
-SHA=$(api "/branches/main" | json 'd["commit"]["sha"]')
+SHA=${PUSHED_SHA:-$(git rev-parse main)}
 say "Menunggu workflow 'Build and deploy VPS' untuk ${SHA:0:7}."
 open_url "https://github.com/$GH_REPO/actions"
 while :; do
-  run=$(api "/actions/runs?head_sha=$SHA&per_page=1" | json '(d["workflow_runs"] or [{}])[0].get("status","none")+" "+str((d["workflow_runs"] or [{}])[0].get("conclusion"))')
+  run=$(api "/actions/runs?head_sha=$SHA&event=push&per_page=1" \
+        | json '(d["workflow_runs"] or [{}])[0].get("status","none")+" "+str((d["workflow_runs"] or [{}])[0].get("conclusion"))') \
+    || run="api-error (coba lagi)"
   note "status: $run"
   case "$run" in
     "completed success") break ;;
@@ -328,9 +346,9 @@ for key in DATABASE_URL SUPABASE_URL SUPABASE_SERVICE_KEY; do
     write_env "$key" "$(local_value "$key")"
   fi
 done
-ask_secret DATABASE_URL "DATABASE_URL (Enter = pakai yang ada):"
+ask_env_secret DATABASE_URL "DATABASE_URL (Enter = pakai yang ada):"
 write_env DATABASE_URL "$DATABASE_URL"
-ask_secret SUPABASE_SERVICE_KEY "SUPABASE_SERVICE_KEY (Enter = pakai yang ada):"
+ask_env_secret SUPABASE_SERVICE_KEY "SUPABASE_SERVICE_KEY (Enter = pakai yang ada):"
 write_env SUPABASE_SERVICE_KEY "$SUPABASE_SERVICE_KEY"
 [[ -n "$(_existing JWT_SECRET_KEY || true)" ]] || write_env JWT_SECRET_KEY "$(openssl rand -hex 48)"
 close_root_env "$DEPLOY_DIR/backend.env"
@@ -359,9 +377,13 @@ else
 fi
 
 stage "Akun superadmin (T16)"
-ask ADMIN_EMAIL "Email admin:"
+while :; do
+  ask ADMIN_EMAIL "Email admin:"
+  [[ "$ADMIN_EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]+$ ]] && break
+  warn "Format email tidak valid."
+done
 ask_secret ADMIN_PASSWORD "Password admin (min. 12 karakter, tidak disimpan):"
-printf '%s\n' "$ADMIN_PASSWORD" | compose "run --rm -T --no-deps backend python create_admin.py '$ADMIN_EMAIL'"
+printf '%s\n' "$ADMIN_PASSWORD" | compose "run --rm -T --no-deps backend python create_admin.py $(printf %q "$ADMIN_EMAIL")"
 
 stage "HTTPS (T17)"
 say "certbot menambahkan blok 443 ke site triad saja."
