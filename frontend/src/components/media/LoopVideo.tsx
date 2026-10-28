@@ -17,7 +17,8 @@ export function LoopVideo({ id, className, eager = false }: LoopVideoProps) {
   const asset = media(id);
   const ref = useRef<HTMLVideoElement>(null);
   const [still] = useState(prefersStill);
-  const [attached, setAttached] = useState(eager && !still);
+  // An eager clip waits for the load event so it never competes with the preloaded poster (LCP).
+  const [attached, setAttached] = useState(eager && !still && document.readyState === "complete");
   const [inView, setInView] = useState(false);
 
   // 200px margin: the clip is attached and already running by the time it scrolls into view.
@@ -35,6 +36,13 @@ export function LoopVideo({ id, className, eager = false }: LoopVideoProps) {
     observer.observe(el);
     return () => observer.disconnect();
   }, [still]);
+
+  useEffect(() => {
+    if (!eager || still || attached) return;
+    const attach = () => setAttached(true);
+    window.addEventListener("load", attach, { once: true });
+    return () => window.removeEventListener("load", attach);
+  }, [eager, still, attached]);
 
   useEffect(() => {
     const el = ref.current;
@@ -59,7 +67,7 @@ export function LoopVideo({ id, className, eager = false }: LoopVideoProps) {
       className={className ? `loop-video ${className}` : "loop-video"}
       src={attached ? asset.src : undefined}
       poster={asset.poster}
-      preload={eager && !still ? "auto" : "none"}
+      preload={eager && !still ? "metadata" : "none"}
       muted
       loop
       playsInline

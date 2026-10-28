@@ -1,13 +1,46 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fireEvent, screen } from "@testing-library/react";
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import { formatTimecode, media } from "@/media";
 import { renderWithProviders } from "@/test/render";
 import { Hero } from "./Hero";
 
+const stubMobileViewport = (matches: boolean) =>
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: matches && query === "(max-width: 767px)",
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }));
+
 describe("Hero", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  test("plays the small loop on desktop viewports", () => {
+    stubMobileViewport(false);
+    renderWithProviders(<Hero />);
+    expect(document.querySelector("video.loop-video")).toHaveAttribute("poster", media("hero-loop").poster);
+  });
+
+  test("plays the tiny loop on phone viewports", () => {
+    stubMobileViewport(true);
+    renderWithProviders(<Hero />);
+    const loop = document.querySelector("video.loop-video");
+    expect(loop).toHaveAttribute("poster", media("hero-loop-mobile").poster);
+    expect(loop).toHaveAttribute("src", media("hero-loop-mobile").src);
+  });
+
+  test("the play button shows a focus ring that the clipped frame cannot hide", () => {
+    renderWithProviders(<Hero />);
+    expect(screen.getByRole("button", { name: "Putar video profil" })).toHaveClass(
+      "focus-visible:outline-2",
+      "focus-visible:-outline-offset-4",
+      "focus-visible:outline-ring",
+    );
+  });
+
   test("has exactly one h1 that reads the headline", () => {
     renderWithProviders(<Hero />);
     const headings = screen.getAllByRole("heading", { level: 1 });

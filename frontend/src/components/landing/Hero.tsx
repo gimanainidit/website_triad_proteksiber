@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { Button, Eyebrow, MarkerRow } from "@/components/ds";
@@ -15,7 +16,11 @@ const DOT_MESH = {
   backgroundSize: "32px 32px",
 };
 
+// Static choice at mount: a phone gets the 640x360 rendition and never pays for the 960x540 loop.
+const isPhone = () => window.matchMedia("(max-width: 767px)").matches;
+
 export function Hero() {
+  const [loopId] = useState(() => (isPhone() ? "hero-loop-mobile" : "hero-loop"));
   const { open } = useVideoPlayer();
   const revealRef = useReveal<HTMLDivElement>();
   const { ref: pillRef, pill } = useCursorPill<HTMLDivElement>(HERO.playLabel);
@@ -27,7 +32,7 @@ export function Hero() {
         ref={revealRef}
         className="relative min-h-[560px] h-[min(calc(100svh-112px),860px)] overflow-hidden rounded-2xl bg-navy-950"
       >
-        <LoopVideo id="hero-loop" eager className="absolute inset-0 size-full object-cover" />
+        <LoopVideo id={loopId} eager className="absolute inset-0 size-full object-cover" />
         <div aria-hidden="true" className={`pointer-events-none absolute inset-0 ${SCRIM}`} />
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-25" style={DOT_MESH} />
 
@@ -36,7 +41,7 @@ export function Hero() {
             type="button"
             aria-label={HERO.playAriaLabel}
             onClick={() => open("hero-full")}
-            className="absolute inset-0 size-full cursor-pointer"
+            className="absolute inset-0 size-full cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ring"
           />
           {pill}
         </div>
