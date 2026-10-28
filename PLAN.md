@@ -26,7 +26,7 @@ Diperbarui 2026-10-28. **Posisi sekarang: situs live dan berfungsi di https://er
 | T07 | Mode deploy shared host + CA Supabase | Agent | – | ✅ | `d8e881d`; 24 test hijau; `nginx -t` site lolos |
 | T08 | Bucket Storage `templates` | Agent | T03 | ✅ | Dibuat public 15 MB; uji upload, ambil URL, hapus |
 | T09 | Review semua commit sebelum push | Agent | T05–T08 | ✅ | 4 putaran review independen; putaran 4 atas `ba4f85d` bersih. Perbaikan: `3db00be`, `e6f7d1c`, `ba4f85d`. Risiko yang diterima: email mixed-case lama di DB dev; PDF draft tetap bisa diunduh lewat URL Supabase publik oleh yang sudah punya link. |
-| T10 | Push riwayat bersih, default branch `main`, hapus branch legacy | User | T09 | 🟡 | GitHub `main` = `4f90c7a`, default `main`, tag legacy ada, `conflict_140226_2128` terhapus. **Belum: hapus branch `emergent`, push commit lokal `88da23b`..HEAD** (migrasi + fix driver + PLAN; tidak mengubah image yang jalan) |
+| T10 | Push riwayat bersih, default branch `main`, hapus branch legacy | User | T09 | ✅ | GitHub hanya branch `main` (`8bfd698`), default `main`, tag `legacy/emergent-2026-10-11`. CI run 40628409979 success, image `8bfd698` di GHCR |
 | T11 | Cabut akses Emergent/Lovable di GitHub | User | – | ✅ | Lewat wizard (dikonfirmasi user, tidak bisa dicek agent tanpa token) |
 | T12 | CI hijau dan image di GHCR | Agent cek | T10 | ✅ | Run push `4f90c7a` success: actions/runs/40623078257 |
 | T13 | Tulis wizard deploy untuk T14–T17 | Agent | T07 | ✅ | `deploy/shared-host/wizard.sh` (12 stage), `bash -n` + shellcheck bersih; cek non-interaktif diuji ke API GitHub dan situs lokal |
