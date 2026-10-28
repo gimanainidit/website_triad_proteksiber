@@ -37,7 +37,7 @@ Pelaku: **Agent** (Claude) · **User** (kamu: key Pixabay, approval visual, merg
 
 ## Progres
 
-Posisi 2026-10-28: semua tiket R00–R16 selesai di `redesign/ui` (42 file test, 317 test hijau). R17: branch di-push dan PR dibuka, menunggu review dan merge user. Migrasi DB tidak ada di rencana ini (T26 di PLAN.md terpisah dan tidak dikerjakan).
+Posisi 2026-10-28: semua tiket R00–R17 selesai dan live di produksi (PR #3). Sisa untuk user: tinjau pilihan video dan foto Pixabay, cek Safari/Firefox/perangkat sentuh, ganti key Pixabay. Migrasi DB tidak ada di rencana ini (T26 di PLAN.md terpisah, tidak dikerjakan).
 
 | ID | Tiket | Pelaku | Blocker | Skill | Status | Bukti |
 |---|---|---|---|---|---|---|
@@ -57,8 +57,8 @@ Posisi 2026-10-28: semua tiket R00–R16 selesai di `redesign/ui` (42 file test,
 | R13 | Dua card video fitur 16:9 | Agent | R11 | `tdd` | ✅ | Merge cc20489. 7 test. Terpasang di Index.tsx (R14b) |
 | R14 | Tentang + Tim + CTA banner | Agent | R11 | `tdd` | ✅ | Merge ff8a19d + R14b 5edec36 (Index.tsx terpasang, komponen lama dan 3 foto lama dihapus, kolom Misi diganti Visi + Pendekatan) |
 | R15 | Halaman publik lain pindah ke shell dan token baru | Agent | R10 | – | ✅ | Merge 4335ed6. Semua halaman termasuk admin di bawah SiteLayout, Header/Footer lama dihapus, 12 test rute baru, gradien biru/indigo/ungu dibersihkan |
-| R16 | QA: a11y, responsif, reduced motion, performa, verifikasi browser | Agent | R12–R15 | `design:accessibility-review`, `slop-patterns:check-ui` | ✅ | QA1 41444c5 (8 cacat visual dari browser pane di 375 dan 1024px), review independen (0 BLOCKER, 0 HIGH, 4 MEDIUM, 7 LOW) lalu QA2 (semua diperbaiki kecuali #9 diterima). 317 test, typecheck 0, JS 676 kB (gzip 208 kB, +3,4% dari baseline, batas 752 kB). Belum dicek: layar 1440px asli (pane terbatas ke 800x600), reduced-motion secara visual, Safari/Firefox, sentuhan nyata |
-| R17 | Review, PR, merge, cek produksi | Agent + User | R16 | `code-review` | 🟡 | Scan key: 0 temuan di diff dan working tree. backend, deploy, .github, tests tidak berubah. Branch di-push dan PR dibuka, menunggu review dan merge user. Setelah merge, cek produksi (hero video 200, modal, /kredit, site-metadata) |
+| R16 | QA: a11y, responsif, reduced motion, performa, verifikasi browser | Agent | R12–R15 | `design:accessibility-review`, `slop-patterns:check-ui` | ✅ | QA1 (8 cacat visual dari browser di 375 dan 1024px), review independen (0 BLOCKER, 0 HIGH, 4 MEDIUM, 7 LOW), QA2 (semua diperbaiki, #9 diterima). Produksi di Chrome asli 1536px: h1 84px DM Serif, container 1400px, grid 12 kolom, tanpa overflow, pill kursor aktif. Belum dicek: Safari, Firefox, sentuhan nyata, reduced-motion secara visual (dicakup unit test dan CSS, belum dilihat) |
+| R17 | Review, PR, merge, cek produksi | Agent + User | R16 | `code-review` | ✅ | PR #3 di-squash-merge ke main (728f70f), CI sukses. Produksi 2026-10-28: /media/*.mp4 200 video/mp4 cache 30 hari, hero memutar small.mp4, modal membuka medium.mp4, /kredit dan /services 200, canonical dan og tetap eranusasiber.my.id, /api/health 200, /api/admin/resources tanpa token 401, Vercel 404, 0 resource 4xx |
 
 R05–R08 bisa paralel setelah R01. R02–R04 adalah jalur aset.
 
