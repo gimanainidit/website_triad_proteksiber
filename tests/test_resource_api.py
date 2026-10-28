@@ -44,6 +44,8 @@ with TestClient(app) as client:
     listed = client.get("/api/admin/resources").json()
     assert [r["published"] for r in listed] == [False], listed
     assert client.get(f"/api/resources/{draft.id}").status_code == 404
+    draft.published = True
+    assert client.get(f"/api/resources/{draft.id}").json()["title"] == "Draft"
 '''
     result = subprocess.run([sys.executable, "-c", script], env=env, cwd=root,
                             text=True, capture_output=True, timeout=30)

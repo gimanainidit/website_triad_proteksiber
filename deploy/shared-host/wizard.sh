@@ -215,7 +215,7 @@ trap 'rm -f "$BASELINE" "$ROOT_ENV_TMP"' EXIT
 as_triad() { sudo -u triad -H bash -c "cd $DEPLOY_DIR && $1"; }
 compose() { as_triad "docker compose --env-file production.env $1"; }
 api() { curl -fsS "https://api.github.com/repos/$GH_REPO$1"; }
-json() { python3 -c "import json,sys; d=json.load(sys.stdin); print($1)"; }
+json() { python3 -c "import json,sys; d=json.load(sys.stdin); print($1)" 2>/dev/null; }
 local_value() { sed -n "s/^$1=//p" "$LOCAL_ENV" 2>/dev/null | tail -n1; }
 status_of() { curl -s -o /dev/null -m 15 -w '%{http_code}' "$@" || true; }
 other_sites() {
@@ -265,7 +265,7 @@ SHA=$(git rev-parse main)
 PUSHED_SHA=""
 say "main lokal: $(git log -1 --format='%h %s' main)"
 git remote get-url origin >/dev/null 2>&1 || git remote add origin "https://github.com/$GH_REPO.git"
-if [[ "$(api "/branches/main" | json 'd["commit"]["sha"]' || true)" == "$SHA" ]]; then
+if [[ "$(api "/branches/main" | json 'd["commit"]["sha"]')" == "$SHA" ]]; then
   PUSHED_SHA=$SHA
   note "GitHub main sudah sama dengan lokal; lewati push."
 else
@@ -281,14 +281,15 @@ else
     rm -f "$askpass"
     PUSHED_SHA=$SHA
   else
-    SKIPPED+=("push riwayat bersih (T10)")
+    warn "Push dilewati. Jalankan ulang wizard setelah main di GitHub sama dengan lokal."
+    exit 1
   fi
 fi
 
 stage "Default branch main, hapus branch legacy (T10)"
 open_url "https://github.com/$GH_REPO/settings"
 step "Default branch: klik ikon ⇄, pilih main, Update, lalu konfirmasi."
-until [[ "$(api "" | json 'd["default_branch"]' || true)" == main ]]; do
+until [[ "$(api "" | json 'd["default_branch"]')" == main ]]; do
   pause "Default branch belum main menurut API GitHub. Enter untuk cek lagi."
 done
 remaining=$(api "/branches" | json '" ".join(b["name"] for b in d if b["name"] != "main")' || true)
@@ -303,8 +304,9 @@ SHA=${PUSHED_SHA:-$(git rev-parse main)}
 say "Menunggu workflow 'Build and deploy VPS' untuk ${SHA:0:7}."
 open_url "https://github.com/$GH_REPO/actions"
 while :; do
-  run=$(api "/actions/runs?head_sha=$SHA&event=push&per_page=1" \
-        | json '(d["workflow_runs"] or [{}])[0].get("status","none")+" "+str((d["workflow_runs"] or [{}])[0].get("conclusion"))') \
+  # Newest push or manual ("Run workflow") run; pull_request runs never build images.
+  run=$(api "/actions/runs?head_sha=$SHA&per_page=20" \
+        | json 'next((r["status"]+" "+str(r["conclusion"]) for r in d["workflow_runs"] if r["event"] in ("push","workflow_dispatch")), "none None")') \
     || run="api-error (coba lagi)"
   note "status: $run"
   case "$run" in
@@ -382,7 +384,12 @@ while :; do
   [[ "$ADMIN_EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]+$ ]] && break
   warn "Format email tidak valid."
 done
-ask_secret ADMIN_PASSWORD "Password admin (min. 12 karakter, tidak disimpan):"
+while :; do
+  ask_secret ADMIN_PASSWORD "Password admin (12 karakter s.d. 72 byte, tidak disimpan):"
+  bytes=$(printf '%s' "$ADMIN_PASSWORD" | wc -c)
+  (( ${#ADMIN_PASSWORD} >= 12 && bytes <= 72 )) && break
+  warn "Password harus minimal 12 karakter dan maksimal 72 byte."
+done
 printf '%s\n' "$ADMIN_PASSWORD" | compose "run --rm -T --no-deps backend python create_admin.py $(printf %q "$ADMIN_EMAIL")"
 
 stage "HTTPS (T17)"

@@ -42,5 +42,6 @@ if __name__ == "__main__":
         sys.exit("Password must be at least 12 characters")
     if len(password.encode()) > 72:
         sys.exit("Password must be at most 72 bytes (bcrypt limit)")
-    asyncio.run(main(sys.argv[1], password))
-    print(f"Superadmin {sys.argv[1]} is ready.")
+    email = sys.argv[1].strip().lower()
+    asyncio.run(main(email, password))
+    print(f"Superadmin {email} is ready.")
