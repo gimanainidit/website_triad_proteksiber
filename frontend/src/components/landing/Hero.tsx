@@ -5,7 +5,7 @@ import { Button, Eyebrow, MarkerRow } from "@/components/ds";
 import { LoopVideo, useCursorPill } from "@/components/media";
 import { useVideoPlayer } from "@/components/video-player";
 import { HERO } from "@/content/hero";
-import { formatTimecode, media } from "@/media";
+import { formatTimecode, media, type MediaId } from "@/media";
 import { revealIndex, useReveal } from "@/motion";
 
 // Mobile text spans the full width, so the scrim rises from the bottom. From md the text sits left, so it fades out by 70% of the width.
@@ -20,7 +20,7 @@ const DOT_MESH = {
 const isPhone = () => window.matchMedia("(max-width: 767px)").matches;
 
 export function Hero() {
-  const [loopId] = useState(() => (isPhone() ? "hero-loop-mobile" : "hero-loop"));
+  const [loopId] = useState<MediaId>(() => (isPhone() ? "hero-loop-mobile" : "hero-loop"));
   const { open } = useVideoPlayer();
   const revealRef = useReveal<HTMLDivElement>();
   const { ref: pillRef, pill } = useCursorPill<HTMLDivElement>(HERO.playLabel);

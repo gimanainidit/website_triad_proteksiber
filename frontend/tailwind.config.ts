@@ -5,12 +5,12 @@ import animate from "tailwindcss-animate";
 // A bare class passes "var(--tw-bg-opacity)", and color-mix with that makes browsers without color-mix (Safari < 16.2, Chrome < 111, Firefox < 113) drop the declaration.
 const NUMERIC_ALPHA = /^\d*\.?\d+$/;
 
-const ds =
-  (variable: string) =>
-  ({ opacityValue }: { opacityValue?: string }) =>
+// Tailwind resolves a color function at build time, but its types only admit strings, hence the cast.
+const ds = (variable: string) =>
+  (({ opacityValue }: { opacityValue?: string }) =>
     opacityValue !== undefined && NUMERIC_ALPHA.test(opacityValue)
       ? `color-mix(in srgb, var(--${variable}) calc(${opacityValue} * 100%), transparent)`
-      : `var(--${variable})`;
+      : `var(--${variable})`) as unknown as string;
 
 export default {
   darkMode: ["class"],

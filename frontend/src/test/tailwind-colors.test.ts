@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import config from "../../tailwind.config";
 
 type ColorFn = (args: { opacityValue?: string }) => string;
-const navy = (config.theme?.extend?.colors as { navy: Record<number, ColorFn> }).navy;
+const navy = (config.theme?.extend?.colors as unknown as { navy: Record<number, ColorFn> }).navy;
 
 describe("design system color classes", () => {
   test("a bare class keeps a plain var() so browsers without color-mix still paint it", () => {
