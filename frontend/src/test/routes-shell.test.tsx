@@ -33,13 +33,14 @@ function expectOneShell() {
 }
 
 beforeAll(() => {
-  vi.stubGlobal("IntersectionObserver", class { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } });
   window.scrollTo = vi.fn();
   HTMLElement.prototype.scrollIntoView = vi.fn();
   HTMLCanvasElement.prototype.getContext = vi.fn(() => null) as never;
 });
 
 beforeEach(() => {
+  vi.stubGlobal("IntersectionObserver", class { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } });
+  vi.stubGlobal("ResizeObserver", class { observe() {} unobserve() {} disconnect() {} });
   localStorage.clear();
   vi.spyOn(console, "error").mockImplementation(() => {});
   vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
@@ -55,7 +56,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
-  vi.stubGlobal("IntersectionObserver", class { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } });
 });
 
 describe("public pages share the one site shell", () => {

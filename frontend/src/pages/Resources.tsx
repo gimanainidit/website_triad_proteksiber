@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, Download, Filter, Search } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -107,13 +105,8 @@ const Resources = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <a href="#main-content" className="skip-to-content">
-        Skip to content
-      </a>
-      <Header />
-
-      <main id="main-content" className="px-4 py-12">
+    <div>
+      <div className="px-4 py-12">
         <section className="py-14">
           <div className="max-w-6xl mx-auto">
             <motion.h1 className="text-4xl md:text-5xl font-serif font-black mb-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -191,9 +184,8 @@ const Resources = () => {
             ))}
           </div>
         </section>
-      </main>
+      </div>
 
-      <Footer />
     </div>
   )
 }

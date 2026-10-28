@@ -253,7 +253,7 @@ const AIGenerator = () => {
 
   if (!generationTypes) {
     return (
-      <div className="min-h-screen bg-background">
+      <div>
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-accent"></div>
         </div>
@@ -262,7 +262,7 @@ const AIGenerator = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="p-4">
       <div className="max-w-6xl mx-auto">
         
         {/* Header */}

@@ -10,8 +10,6 @@ import { useToast } from '@/hooks/use-toast'
 import { ResourceService } from '@/services/resourceService'
 import type { Resource } from '@/types/resource'
 import { useNavigate } from 'react-router-dom'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 
 const ResourcesNew = () => {
   const [resources, setResources] = useState<Resource[]>([])
@@ -155,22 +153,19 @@ const ResourcesNew = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      <div>
         <div className="max-w-6xl mx-auto p-4">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
           </div>
         </div>
-        <Footer />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="py-8">
+    <div>
+      <div className="py-8">
         <div className="max-w-6xl mx-auto px-4">
           
           {/* Header */}
@@ -367,8 +362,7 @@ const ResourcesNew = () => {
             </div>
           )}
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   )
 }

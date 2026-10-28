@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import type { Resource } from '@/types/resource'
 import { ResourceService } from '@/services/resourceService'
 import { Button } from '@/components/ui/button'
@@ -30,7 +28,7 @@ const ResourceDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex items-center justify-center px-4 py-24">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-accent" />
       </div>
     )
@@ -38,17 +36,15 @@ const ResourceDetail = () => {
 
   if (!resource) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Header />
-        <p className="text-center text-lg">Resource tidak ditemukan.</p>
+      <div className="flex items-center justify-center px-4 py-24">
+        <h1 className="text-center text-lg">Resource tidak ditemukan.</h1>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="px-4 py-12">
+    <div>
+      <div className="px-4 py-12">
         <div className="max-w-5xl mx-auto space-y-6">
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">{resource.category}</p>
@@ -80,8 +76,7 @@ const ResourceDetail = () => {
             </div>
           )}
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   )
 }

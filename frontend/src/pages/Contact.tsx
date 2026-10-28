@@ -4,8 +4,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send, Mail, Shield, CheckCircle } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,10 +56,8 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <a href="#main-content" className="skip-to-content">Skip to content</a>
-      <Header />
-      <main id="main-content">
+    <div>
+      <div>
         {/* Hero */}
         <section className="bg-hero-gradient text-dark-foreground py-16 relative">
           <div className="max-w-7xl mx-auto px-6">
@@ -272,8 +268,7 @@ const Contact = () => {
             </aside>
           </div>
         </section>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };

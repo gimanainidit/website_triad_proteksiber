@@ -3,8 +3,6 @@ import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { serviceCategories } from "@/content/services";
 
 const Services = () => {
@@ -20,10 +18,8 @@ const Services = () => {
   }, [location.hash]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <a href="#main-content" className="skip-to-content">Skip to content</a>
-      <Header />
-      <main id="main-content">
+    <div>
+      <div>
         <section className="bg-hero-gradient text-dark-foreground py-16">
           <div className="max-w-7xl mx-auto px-6">
             <motion.h1
@@ -120,8 +116,7 @@ const Services = () => {
             ))}
           </div>
         </section>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };

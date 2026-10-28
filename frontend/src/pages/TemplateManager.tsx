@@ -68,7 +68,7 @@ const TemplateManager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="p-6">
       <div className="max-w-5xl mx-auto space-y-8">
         <Card className="border border-border">
           <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
