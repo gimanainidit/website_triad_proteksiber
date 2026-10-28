@@ -67,3 +67,39 @@ describe("api key", () => {
     expect(fake.calls).toEqual([]);
   });
 });
+
+describe("api cache", () => {
+  const HOUR = 3_600_000;
+
+  it("reuses a cached response younger than 24h without calling the API", async () => {
+    let t = 1_000_000;
+    const first = setup({ now: () => t });
+    await first.run();
+    expect(first.fake.apiCalls).toHaveLength(1);
+
+    t += 23 * HOUR;
+    const second = setup({ fs: first.fs, now: () => t });
+    const { manifest } = await second.run();
+    expect(second.fake.apiCalls).toHaveLength(0);
+    expect(manifest[0].user).toBe("spacetrip");
+  });
+
+  it("asks the API again once the cached response is 24h old", async () => {
+    let t = 1_000_000;
+    const first = setup({ now: () => t });
+    await first.run();
+
+    t += 24 * HOUR;
+    const second = setup({ fs: first.fs, now: () => t });
+    await second.run();
+    expect(second.fake.apiCalls).toHaveLength(1);
+  });
+
+  it("keeps one cache entry per kind and pixabayId, never containing the key", async () => {
+    const { fs, run } = setup();
+    await run();
+    const cached = [...fs.files.keys()].filter((p) => p.startsWith(".cache/pixabay/"));
+    expect(cached).toEqual([".cache/pixabay/video-173102.json"]);
+    expect(String(fs.files.get(cached[0]))).not.toContain(API_KEY);
+  });
+});

@@ -1,8 +1,8 @@
+import { createPixabayClient } from "./api.mjs";
 import { LICENSE } from "./model.mjs";
 import { selectRendition } from "./select.mjs";
 
 const MEDIA_DIR = "public/media";
-const API = "https://pixabay.com/api";
 
 export const MISSING_KEY_MESSAGE =
   "PIXABAY_API_KEY is not set. Put PIXABAY_API_KEY=<your key> in frontend/.env.local (no VITE_ prefix, or the key would ship in the browser bundle).";
@@ -30,15 +30,14 @@ export const MISSING_KEY_MESSAGE =
  */
 export async function syncAssets({ config, apiKey, fetch, fs, now, log = () => {} }) {
   if (!apiKey?.trim()) throw new Error(MISSING_KEY_MESSAGE);
+  const api = createPixabayClient({ apiKey, fetch, fs, now });
   const manifest = [];
   const downloaded = [];
   const reused = [];
   await fs.mkdir(MEDIA_DIR, { recursive: true });
 
   for (const entry of config.entries) {
-    const base = entry.kind === "video" ? `${API}/videos/` : `${API}/`;
-    const res = await fetch(`${base}?${new URLSearchParams({ key: apiKey, id: String(entry.pixabayId) })}`);
-    const hit = (await res.json()).hits[0];
+    const hit = await api.getHit(entry.kind, entry.pixabayId);
     const pick = selectRendition(entry, hit);
 
     const name = `pixabay-${entry.pixabayId}-${pick.rendition}`;
