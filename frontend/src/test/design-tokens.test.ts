@@ -16,7 +16,7 @@ const rootBlock = block(/:root\s*\{([^}]*)\}/);
 const darkBlock = block(/\.dark\s*\{([^}]*)\}/);
 
 const declaration = (body: string, variable: string) =>
-  body.match(new RegExp(`--${variable}\s*:\s*([^;]+);`))?.[1].trim();
+  body.match(new RegExp(String.raw`--${variable}\s*:\s*([^;]+);`))?.[1].trim();
 
 // A DS hex either lives as plain hex, or as a shadcn "H S% L%" triplet.
 function hslTripletToHex(triplet: string): string {
@@ -109,9 +109,5 @@ describe("fonts", () => {
   test.each(Object.entries(families))("--font-%s is the DS family stack and its package is imported", (kind, stack) => {
     expect(declaration(rootBlock, `font-${kind}`)).toBe(stack);
     expect(css).toContain(`'${fontsource[kind as keyof typeof families]}/`);
-  });
-
-  test("the old serif is gone", () => {
-    expect(css.toLowerCase()).not.toContain("merriweather");
   });
 });

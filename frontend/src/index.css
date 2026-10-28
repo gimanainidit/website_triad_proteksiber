@@ -151,6 +151,89 @@
   }
 }
 
+/* Type scale from the design system. Colour is not set here: the classes sit on light and navy grounds alike, so they inherit it. */
+@layer components {
+  .text-hero-display,
+  .text-display-lg,
+  .text-stat-display,
+  .text-heading-1 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+  }
+
+  .text-hero-display {
+    font-size: 36px;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+  }
+  .text-display-lg {
+    font-size: 36px;
+    line-height: 1.1;
+    letter-spacing: -1px;
+  }
+  .text-stat-display {
+    font-size: 56px;
+    line-height: 1.1;
+    letter-spacing: -1px;
+  }
+  .text-heading-1 {
+    font-size: 36px;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+  }
+
+  @screen sm {
+    .text-hero-display { font-size: 48px; }
+    .text-display-lg { font-size: 48px; }
+    .text-heading-1 { font-size: 52px; }
+  }
+  @screen md {
+    .text-hero-display { font-size: 60px; }
+    .text-display-lg { font-size: 60px; }
+  }
+  @screen lg {
+    .text-hero-display { font-size: 72px; }
+    .text-display-lg { font-size: 72px; }
+  }
+  @screen xl {
+    .text-hero-display { font-size: 84px; }
+  }
+
+  .text-heading-2,
+  .text-heading-3,
+  .text-heading-4,
+  .text-heading-5 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+  }
+  .text-heading-2 { font-size: 36px; line-height: 1.2; letter-spacing: -0.5px; }
+  .text-heading-3 { font-size: 28px; line-height: 1.25; }
+  .text-heading-4 { font-size: 22px; line-height: 1.3; }
+  .text-heading-5 { font-size: 18px; line-height: 1.4; }
+
+  .text-subtitle { font-family: var(--font-sans); font-size: 18px; line-height: 1.5; }
+  .text-body-md { font-family: var(--font-sans); font-size: 16px; line-height: 1.55; }
+  .text-body-sm { font-family: var(--font-sans); font-size: 14px; line-height: 1.5; }
+  .text-caption { font-family: var(--font-sans); font-size: 13px; line-height: 1.4; }
+
+  .text-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .text-tagline {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 3.9px;
+    text-transform: uppercase;
+  }
+}
+
 @layer utilities {
   .bg-dark {
     background-color: hsl(var(--dark));
@@ -209,6 +292,14 @@
 .animate-line-draw {
   stroke-dasharray: 1000;
   animation: line-draw 3s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-float-slow,
+  .animate-pulse-glow {
+    animation: none;
+  }
 }
 
 /* Skip to content */
