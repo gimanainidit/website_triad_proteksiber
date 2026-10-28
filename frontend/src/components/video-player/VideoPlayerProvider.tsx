@@ -1,4 +1,5 @@
-import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import { lockScroll } from "./scroll-lock";
 import { formatTimecode } from "./timecode";
 import { VideoPlayerContext, type ResolveVideo, type VideoPlayerControls, type VideoSource } from "./context";
 
@@ -17,6 +18,7 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
   const positions = useRef(new Map<string, number>());
   const shownId = useRef<string | null>(null);
   const idleTimer = useRef<number>();
+  const releaseScroll = useRef<(() => void) | null>(null);
   const playing = useRef(false);
   const [idle, setIdle] = useState(false);
   const [active, setActive] = useState<Active | null>(null);
@@ -136,6 +138,7 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
       syncTime();
     }
     if (!dialog.open) {
+      releaseScroll.current = lockScroll();
       dialog.showModal();
       // showModal focuses the first control (Close), where Space would dismiss the player
       dialog.focus();
@@ -144,6 +147,23 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
   }, [active]);
 
   const loading = active !== null && readySrc !== active.src;
+  useEffect(
+    () => () => {
+      window.clearTimeout(idleTimer.current);
+      releaseScroll.current?.();
+    },
+    [],
+  );
+
+  const handlePointerMove = (e: PointerEvent<HTMLDialogElement>) => {
+    // Over the ::backdrop the target is the dialog itself and no pointerleave fires, so compare against the frame.
+    const frame = e.currentTarget.getBoundingClientRect();
+    const outside =
+      frame.width > 0 && (e.clientX < frame.left || e.clientX > frame.right || e.clientY < frame.top || e.clientY > frame.bottom);
+    if (outside) hideControls();
+    else wake();
+  };
+
   const elapsed = formatTimecode(time.current);
   const progress = time.duration > 0 ? Math.min(time.current / time.duration, 1) : 0;
 
@@ -155,7 +175,7 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
         className={idle ? "vp-dialog is-idle" : "vp-dialog"}
         tabIndex={-1}
         onKeyDown={handleKeyDown}
-        onPointerMove={wake}
+        onPointerMove={handlePointerMove}
         onPointerLeave={hideControls}
         onFocus={wake}
         aria-label={active?.title ?? "Pemutar video"}
@@ -171,6 +191,8 @@ export function VideoPlayerProvider({ resolve, children }: { resolve: ResolveVid
           videoRef.current?.pause();
           window.clearTimeout(idleTimer.current);
           setIdle(false);
+          releaseScroll.current?.();
+          releaseScroll.current = null;
         }}
       >
         <video ref={videoRef} className="vp-video" src={active?.src} poster={active?.poster} playsInline

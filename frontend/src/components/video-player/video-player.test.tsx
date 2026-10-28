@@ -1,5 +1,5 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { VideoPlayerProvider, useVideoPlayer, type VideoPlayerControls } from ".";
 
 const sources: Record<string, { src: string; poster?: string; title?: string }> = {
@@ -27,7 +27,7 @@ const video = () => document.querySelector("video") as HTMLVideoElement;
 
 beforeEach(() => {
   document.documentElement.style.overflow = "";
-  document.body.style.paddingRight = "";
+  document.body.style.removeProperty("padding-right");
 });
 
 describe("open and close", () => {
@@ -306,6 +306,10 @@ describe("loading state", () => {
 });
 
 describe("auto-hiding controls", () => {
+  beforeAll(() => {
+    // jsdom has no PointerEvent, so clientX/Y would be dropped from fireEvent
+    window.PointerEvent ??= class PointerEvent extends MouseEvent {} as typeof window.PointerEvent;
+  });
   beforeEach(() => {
     vi.useFakeTimers();
     setup();
@@ -348,6 +352,14 @@ describe("auto-hiding controls", () => {
     expect(dialog()).not.toHaveClass("is-idle");
   });
 
+  test("a pointer over the backdrop counts as outside the frame", () => {
+    dialog().getBoundingClientRect = () => ({ left: 100, top: 50, right: 900, bottom: 500, width: 800, height: 450 }) as DOMRect;
+    fireEvent.pointerMove(video(), { clientX: 500, clientY: 200 });
+    expect(dialog()).not.toHaveClass("is-idle");
+    fireEvent.pointerMove(dialog(), { clientX: 20, clientY: 200 });
+    expect(dialog()).toHaveClass("is-idle");
+  });
+
   test("a paused video keeps its controls visible, and playing again restarts the countdown", () => {
     fireEvent.click(screen.getByRole("button", { name: "Jeda" }));
     wait(10_000);
@@ -363,5 +375,40 @@ describe("auto-hiding controls", () => {
     act(() => player.close());
     act(() => player.open("a"));
     expect(dialog()).not.toHaveClass("is-idle");
+  });
+});
+
+describe("body scroll lock", () => {
+  beforeEach(() => {
+    setup();
+    Object.defineProperty(document.documentElement, "clientWidth", { configurable: true, value: window.innerWidth - 15 });
+  });
+  afterEach(() => {
+    delete (document.documentElement as { clientWidth?: number }).clientWidth;
+  });
+
+  test("locks scroll and compensates the scrollbar width while open, restores on close", () => {
+    document.body.style.paddingRight = "3px";
+    act(() => player.open("a"));
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    expect(document.body.style.paddingRight).toBe("15px");
+
+    act(() => player.close());
+    expect(document.documentElement.style.overflow).toBe("");
+    expect(document.body.style.paddingRight).toBe("3px");
+  });
+
+  test("switching videos while open does not stack locks", () => {
+    act(() => player.open("a"));
+    act(() => player.open("b"));
+    act(() => player.close());
+    expect(document.documentElement.style.overflow).toBe("");
+    expect(document.body.style.paddingRight).toBe("");
+  });
+
+  test("unmounting while open releases the lock", () => {
+    act(() => player.open("a"));
+    cleanup();
+    expect(document.documentElement.style.overflow).toBe("");
   });
 });
