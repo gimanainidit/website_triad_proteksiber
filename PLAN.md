@@ -13,7 +13,7 @@ Pelaku: **Agent** (Claude di VPS, tanpa sudo/GitHub/Docker) · **User** (kamu: d
 
 ## Progres
 
-Diperbarui 2026-10-28. **Posisi sekarang: situs live; login, upload PDF, dan publish/unpublish terbukti jalan. Berikutnya: upload satu template (sisa T18), lalu T20 (matikan Vercel).** T19 menunggu keputusan user.
+Diperbarui 2026-10-28. **Posisi sekarang: situs live dan T18 lulus (login, upload PDF, publish/unpublish, upload template). Berikutnya: rilis T20 lalu user menghapus project Vercel.** T19 menunggu keputusan user.
 
 | ID | Tiket | Pelaku | Blocker | Status | Bukti |
 |---|---|---|---|---|---|
@@ -34,9 +34,9 @@ Diperbarui 2026-10-28. **Posisi sekarang: situs live; login, upload PDF, dan pub
 | T15 | `setup-host.sh` di VPS | Wizard | T13 | ✅ | User `triad` uid 999 + grup docker; site `triad` aktif; listener hanya `127.0.0.1:8180` |
 | T16 | Isi env, login GHCR, `init_db.py`, superadmin, jalankan stack | Wizard | T12, T15 | ✅ | Stack jalan; 1 superadmin; migrasi Alembic `0001` dijalankan user (setelah fix driver `e900a6c`). `/api/resources` 200 (8 resource, 5 file Supabase HEAD 200), `/api/admin/resources` tanpa token 401 |
 | T17 | HTTPS dengan certbot | Wizard | T14, T16 | ✅ | Let's Encrypt `eranusasiber.my.id` + `www`, s.d. 2027-01-26; HTTP → 301 HTTPS. Situs lain sama seperti sebelum deploy (DuckDNS 404, CTF 502/502) |
-| T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | 🟡 | Login OK (`8bfd698`), halaman upload OK (`a27f678`). Upload PDF 2,1 MB 2026-10-28 04:17 UTC: tampil publik, file Supabase 200 `application/pdf`. Unpublish bekerja (8 resource lama tersembunyi dari publik). **Belum: upload template** (tabel `templates` masih 0 baris) |
+| T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | ✅ | Login OK (`8bfd698`), halaman upload OK (`a27f678`). Upload PDF 2,1 MB 2026-10-28 04:17 UTC: tampil publik, file Supabase 200 `application/pdf`. Unpublish bekerja (8 resource lama tersembunyi). Upload template `.pptx` 2026-10-28 06:12 UTC: 1 baris `templates` + 1 objek di bucket `templates` |
 | T19 | Nasib tabel n8n di schema `public` | User | – | ⛔ | |
-| T20 | Matikan Vercel + canonical/og ke domain baru | Agent + User | T18 | ⬜ | |
+| T20 | Matikan Vercel + canonical/og ke domain baru | Agent + User | T18 | 🟡 | Kode: canonical/og/twitter/JSON-LD ke `eranusasiber.my.id` + test `site-metadata.test.ts`, README bebas Vercel. **Belum: rilis (`ship.sh`) dan user menghapus project Vercel** |
 | T21 | Hapus cache commit lama di GitHub | User | T10 | ⬜ | Opsional |
 | T22 | Rilis otomatis dari GitHub Actions | Agent + User | T18 | ⬜ | Opsional |
 | T23 | Perbaiki 5 error TypeScript + typecheck di CI | Agent | – | ✅ | `04f714f`; ternyata bug: API tidak mengirim `published`, tombol Publish admin selalu mengirim `true`. `tsc` 0, CI `npm run typecheck` |
@@ -153,7 +153,7 @@ Schema `public` memuat ±50 tabel n8n (3 workflow, terakhir diubah 2026-02-22). 
 ### T20 · Matikan Vercel
 Pakai `tdd` untuk perubahan `frontend/index.html`: `canonical`, `og:url`, `og:image`, `twitter:image`, dan JSON-LD `url` diarahkan ke `https://eranusasiber.my.id`. Lalu hapus project Vercel, dan perbarui `README.md` serta `frontend/README.md` yang masih menyebut Vercel.
 
-**Selesai bila:** `git grep vercel` kosong, dan `triad-proteksiber-web.vercel.app` tidak lagi melayani situs.
+**Selesai bila:** `git grep vercel` kosong di luar PLAN ini, dan `triad-proteksiber-web.vercel.app` tidak lagi melayani situs.
 
 ### T21 · Cache GitHub (opsional)
 Ajukan ke GitHub Support (Sensitive data removal) untuk ref `refs/pull/1` dan `refs/pull/2` serta cached views. Semua secret yang bocor sudah dirotasi, jadi risikonya rendah.

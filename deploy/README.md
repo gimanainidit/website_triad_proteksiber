@@ -125,16 +125,14 @@ docker compose --env-file production.env up -d --force-recreate gateway
 
 Caddy obtains and renews HTTPS certificates when DNS and ports 80/443 are reachable.
 Domain change does not require rebuilding this frontend because API URLs are relative.
-The current social-card/canonical URL still points to Vercel; update frontend metadata
-once the final domain is known. Add www to Caddy routing if you want it supported.
+Canonical and social-card URLs in `frontend/index.html` point to https://eranusasiber.my.id.
+Add www to Caddy routing if you want it supported.
 
 ## Preview and retained state
 
-Vercel Git previews still require connecting the GitHub repository in the Vercel project
-(root frontend, output build). This workflow does not configure Vercel integration.
-Use a separate staging backend and Neon database/branch for interactive previews;
-never let PR preview writes target production. Existing Vercel static deployment
-has no deployed backend. Avoid putting server secrets into any VITE_* variable.
+There is no preview deployment. For interactive previews use a separate staging
+backend and database; never let preview writes target production.
+Avoid putting server secrets into any VITE_* variable.
 
 Back up n8n volume together with its encryption key, securely and off the VPS.
 A filesystem copy of live SQLite is insufficient; use a consistent SQLite backup

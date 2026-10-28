@@ -13,10 +13,9 @@ Local configuration belongs in ignored `.env` files:
 Never expose backend secret keys, database passwords, or console tokens through
 `VITE_` variables.
 
-The production frontend is https://triad-proteksiber-web.vercel.app. Vercel uses
-root directory `frontend`, build command `npm run build`, and output directory
-`build`. The public site is currently deployed from a local build; automatic Git
-deployments are not configured.
+The production site is https://eranusasiber.my.id, served from the frontend
+container on the VPS (see `deploy/shared-host/README.md`).
 
 Brand assets in `public/` provide the TRIAD favicon and social sharing image.
-Update the canonical and social URLs in `index.html` when a custom domain is set.
+`src/test/site-metadata.test.ts` pins the canonical and social URLs in `index.html`
+to the production domain.
