@@ -1,0 +1,62 @@
+/* Styles Tailwind cannot express. Component-level utilities live in the .tsx files. */
+
+.ds-shield-stripe {
+  height: 12px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--stripe-1) 0%,
+    var(--stripe-2) 28%,
+    var(--stripe-3) 55%,
+    var(--stripe-4) 78%,
+    var(--stripe-5) 100%
+  );
+}
+
+@property --mask-edge {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+
+.ds-mask-reveal {
+  display: inline-block;
+  mask-image: linear-gradient(to right, transparent var(--mask-edge), black 0%);
+  transition: --mask-edge 400ms ease-in-out;
+}
+
+.group:hover .ds-mask-reveal,
+.group:focus-visible .ds-mask-reveal {
+  --mask-edge: -1%;
+}
+
+/* Kept apart: a browser without :has() would drop a shared selector list, hover included. */
+.group:has(:focus-visible) .ds-mask-reveal {
+  --mask-edge: -1%;
+}
+
+@supports not (mask-image: linear-gradient(black, black)) {
+  .ds-mask-reveal {
+    mask-image: none;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 400ms ease-in-out;
+  }
+
+  .group:hover .ds-mask-reveal,
+  .group:focus-visible .ds-mask-reveal {
+    clip-path: inset(0);
+  }
+
+  .group:has(:focus-visible) .ds-mask-reveal {
+    clip-path: inset(0);
+  }
+}
+
+/* Nothing to hover on touch, and no motion under reduced motion: show the text outright. Keep this block last. */
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .ds-mask-reveal {
+    mask-image: none;
+    clip-path: none;
+    transition: none;
+  }
+}
