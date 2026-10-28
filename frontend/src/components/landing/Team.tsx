@@ -10,7 +10,7 @@ export function Team() {
 
   return (
     <section ref={ref} aria-labelledby="team-heading" className="container py-12 md:py-16">
-      <header className="reveal-fade mb-10 max-w-2xl">
+      <div className="reveal-fade mb-10 max-w-2xl">
         <Eyebrow tone="link" className="mb-4">
           {teamIntro.eyebrow}
         </Eyebrow>
@@ -18,7 +18,7 @@ export function Team() {
           {teamIntro.heading}
         </h2>
         <p className="text-body-md text-steel">{teamIntro.description}</p>
-      </header>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         {teamMembers.map((member, i) => (

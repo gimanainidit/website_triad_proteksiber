@@ -20,12 +20,19 @@ describe("About", () => {
     expect(screen.getByText("TENTANG KAMI")).toBeInTheDocument();
   });
 
-  test("lists Misi, Visi and Pendekatan as three titled columns with copy", () => {
+  test("lists Visi and Pendekatan as two titled columns with copy", () => {
     renderWithProviders(<About />);
     const titles = screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent);
-    expect(titles).toEqual(["Misi Kami", "Visi Kami", "Pendekatan Kami"]);
+    expect(titles).toEqual(["Visi Kami", "Pendekatan Kami"]);
     const visi = screen.getByRole("heading", { level: 3, name: "Visi Kami" }).parentElement as HTMLElement;
     expect(within(visi).getByText(/mitra keamanan siber terpercaya di Indonesia/)).toBeInTheDocument();
+  });
+
+  test("does not repeat the mission statement in any column", () => {
+    renderWithProviders(<About />);
+    const occurrences = screen.getAllByText(MISSION, { exact: false });
+    expect(occurrences).toHaveLength(1);
+    expect(occurrences[0].tagName).toBe("H2");
   });
 
   test("contains no nested anchors", () => {

@@ -25,7 +25,7 @@ export function About() {
         </SectionGrid>
         <SectionGrid className="mt-12 gap-y-10 lg:mt-20">
           {about.pillars.map((pillar, i) => (
-            <Col key={pillar.title} start={([1, 5, 9] as const)[i]} span={4}>
+            <Col key={pillar.title} start={([1, 5] as const)[i]} span={4}>
               <LineMarker index={i} />
               <div className="reveal-fade" style={revealIndex(i + 2)}>
                 <h3 className="text-heading-4 mb-3 text-ink-strong">{pillar.title}</h3>
