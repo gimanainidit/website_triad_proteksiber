@@ -13,7 +13,7 @@ Pelaku: **Agent** (Claude di VPS, tanpa sudo/GitHub/Docker) · **User** (kamu: d
 
 ## Progres
 
-Diperbarui 2026-10-28. **Posisi sekarang: semua kerja lokal selesai; berikutnya T09 (review sebelum push), lalu T10 (push).** Tiket yang bisa dikerjakan paralel sekarang: T04, T11, T13, T19, T23.
+Diperbarui 2026-10-28. **Posisi sekarang: kerja agent untuk deploy selesai; berikutnya user menjalankan `bash deploy/shared-host/wizard.sh` (T04, T10, T11, T12, T14–T17 berurutan).** T09 menunggu review kedua. T19 dan T24 bisa dikerjakan terpisah.
 
 | ID | Tiket | Pelaku | Blocker | Status | Bukti |
 |---|---|---|---|---|---|
@@ -25,21 +25,22 @@ Diperbarui 2026-10-28. **Posisi sekarang: semua kerja lokal selesai; berikutnya 
 | T06 | Buang dead code + jejak Emergent/Lovable | Agent | – | ✅ | `c6c918a`; frontend build/test hijau |
 | T07 | Mode deploy shared host + CA Supabase | Agent | – | ✅ | `d8e881d`; 24 test hijau; `nginx -t` site lolos |
 | T08 | Bucket Storage `templates` | Agent | T03 | ✅ | Dibuat public 15 MB; uji upload, ambil URL, hapus |
-| T09 | Review semua commit sebelum push | Agent | T05–T08 | ⬜ | |
+| T09 | Review semua commit sebelum push | Agent | T05–T08 | 🟡 | Review independen `1972341..399b1d6`: 1 Medium + 5 Low, semua diperbaiki di `3db00be`. Review kedua untuk `399b1d6..3db00be` sedang jalan. |
 | T10 | Push riwayat bersih, default branch `main`, hapus branch legacy | User | T09 | ⬜ | |
 | T11 | Cabut akses Emergent/Lovable di GitHub | User | – | ⬜ | |
 | T12 | CI hijau dan image di GHCR | Agent cek | T10 | ⬜ | |
-| T13 | Tulis wizard deploy untuk T14–T17 | Agent | T07 | ⬜ | |
+| T13 | Tulis wizard deploy untuk T14–T17 | Agent | T07 | ✅ | `deploy/shared-host/wizard.sh` (12 stage), `bash -n` + shellcheck bersih; cek non-interaktif diuji ke API GitHub dan situs lokal |
 | T14 | DNS Cloudflare apex + www | Wizard | T13 | ⬜ | |
 | T15 | `setup-host.sh` di VPS | Wizard | T13 | ⬜ | |
-| T16 | Isi env, login GHCR, `init_db.py`, jalankan stack | Wizard | T12, T15 | ⬜ | |
+| T16 | Isi env, login GHCR, `init_db.py`, superadmin, jalankan stack | Wizard | T12, T15 | ⬜ | `backend/create_admin.py` (`2fb82dd`) menyediakan login pertama |
 | T17 | HTTPS dengan certbot | Wizard | T14, T16 | ⬜ | |
 | T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | ⬜ | |
 | T19 | Nasib tabel n8n di schema `public` | User | – | ⛔ | |
 | T20 | Matikan Vercel + canonical/og ke domain baru | Agent + User | T18 | ⬜ | |
 | T21 | Hapus cache commit lama di GitHub | User | T10 | ⬜ | Opsional |
 | T22 | Rilis otomatis dari GitHub Actions | Agent + User | T18 | ⬜ | Opsional |
-| T23 | Perbaiki 5 error TypeScript + typecheck di CI | Agent | – | ⬜ | |
+| T23 | Perbaiki 5 error TypeScript + typecheck di CI | Agent | – | ✅ | `04f714f`; ternyata bug: API tidak mengirim `published`, tombol Publish admin selalu mengirim `true`. `tsc` 0, CI `npm run typecheck` |
+| T24 | Admin melihat draft; publik tidak | Agent | – | ⬜ | Temuan saat T23 |
 
 ## Skill per jenis tiket
 
@@ -136,6 +137,11 @@ Jalankan `bash deploy/shared-host/wizard.sh` sebagai `usersaya`. Bagian sudo aka
 Login admin, upload PDF ≤ 15 MB, buka `/resources` dan detailnya, upload satu template. AI dan n8n boleh mengembalikan 503. Pantau `free -h` dan `docker stats --no-stream` selama 24 jam.
 
 **Selesai bila:** setiap fitur di atas berhasil lewat HTTPS, dan RAM tersedia tidak turun di bawah 150 MB.
+
+### T24 · Draft hanya untuk admin
+Halaman admin (`ResourcesNew.tsx`) memuat `/api/resources` yang default-nya hanya resource published, jadi draft tidak pernah tampil di admin. Di sisi lain `GET /api/resources?published=false` terbuka tanpa login, jadi siapa pun bisa membaca draft. Pakai `tdd` di seam HTTP API: endpoint publik selalu `published=True`, dan endpoint admin baru di `routes/admin.py` (dengan `admin_guard`) mengembalikan semua resource.
+
+**Selesai bila:** request anonim dengan `published=false` tidak mengembalikan draft, admin melihat draft, dan tombol Publish/Unpublish mengubah status yang tampil.
 
 ### T19 · Tabel n8n di `public` ⛔
 Schema `public` memuat ±50 tabel n8n (3 workflow, terakhir diubah 2026-02-22). Instance n8n di hf.space tidak bisa konek lagi sejak T02. **Keputusan user:** hapus tabel n8n, atau pindahkan ke schema `n8n` (kalau masih mau dipakai). Tabel CMS (`users`, dll.) tidak bentrok dengan tabel n8n (`user`), jadi ini tidak memblokir T16.
