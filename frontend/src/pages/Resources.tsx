@@ -3,8 +3,7 @@ import { motion } from "framer-motion";
 import { BookOpen, Download, Filter, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge, Button } from "@/components/ds";
 import type { Resource } from "@/types/resource";
 import { ResourceService } from "@/services/resourceService";
 
@@ -66,18 +65,6 @@ const Resources = () => {
     [resources.length, categories.length, filteredResources.length]
   );
 
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      Panduan: "bg-blue-100 text-blue-800",
-      Whitepaper: "bg-green-100 text-green-800",
-      Checklist: "bg-yellow-100 text-yellow-800",
-      Template: "bg-purple-100 text-purple-800",
-      Laporan: "bg-red-100 text-red-800",
-      Standar: "bg-indigo-100 text-indigo-800",
-    };
-    return colors[category] || "bg-gray-100 text-gray-800";
-  };
-
   const getFileIcon = (fileType: string) => {
     switch (fileType) {
       case "pdf":
@@ -109,10 +96,10 @@ const Resources = () => {
       <div className="px-4 py-12">
         <section className="py-14">
           <div className="max-w-6xl mx-auto">
-            <motion.h1 className="text-4xl md:text-5xl font-serif font-black mb-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <motion.h1 className="text-heading-1 mb-3 text-ink-strong" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               Resource Center
             </motion.h1>
-            <p className="text-lg text-muted-foreground/80">
+            <p className="text-subtitle text-steel">
               Temukan materi edukasi keamanan siber terbaru dari tim TRIAD PRO-TX SIBER.
             </p>
           </div>
@@ -120,8 +107,8 @@ const Resources = () => {
 
         <section className="max-w-6xl mx-auto space-y-10">
           <div className="grid gap-4 md:grid-cols-[2fr,3fr]">
-            <div className="bg-card border border-border p-4 rounded-lg flex items-center gap-3">
-              <Search className="text-muted-foreground w-5 h-5" />
+            <div className="flex items-center gap-3 rounded-xl border border-hairline bg-canvas p-4">
+              <Search className="h-5 w-5 text-steel" aria-hidden="true" />
               <Input
                 placeholder="Cari resources..."
                 value={searchQuery}
@@ -157,26 +144,26 @@ const Resources = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="bg-card border border-border rounded-2xl p-6 flex flex-col md:flex-row gap-6"
+                className="flex flex-col gap-6 rounded-xl border border-hairline bg-canvas p-6 md:flex-row"
               >
-                <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center text-3xl">
+                <div className="h-16 w-16 rounded-xl bg-soft flex items-center justify-center text-3xl">
                   {getFileIcon(resource.file_type)}
                 </div>
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center gap-3">
-                    <Badge className={getCategoryColor(resource.category)}>{resource.category}</Badge>
-                    <span className="text-xs text-muted-foreground">{resource.file_size}</span>
+                    <Badge variant="soft">{resource.category}</Badge>
+                    <span className="text-xs text-steel">{resource.file_size}</span>
                   </div>
-                  <h3 className="text-xl font-semibold text-card-foreground">{resource.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
+                  <h3 className="text-heading-5 text-ink-strong">{resource.title}</h3>
+                  <p className="line-clamp-3 text-sm leading-relaxed text-steel">
                     {resource.description}
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 justify-between">
-                  <Button className="bg-accent text-accent-foreground" onClick={() => handleDownload(resource.file_url, resource.title)}>
-                    <Download className="w-4 h-4 mr-2" /> Download
+                  <Button expand={false} onClick={() => handleDownload(resource.file_url, resource.title)}>
+                    <Download className="h-4 w-4" aria-hidden="true" /> Download
                   </Button>
-                  <Button variant="secondary" asChild>
+                  <Button variant="secondary" expand={false} asChild>
                     <a href={`/resources/${resource.id}`}>Lihat detail</a>
                   </Button>
                 </div>
@@ -191,11 +178,11 @@ const Resources = () => {
 }
 
 const CardStat = ({ label, value, icon }: { label: string; value: number; icon: JSX.Element }) => (
-  <div className="bg-card border border-border rounded-lg p-5 flex items-center gap-3">
-    <div className="text-accent text-2xl">{icon}</div>
+  <div className="flex items-center gap-3 rounded-xl border border-hairline bg-canvas p-5">
+    <div className="text-2xl text-shield" aria-hidden="true">{icon}</div>
     <div>
-      <p className="text-3xl font-bold text-card-foreground">{value}</p>
-      <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="text-heading-3 text-ink-strong">{value}</p>
+      <p className="text-eyebrow text-steel">{label}</p>
     </div>
   </div>
 )

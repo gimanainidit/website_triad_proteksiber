@@ -7,7 +7,7 @@ import { Send, Mail, Shield, CheckCircle } from "lucide-react";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ds";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 
@@ -59,16 +59,16 @@ const Contact = () => {
     <div>
       <div>
         {/* Hero */}
-        <section className="bg-hero-gradient text-dark-foreground py-16 relative">
+        <section className="bg-navy-950 py-16 text-on-dark">
           <div className="max-w-7xl mx-auto px-6">
             <motion.h1
-              className="text-4xl md:text-5xl font-serif font-black mb-4"
+              className="text-heading-1 mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               Hubungi Kami
             </motion.h1>
-            <p className="text-dark-foreground/70 text-lg max-w-xl">
+            <p className="max-w-xl text-subtitle text-on-dark-muted">
               Konsultasikan kebutuhan keamanan siber organisasi Anda dengan tim ahli kami.
             </p>
           </div>
@@ -84,9 +84,9 @@ const Contact = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                 >
-                  <CheckCircle className="w-16 h-16 text-accent mx-auto mb-4" />
-                  <h2 className="text-2xl font-serif font-bold mb-2 text-foreground">Pesan Terkirim!</h2>
-                  <p className="text-muted-foreground">Tim kami akan menghubungi Anda dalam 1-2 hari kerja.</p>
+                  <CheckCircle className="mx-auto mb-4 h-16 w-16 text-shield" aria-hidden="true" />
+                  <h2 className="mb-2 text-heading-4 text-ink-strong">Pesan Terkirim!</h2>
+                  <p className="text-steel">Tim kami akan menghubungi Anda dalam 1-2 hari kerja.</p>
                 </motion.div>
               ) : (
                 <Form {...form}>
@@ -202,7 +202,7 @@ const Contact = () => {
                             />
                           </FormControl>
                           <div className="space-y-1 leading-none">
-                            <FormLabel className="text-sm font-normal text-muted-foreground cursor-pointer">
+                            <FormLabel className="cursor-pointer text-sm font-normal text-steel">
                               Saya menyetujui bahwa data yang saya berikan akan digunakan untuk menghubungi saya terkait layanan TRIAD PRO-TX SIBER.
                             </FormLabel>
                             <FormMessage />
@@ -213,8 +213,8 @@ const Contact = () => {
 
                     <Button
                       type="submit"
-                      size="lg"
-                      className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90 rounded-lg glow-hover"
+                      expand={false}
+                      className="w-full sm:w-auto"
                       disabled={form.formState.isSubmitting}
                     >
                       <Send size={16} />
@@ -227,42 +227,42 @@ const Contact = () => {
 
             {/* Sidebar */}
             <aside className="md:col-span-5">
-              <div className="bg-card border border-border rounded-lg p-8 sticky top-24">
+              <div className="sticky top-24 rounded-xl border border-hairline bg-canvas p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <Shield className="w-8 h-8 text-accent" />
-                  <h3 className="font-serif font-bold text-lg text-card-foreground">Informasi Kontak</h3>
+                  <Shield className="h-8 w-8 text-shield" aria-hidden="true" />
+                  <h3 className="text-heading-5 text-ink-strong">Informasi Kontak</h3>
                 </div>
 
                 <div className="space-y-4 text-sm">
                   <div className="flex items-center gap-3">
-                    <Mail size={16} className="text-accent shrink-0" />
-                    <a href="mailto:triad-proteksiber@pm.me" className="text-muted-foreground hover:text-accent transition-colors">
+                    <Mail size={16} className="shrink-0 text-shield" aria-hidden="true" />
+                    <a href="mailto:triad-proteksiber@pm.me" className="text-link hover:underline">
                       triad-proteksiber@pm.me
                     </a>
                   </div>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-border">
-                  <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Tim Kami</h4>
+                <div className="mt-8 border-t border-hairline pt-6">
+                  <h4 className="mb-4 text-eyebrow text-steel">Tim Kami</h4>
                   {[
                     { name: "Mochamad Iqbal Fawzan", role: "Partner, IT Strategy & Digital Transformation" },
                     { name: "Erlangga Putera", role: "Partner, Cybersecurity Infrastructure & Architecture" },
                     { name: "Adhitya Jiwa Pratama", role: "Partner, Cyber Security Compliance & GRC" },
                   ].map((p) => (
                     <div key={p.name} className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <span className="text-sm font-bold text-accent">{p.name.charAt(0)}</span>
+                      <div className="w-10 h-10 rounded-full bg-soft flex items-center justify-center shrink-0">
+                        <span className="text-sm font-semibold text-primary">{p.name.charAt(0)}</span>
                       </div>
                       <div>
-                        <p className="font-semibold text-card-foreground text-sm">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">{p.role}</p>
+                        <p className="text-sm font-semibold text-ink-strong">{p.name}</p>
+                        <p className="text-xs text-steel">{p.role}</p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-6 p-4 bg-secondary rounded-lg text-xs text-muted-foreground leading-relaxed">
-                  <strong className="text-foreground">Privasi:</strong> Data Anda dilindungi dan hanya digunakan untuk keperluan komunikasi bisnis. Kami tidak membagikan informasi Anda kepada pihak ketiga.
+                <div className="mt-6 rounded-lg bg-soft p-4 text-xs leading-relaxed text-ink">
+                  <strong className="text-ink-strong">Privasi:</strong> Data Anda dilindungi dan hanya digunakan untuk keperluan komunikasi bisnis. Kami tidak membagikan informasi Anda kepada pihak ketiga.
                 </div>
               </div>
             </aside>

@@ -210,8 +210,8 @@ const AdminUpload = () => {
           </Button>
         </div>
 
-        <Card className="shadow-xl border-0">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <Card className="overflow-hidden rounded-xl border-hairline shadow-none">
+          <CardHeader className="bg-navy-950 text-on-dark">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <Upload className="h-6 w-6" />
               Upload Resource Baru
@@ -227,8 +227,8 @@ const AdminUpload = () => {
                 <div
                   className={`
                     relative border-2 border-dashed rounded-lg p-8 text-center transition-all
-                    ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
-                    ${selectedFile ? 'border-green-500 bg-green-50' : ''}
+                    ${dragActive ? 'border-primary bg-soft' : 'border-hairline-strong hover:border-steel'}
+                    ${selectedFile ? 'border-primary bg-soft' : ''}
                   `}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
@@ -244,25 +244,25 @@ const AdminUpload = () => {
                   
                   {selectedFile ? (
                     <div className="flex items-center justify-center gap-3">
-                      <FileText className="h-8 w-8 text-green-600" />
+                      <FileText className="h-8 w-8 text-primary" aria-hidden="true" />
                       <div>
-                        <p className="font-medium text-green-700">{selectedFile.name}</p>
-                        <p className="text-sm text-green-600">
+                        <p className="font-medium text-ink-strong">{selectedFile.name}</p>
+                        <p className="text-sm text-steel">
                           {(selectedFile.size / (1024 * 1024)).toFixed(1)} MB
                         </p>
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-lg font-medium text-gray-700 mb-2">
+                      <Upload className="mx-auto mb-4 h-12 w-12 text-steel" aria-hidden="true" />
+                      <p className="mb-2 text-lg font-medium text-ink-strong">
                         Drag & drop file di sini
                       </p>
-                      <p className="text-gray-500 mb-4">atau klik untuk memilih file</p>
-                      <p className="text-sm text-gray-400">
+                      <p className="mb-4 text-steel">atau klik untuk memilih file</p>
+                      <p className="text-sm text-steel">
                         Support: PDF, PPTX (Max 15MB)
                         <br />
-                        <span className="text-xs text-blue-400">
+                        <span className="text-xs text-link">
                           *PPTX akan otomatis dikonversi ke PDF
                         </span>
                       </p>
@@ -341,7 +341,7 @@ const AdminUpload = () => {
                   onChange={(e) => handleInputChange('tags', e.target.value)}
                   placeholder="cyber security, panduan, keamanan (pisahkan dengan koma)"
                 />
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-steel">
                   Pisahkan dengan koma untuk multiple tags
                 </p>
               </div>
@@ -351,7 +351,8 @@ const AdminUpload = () => {
                 <Button
                   type="button"
                   disabled={reviewLoading || !selectedFile}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 text-lg"
+                  variant="secondary"
+                  className="w-full py-3 text-lg"
                   onClick={handleReview}
                 >
                   {reviewLoading ? 'Melakukan review...' : 'Review Dokumen dengan AI'}
@@ -371,7 +372,7 @@ const AdminUpload = () => {
                 <Button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 text-lg"
+                  className="w-full py-3 text-lg"
                 >
                   {loading ? 'Mengupload...' : 'Upload Resource'}
                 </Button>

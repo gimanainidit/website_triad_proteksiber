@@ -34,8 +34,8 @@ const Login = () => {
 
   return (
     <div className="flex items-center justify-center px-4 py-16">
-      <Card className="w-full max-w-md shadow-xl border border-border">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+      <Card className="w-full max-w-md overflow-hidden rounded-xl border-hairline shadow-none">
+        <CardHeader className="bg-navy-950 text-on-dark">
           <h1 className="text-2xl font-semibold leading-none tracking-tight">Admin Login</h1>
         </CardHeader>
         <CardContent>

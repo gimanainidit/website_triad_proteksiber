@@ -70,8 +70,8 @@ const TemplateManager = () => {
   return (
     <div className="p-6">
       <div className="max-w-5xl mx-auto space-y-8">
-        <Card className="border border-border">
-          <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+        <Card className="overflow-hidden rounded-xl border-hairline">
+          <CardHeader className="bg-navy-950 text-on-dark">
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Upload className="h-5 w-5" /> Template Library
             </CardTitle>
