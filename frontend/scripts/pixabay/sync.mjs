@@ -63,7 +63,7 @@ export async function syncAssets({ config, apiKey, fetch, fs, now, sleep, log = 
   return { manifest, downloaded, reused };
 
   /** A file counts as present when it has the size the API reported, or any content when the API reports none. */
-  async function save(entry, path, url, { expectedSize, maxBytes = Infinity }) {
+  async function save(entry, path, url, /** @type {{ expectedSize?: number, maxBytes?: number }} */ { expectedSize, maxBytes = Infinity }) {
     const onDisk = await fs.stat(path).then((s) => s.size, () => 0);
     if (onDisk > 0 && (expectedSize === undefined || onDisk === expectedSize)) {
       reused.push(path);
