@@ -13,7 +13,7 @@ Pelaku: **Agent** (Claude di VPS, tanpa sudo/GitHub/Docker) · **User** (kamu: d
 
 ## Progres
 
-Diperbarui 2026-10-28. **Posisi sekarang: situs live dan berfungsi di https://eranusasiber.my.id (halaman publik, API, file). Berikutnya T18 (uji admin di browser), sisa T10 (push + hapus `emergent`), lalu T20 (matikan Vercel).** T19 menunggu keputusan user.
+Diperbarui 2026-10-28. **Posisi sekarang: situs live; login, upload PDF, dan publish/unpublish terbukti jalan. Berikutnya: upload satu template (sisa T18), lalu T20 (matikan Vercel).** T19 menunggu keputusan user.
 
 | ID | Tiket | Pelaku | Blocker | Status | Bukti |
 |---|---|---|---|---|---|
@@ -34,14 +34,14 @@ Diperbarui 2026-10-28. **Posisi sekarang: situs live dan berfungsi di https://er
 | T15 | `setup-host.sh` di VPS | Wizard | T13 | ✅ | User `triad` uid 999 + grup docker; site `triad` aktif; listener hanya `127.0.0.1:8180` |
 | T16 | Isi env, login GHCR, `init_db.py`, superadmin, jalankan stack | Wizard | T12, T15 | ✅ | Stack jalan; 1 superadmin; migrasi Alembic `0001` dijalankan user (setelah fix driver `e900a6c`). `/api/resources` 200 (8 resource, 5 file Supabase HEAD 200), `/api/admin/resources` tanpa token 401 |
 | T17 | HTTPS dengan certbot | Wizard | T14, T16 | ✅ | Let's Encrypt `eranusasiber.my.id` + `www`, s.d. 2027-01-26; HTTP → 301 HTTPS. Situs lain sama seperti sebelum deploy (DuckDNS 404, CTF 502/502) |
-| T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | 🟡 | Login OK sejak `8bfd698`. `/admin/upload` kosong (Radix `SelectItem value=""`) diperbaiki di `a27f678`, live (bundle `index-CKyMQ4jx.js`). Menunggu uji user: upload PDF, template, Publish/Unpublish. Rilis berikutnya: `bash deploy/shared-host/ship.sh` |
+| T18 | Uji fungsi end-to-end di domain | User + Agent | T17 | 🟡 | Login OK (`8bfd698`), halaman upload OK (`a27f678`). Upload PDF 2,1 MB 2026-10-28 04:17 UTC: tampil publik, file Supabase 200 `application/pdf`. Unpublish bekerja (8 resource lama tersembunyi dari publik). **Belum: upload template** (tabel `templates` masih 0 baris) |
 | T19 | Nasib tabel n8n di schema `public` | User | – | ⛔ | |
 | T20 | Matikan Vercel + canonical/og ke domain baru | Agent + User | T18 | ⬜ | |
 | T21 | Hapus cache commit lama di GitHub | User | T10 | ⬜ | Opsional |
 | T22 | Rilis otomatis dari GitHub Actions | Agent + User | T18 | ⬜ | Opsional |
 | T23 | Perbaiki 5 error TypeScript + typecheck di CI | Agent | – | ✅ | `04f714f`; ternyata bug: API tidak mengirim `published`, tombol Publish admin selalu mengirim `true`. `tsc` 0, CI `npm run typecheck` |
 | T24 | Admin melihat draft; publik tidak | Agent | – | ✅ | `8fab47e` + `e6f7d1c`: listing publik dan detail by id hanya published; `GET /api/admin/resources` untuk admin |
-| T25 | Bersihkan data uji di produksi | User | – | ⛔ | 8 resource published, termasuk `Test AI Guide`, `Test PPTX Conversion`, `Test Resource Document` dan duplikat judul; 3 tanpa file. Keputusan konten user |
+| T25 | Bersihkan data uji di produksi | User | – | 🟡 | 8 resource lama sudah di-unpublish oleh user (tidak tampil publik). Hapus permanen atau biarkan sebagai draft: keputusan user |
 | T26 | Buang kolom `ai_review_score`, `ai_review_result`, `is_published` | Agent | T16 | ⬜ | Tidak dipakai kode; perlu migrasi `0002` + rilis image baru |
 
 ## Skill per jenis tiket
