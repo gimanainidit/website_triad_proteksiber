@@ -13,7 +13,7 @@ Pelaku: **Agent** (Claude di VPS, tanpa sudo/GitHub/Docker) · **User** (kamu: d
 
 ## Progres
 
-Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T18 dan T20 lulus, Vercel mati. Sisa: keputusan T19 dan T25, serta tiket opsional T21, T22, T26.** T19 menunggu keputusan user.
+Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T18 dan T20 lulus, Vercel mati. Sisa: keputusan T19, serta tiket opsional T21, T22, T26.** T19 menunggu keputusan user.
 
 | ID | Tiket | Pelaku | Blocker | Status | Bukti |
 |---|---|---|---|---|---|
@@ -41,7 +41,7 @@ Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T1
 | T22 | Rilis otomatis dari GitHub Actions | Agent + User | T18 | ⬜ | Opsional |
 | T23 | Perbaiki 5 error TypeScript + typecheck di CI | Agent | – | ✅ | `04f714f`; ternyata bug: API tidak mengirim `published`, tombol Publish admin selalu mengirim `true`. `tsc` 0, CI `npm run typecheck` |
 | T24 | Admin melihat draft; publik tidak | Agent | – | ✅ | `8fab47e` + `e6f7d1c`: listing publik dan detail by id hanya published; `GET /api/admin/resources` untuk admin |
-| T25 | Bersihkan data uji di produksi | User | – | 🟡 | 8 resource lama sudah di-unpublish oleh user (tidak tampil publik). Hapus permanen atau biarkan sebagai draft: keputusan user |
+| T25 | Bersihkan data uji di produksi | User | – | ✅ | 8 resource lama di-unpublish oleh user. Keputusan user 2026-10-28: dibiarkan sebagai draft (tidak dihapus). File PDF-nya tetap bisa diunduh lewat URL Supabase publik oleh siapa pun yang sudah punya link-nya (risiko diterima) |
 | T26 | Buang kolom `ai_review_score`, `ai_review_result`, `is_published` | Agent | T16 | ⬜ | Tidak dipakai kode; perlu migrasi `0002` + rilis image baru |
 
 ## Skill per jenis tiket
