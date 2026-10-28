@@ -90,10 +90,13 @@ describe("Hero", () => {
     expect(screen.getByRole("link", { name: "Hubungi Kami" }).closest("[data-blend]")).toBeNull();
   });
 
-  test("the index.html head preloads the hero poster", () => {
+  test("the index.html head preloads the poster the hero actually shows at each width", () => {
     const html = readFileSync(resolve(__dirname, "../../../index.html"), "utf8");
     expect(html).toContain(
-      "<link rel=\"preload\" as=\"image\" href=\"/media/pixabay-173102-small-poster.jpg\" fetchpriority=\"high\">",
+      "<link rel=\"preload\" as=\"image\" href=\"/media/pixabay-173102-small-poster.jpg\" media=\"(min-width: 768px)\" fetchpriority=\"high\">",
+    );
+    expect(html).toContain(
+      "<link rel=\"preload\" as=\"image\" href=\"/media/pixabay-173102-tiny-poster.jpg\" media=\"(max-width: 767px)\" fetchpriority=\"high\">",
     );
   });
 });
