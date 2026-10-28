@@ -71,4 +71,22 @@ describe("useReveal", () => {
     expect(getByTestId("host").dataset.visible).toBe("true");
     expect(observers()[0].disconnected).toBe(true);
   });
+
+  it("stays hidden and connected until the element intersects", () => {
+    const { getByTestId } = render(<Host />);
+    expect(getByTestId("host").dataset.visible).toBeUndefined();
+
+    act(() => observers()[0].trigger(false));
+
+    expect(getByTestId("host").dataset.visible).toBeUndefined();
+    expect(observers()[0].disconnected).toBe(false);
+  });
+
+  it("is visible immediately under reduced motion without creating an observer", () => {
+    stubMatchMedia(true);
+    const { getByTestId } = render(<Host />);
+
+    expect(getByTestId("host").dataset.visible).toBe("true");
+    expect(observers()).toHaveLength(0);
+  });
 });

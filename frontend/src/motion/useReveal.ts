@@ -15,6 +15,11 @@ export function useReveal<T extends HTMLElement = HTMLElement>({
     const el = ref.current;
     if (!el) return;
 
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.dataset.visible = "true";
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
