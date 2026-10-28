@@ -1,7 +1,9 @@
-@import '@fontsource/merriweather/700.css';
-@import '@fontsource/merriweather/900.css';
+@import '@fontsource/dm-serif-display/400.css';
 @import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
 
 @tailwind base;
 @tailwind components;
@@ -52,8 +54,9 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 207 78% 51%;
 
-    --font-serif: 'Merriweather', Georgia, serif;
-    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-serif: "DM Serif Display", Georgia, "Times New Roman", serif;
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
 
     --gradient-hero: linear-gradient(135deg, hsl(236, 43%, 30%) 0%, hsl(207, 78%, 51%) 100%);
   }
@@ -89,9 +92,6 @@
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
   }
-  h1, h2, h3, h4 {
-    font-family: var(--font-serif);
-  }
 }
 
 @layer utilities {
@@ -103,12 +103,6 @@
   }
   .text-dark-muted {
     color: hsl(var(--dark-muted));
-  }
-  .font-serif {
-    font-family: var(--font-serif);
-  }
-  .font-sans {
-    font-family: var(--font-sans);
   }
   .bg-hero-gradient {
     background: var(--gradient-hero);
