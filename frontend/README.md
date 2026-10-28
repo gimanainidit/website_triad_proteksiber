@@ -8,8 +8,6 @@ suite. Node.js 22 or newer is recommended.
 
 Local configuration belongs in ignored `.env` files:
 
-- `VITE_SUPABASE_URL`: Supabase project URL.
-- `VITE_SUPABASE_ANON_KEY`: Supabase publishable key only.
 - `VITE_BACKEND_URL`: Public backend URL for CMS, authentication, and AI features.
 
 Never expose backend secret keys, database passwords, or console tokens through

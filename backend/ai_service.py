@@ -1,6 +1,6 @@
 import asyncio
 import uuid
-from typing import Dict, List, Optional, Any
+from typing import Dict, Optional, Any
 from openai_service import OpenAITextGenerator
 
 class AIContentGenerator:

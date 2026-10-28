@@ -1,7 +1,4 @@
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_URL ||
-  import.meta.env.REACT_APP_BACKEND_URL ||
-  "";
+export const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "";
 
 type ApiFetchOptions = Omit<RequestInit, "headers"> & {
   headers?: Record<string, string>;

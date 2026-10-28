@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Wand2, ArrowLeft, Brain, FileText, Lightbulb } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { ResourceService } from '@/services/resourceService'
+import { API_BASE_URL } from '@/services/api'
 
 interface GenerationTypes {
   material_types: Record<string, string>
@@ -60,7 +61,7 @@ const AIGenerator = () => {
 
   const loadGenerationTypes = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || ""}/api/ai/generation-types`)
+      const response = await fetch(`${API_BASE_URL}/api/ai/generation-types`)
       if (response.ok) {
         const data = await response.json()
         setGenerationTypes(data)
@@ -105,7 +106,7 @@ const AIGenerator = () => {
       formData.append('context', createForm.context)
       formData.append('save_as_resource', 'true')
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || ""}/api/ai/generate-content`, {
+      const response = await fetch(`${API_BASE_URL}/api/ai/generate-content`, {
         method: 'POST',
         body: formData
       })
@@ -169,7 +170,7 @@ const AIGenerator = () => {
       formData.append('new_title', enhanceForm.new_title)
       formData.append('new_category', enhanceForm.new_category)
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || ""}/api/ai/generate-from-resource/${enhanceForm.resource_id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/ai/generate-from-resource/${enhanceForm.resource_id}`, {
         method: 'POST',
         body: formData
       })
@@ -220,7 +221,7 @@ const AIGenerator = () => {
       formData.append('difficulty', quizForm.difficulty)
       formData.append('save_as_resource', 'true')
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || ""}/api/ai/create-quiz/${quizForm.resource_id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/ai/create-quiz/${quizForm.resource_id}`, {
         method: 'POST',
         body: formData
       })

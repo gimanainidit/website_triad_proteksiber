@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Resource } from "@/lib/supabase";
+import type { Resource } from "@/types/resource";
 import { ResourceService } from "@/services/resourceService";
 
 const Resources = () => {

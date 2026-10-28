@@ -1,4 +1,4 @@
-import { Resource } from '@/lib/supabase'
+import type { Resource } from '@/types/resource'
 import { apiFetch } from './api'
 
 export interface TemplateMeta {

@@ -47,8 +47,7 @@ replace it with the intended Neon connection rather than assuming Neon is provis
 ## First deployment before buying a domain
 
 1. Push the workflow to main. It runs existing checks and publishes two private GHCR
-   images tagged with the complete commit SHA. Configure repository variables
-   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (publishable key only).
+   images tagged with the complete commit SHA.
    `VITE_BACKEND_URL` is empty in VPS builds, so requests use the same origin.
 2. On VPS, authenticate to GHCR using a credential with `read:packages`, through
    `docker login ghcr.io --username YOUR_GITHUB_USER --password-stdin`. For private

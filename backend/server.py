@@ -7,8 +7,8 @@ load_dotenv(ROOT_DIR / '.env')
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
-from typing import List, Optional
+from sqlalchemy import select
+from typing import Optional
 import os
 import uuid
 

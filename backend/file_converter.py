@@ -6,8 +6,6 @@ from typing import Tuple, Optional
 from pptx import Presentation
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.utils import ImageReader
-from PIL import Image
 import io
 
 class FileConverter:
