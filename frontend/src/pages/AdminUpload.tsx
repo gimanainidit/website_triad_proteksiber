@@ -10,6 +10,8 @@ import { Upload, ArrowLeft, FileText } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { ResourceService, TemplateMeta } from '@/services/resourceService'
 
+const NO_TEMPLATE = 'none'
+
 const AdminUpload = () => {
   const [loading, setLoading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
@@ -314,12 +316,13 @@ const AdminUpload = () => {
               {/* Template Reference */}
               <div className="space-y-2">
                 <Label>Template Referensi (opsional)</Label>
-                <Select value={selectedTemplate} onValueChange={(value) => setSelectedTemplate(value)}>
+                {/* Radix Select reserves "" for "no selection", so the explicit choice uses NO_TEMPLATE. */}
+                <Select value={selectedTemplate} onValueChange={(value) => setSelectedTemplate(value === NO_TEMPLATE ? '' : value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Pilih template" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Tanpa template</SelectItem>
+                    <SelectItem value={NO_TEMPLATE}>Tanpa template</SelectItem>
                     {templates.map((template) => (
                       <SelectItem key={template.id} value={template.id}>
                         {template.name} ({template.material_type})
