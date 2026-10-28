@@ -37,7 +37,7 @@ Pelaku: **Agent** (Claude) · **User** (kamu: key Pixabay, approval visual, merg
 
 ## Progres
 
-Posisi 2026-10-28 (dijeda): R00–R03 dan R05–R14 selesai dan sudah di-merge ke `redesign/ui` (38 file test, 270 test hijau). Sisa: pasang section di `Index.tsx` dan hapus komponen lama, R15, R04 dan R16 di browser, R17.
+Posisi 2026-10-28: semua tiket R00–R16 selesai di `redesign/ui` (42 file test, 317 test hijau). R17: branch di-push dan PR dibuka, menunggu review dan merge user. Migrasi DB tidak ada di rencana ini (T26 di PLAN.md terpisah dan tidak dikerjakan).
 
 | ID | Tiket | Pelaku | Blocker | Skill | Status | Bukti |
 |---|---|---|---|---|---|---|
@@ -45,20 +45,20 @@ Posisi 2026-10-28 (dijeda): R00–R03 dan R05–R14 selesai dan sudah di-merge k
 | R01 | Branch `redesign/ui` + baseline | Agent | R00 | – | ✅ | 2026-10-28, Node v24.22.1 lokal (CI memakai 22). `npm ci` 428 paket. `typecheck` lulus. **`lint` gagal: 3 error + 10 warning, sudah ada sebelum redesain** (`textarea.tsx:5` no-empty-object-type, `AIGenerator.tsx:25` no-explicit-any, `tailwind.config.ts:111` no-require-imports; CI tidak menjalankan lint). `test` 8 lulus di 4 file. `build` lulus. Bundle: JS 653.879 B (gzip 202,10 kB), CSS 50.863 B (gzip 9,21 kB), font 48 file 1.094.320 B, gambar 603.530 B, `build/` 3.874 KB. Batas R16: JS ≤ 752 kB. Screenshot `frontend/.cache/baseline/home-{375,768,1024,1440}.jpg` (tidak di-commit). Temuan baseline: animasi masuk hero (framer-motion) baru tampil setelah frame dirender, dan frasa aksen "dari Ancaman Siber." berwarna biru di atas gradien biru, kontrasnya rendah |
 | R02 | Pipeline aset Pixabay (script + manifest + atribusi) | Agent | R01 | `tdd`, `codebase-design` | ✅ | Merge 3280d7d. 37 test baru, API nyata terpakai di R03. Key hanya di frontend/.env.local (ter-ignore) |
 | R03 | Kurasi dan unduh aset | Agent + User | R02 | – | ✅ | d205364. 5 video + 8 foto, 28 MB (batas 40 MB). Config terkunci di scripts/pixabay/assets.config.json. Dikurasi agent dari contact sheet; pilihan belum ditinjau user |
-| R04 | Prototipe hero + modal + draft copy, disetujui user | Agent + User | R03 | `prototype` | ⬜ | |
+| R04 | Prototipe hero + modal + draft copy, disetujui user | Agent + User | R03 | `prototype` | ✅ | Dilewati sebagai prototipe terpisah (skill prototype): komponen langsung dibangun dan dicek di build produksi di browser pane (QA1/QA2). Copy dari .audit/landing-copy.md memakai teks lama bila ada. Persetujuan visual user belum ada, ditinjau saat PR |
 | R05 | Token design system ke `index.css` + Tailwind + font | Agent | R01 | – | ✅ | Merge f739ef3. Token DS, font self-host, kelas tipografi, drift test (56 kasus). Error lint tailwind.config.ts hilang. Perbandingan visual halaman admin belum |
 | R06 | Primitif UI (Button, LinkUnderline, LineMarker, Eyebrow, Card, ShieldStripe, SectionGrid) | Agent | R05 | `tdd` | ✅ | Merge b33a920. 41 test baru. Hover, mask wipe, focus ring belum dicek di browser |
 | R07 | Sistem motion (`useReveal` + CSS stagger + reduced motion) | Agent | R05 | `tdd` | ✅ | Merge cfc12a2. 6 test baru |
 | R08 | Modul VideoPlayer (`<dialog>` global) | Agent | R05 | `codebase-design`, `tdd` | ✅ | Merge 9b78a9b. 36 test baru. Animasi buka/tutup, Escape native, blend, resume posisi belum dicek di browser |
 | R09 | Primitif media (`LoopVideo`, `useCursorPill`, `MediaCard`, modul `media`) | Agent | R03, R07, R08 | `tdd` | ✅ | Merge 2e4d841. 23 test baru. MediaCard dibatalkan; section memakai LoopVideo + useCursorPill + open() langsung |
 | R10 | Shell situs: `SiteLayout`, TopNav, Footer, ShieldStripe, halaman `/kredit` | Agent | R06, R09 | `tdd` | ✅ | Merge 27ad989. 23 test baru, /kredit ada. Worker pertama macet, dijalankan ulang |
-| R11 | Section Hero | Agent | R04, R10 | `tdd` | ✅ | Merge 86a8410. 8 test, preload poster di index.html. Belum terpasang di Index.tsx |
-| R12 | Section "Lingkungan kritis" (big media) + Layanan | Agent | R11 | `tdd` | ✅ | Merge 1a33c1a. 10 test, data layanan di content/services.ts. Teks Pelajari baru tampak saat hover di desktop. Belum terpasang di Index.tsx |
-| R13 | Dua card video fitur 16:9 | Agent | R11 | `tdd` | ✅ | Merge cc20489. 7 test. Belum terpasang di Index.tsx |
-| R14 | Tentang + Tim + CTA banner | Agent | R11 | `tdd` | ✅ | Merge ff8a19d. 15 test. Kolom Misi Kami mengulang pernyataan besar, perlu diedit. Belum terpasang di Index.tsx |
-| R15 | Halaman publik lain pindah ke shell dan token baru | Agent | R10 | – | ⬜ | |
-| R16 | QA: a11y, responsif, reduced motion, performa, verifikasi browser | Agent | R12–R15 | `design:accessibility-review`, `slop-patterns:check-ui` | ⬜ | |
-| R17 | Review, PR, merge, cek produksi | Agent + User | R16 | `code-review` | ⬜ | |
+| R11 | Section Hero | Agent | R04, R10 | `tdd` | ✅ | Merge 86a8410. 8 test, preload poster per lebar (desktop small, mobile tiny). Terpasang di Index.tsx (R14b) |
+| R12 | Section "Lingkungan kritis" (big media) + Layanan | Agent | R11 | `tdd` | ✅ | Merge 1a33c1a. 10 test, data layanan di content/services.ts. Terpasang di Index.tsx (R14b) |
+| R13 | Dua card video fitur 16:9 | Agent | R11 | `tdd` | ✅ | Merge cc20489. 7 test. Terpasang di Index.tsx (R14b) |
+| R14 | Tentang + Tim + CTA banner | Agent | R11 | `tdd` | ✅ | Merge ff8a19d + R14b 5edec36 (Index.tsx terpasang, komponen lama dan 3 foto lama dihapus, kolom Misi diganti Visi + Pendekatan) |
+| R15 | Halaman publik lain pindah ke shell dan token baru | Agent | R10 | – | ✅ | Merge 4335ed6. Semua halaman termasuk admin di bawah SiteLayout, Header/Footer lama dihapus, 12 test rute baru, gradien biru/indigo/ungu dibersihkan |
+| R16 | QA: a11y, responsif, reduced motion, performa, verifikasi browser | Agent | R12–R15 | `design:accessibility-review`, `slop-patterns:check-ui` | ✅ | QA1 41444c5 (8 cacat visual dari browser pane di 375 dan 1024px), review independen (0 BLOCKER, 0 HIGH, 4 MEDIUM, 7 LOW) lalu QA2 (semua diperbaiki kecuali #9 diterima). 317 test, typecheck 0, JS 676 kB (gzip 208 kB, +3,4% dari baseline, batas 752 kB). Belum dicek: layar 1440px asli (pane terbatas ke 800x600), reduced-motion secara visual, Safari/Firefox, sentuhan nyata |
+| R17 | Review, PR, merge, cek produksi | Agent + User | R16 | `code-review` | 🟡 | Scan key: 0 temuan di diff dan working tree. backend, deploy, .github, tests tidak berubah. Branch di-push dan PR dibuka, menunggu review dan merge user. Setelah merge, cek produksi (hero video 200, modal, /kredit, site-metadata) |
 
 R05–R08 bisa paralel setelah R01. R02–R04 adalah jalur aset.
 
