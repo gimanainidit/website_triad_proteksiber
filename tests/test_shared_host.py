@@ -56,6 +56,8 @@ def test_host_nginx_site_serves_only_the_triad_domain_through_loopback():
     assert set(re.findall(r"proxy_pass\s+([^;]+);", conf)) == {"http://127.0.0.1:8180"}
     body_limit = int(re.search(r"client_max_body_size\s+(\d+)m;", conf).group(1))
     assert body_limit > 15  # backend accepts uploads up to 15 MB
+    read_timeout = int(re.search(r"proxy_read_timeout\s+(\d+)s;", conf).group(1))
+    assert read_timeout >= 3 * 120  # OpenAI client: 120 s timeout, 2 retries
 
 
 def test_supabase_root_ca_is_the_pinned_certificate():

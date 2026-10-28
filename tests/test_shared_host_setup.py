@@ -59,3 +59,39 @@ def test_failed_nginx_check_removes_the_site_and_skips_reload(tmp_path):
     assert result.returncode != 0
     assert not (nginx / "sites-enabled/triad").exists()
     assert "systemctl reload nginx" not in calls.read_text()
+
+
+def test_rerun_keeps_a_site_certbot_has_edited(tmp_path):
+    env, _, nginx = fake_host(tmp_path)
+    run(env)
+    site = nginx / "sites-available/triad"
+    site.write_text(site.read_text() + "    listen 443 ssl; # managed by Certbot\n")
+    assert run(env).returncode == 0
+    assert "listen 443 ssl" in site.read_text()
+
+
+def test_failed_nginx_check_restores_a_previous_link_target(tmp_path):
+    env, _, nginx = fake_host(tmp_path, nginx_test_fails=True)
+    other = nginx / "sites-available/triad-old"
+    other.write_text("server {}\n")
+    (nginx / "sites-enabled/triad").symlink_to(other)
+    assert run(env).returncode != 0
+    assert (nginx / "sites-enabled/triad").resolve() == other
+
+
+def test_refuses_to_replace_a_regular_file_in_sites_enabled(tmp_path):
+    env, _, nginx = fake_host(tmp_path)
+    handmade = nginx / "sites-enabled/triad"
+    handmade.write_text("server { listen 80; }\n")
+    assert run(env).returncode != 0
+    assert handmade.read_text() == "server { listen 80; }\n"
+
+
+def test_refuses_a_symlinked_env_file(tmp_path):
+    env, _, _ = fake_host(tmp_path)
+    run(env)
+    production = tmp_path / "opt-triad/production.env"
+    production.unlink()
+    production.symlink_to(tmp_path / "elsewhere")
+    assert run(env).returncode != 0
+    assert not (tmp_path / "elsewhere").exists()

@@ -13,12 +13,15 @@ certificate with its own root CA, shipped in the backend image at
 ## Install
 
 1. DNS (Cloudflare): `A eranusasiber.my.id -> <VPS IPv4>`, `CNAME www -> eranusasiber.my.id`.
-   No AAAA unless IPv6 is routed to the VPS. If proxied, set SSL/TLS mode to Full (strict)
-   after step 5.
+   Keep both records DNS only: Cloudflare's proxy cuts requests at 100 s and AI generation
+   can take longer. No AAAA unless IPv6 is routed to the VPS. If you later enable the proxy,
+   set SSL/TLS mode to Full (strict).
 2. From a checkout of this repository: `sudo bash deploy/shared-host/setup-host.sh`.
    It creates user `triad` (docker group: root-equivalent), fills `/opt/triad`, creates the
    `*.env` files once with mode 600, installs the nginx site, runs `nginx -t` and reloads
-   (and rolls the site back if the check fails). Re-running it never overwrites `*.env`.
+   (and rolls the site back if the check fails). Re-running it never overwrites `*.env`
+   and keeps a site file certbot has edited.
+2b. Or run the guided path for steps 1–5 as a normal user: `bash deploy/shared-host/wizard.sh`.
 3. As `triad` in `/opt/triad`: fill `backend.env` and the image tags in `production.env`,
    `docker login ghcr.io` with a `read:packages` token, then
    `docker compose --env-file production.env run --rm --no-deps backend python init_db.py`
