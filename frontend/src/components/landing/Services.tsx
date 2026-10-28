@@ -37,10 +37,10 @@ function ServiceCard({ service, number }: { service: ServiceItem; number: number
       <Link
         to={`/services#${service.slug}`}
         aria-label={`Pelajari ${service.title}`}
-        className="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-medium text-link focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-medium text-steel focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         <MaskReveal>Pelajari</MaskReveal>
-        <ArrowRight aria-hidden="true" className="size-4" />
+        <ArrowRight aria-hidden="true" className="size-4 text-link" />
       </Link>
     </article>
   );
