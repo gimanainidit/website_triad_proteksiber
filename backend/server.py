@@ -16,7 +16,7 @@ from models import Resource, Base, UserRole, User
 from database import get_db, engine
 from ai_service import AIContentGenerator
 from n8n_service import N8NIntegration
-from optional_features import ai_configured, n8n_configured, require_ai, require_n8n
+from optional_features import ai_configured, n8n_configured, require_ai, require_n8n, require_n8n_webhook_secret
 from storage import supabase
 from utils import create_slug, format_file_size, resource_payload
 from dependencies import require_roles
@@ -367,7 +367,7 @@ async def get_generation_types():
     }
 
 # N8N Workflow Integration Endpoints
-@api_router.post("/n8n/webhook/content")
+@api_router.post("/n8n/webhook/content", dependencies=[Depends(require_n8n_webhook_secret)])
 async def n8n_content_webhook(
     title: str = Form(...),
     content: str = Form(...),
@@ -376,7 +376,7 @@ async def n8n_content_webhook(
     material_type: str = Form("guide"),
     db: AsyncSession = Depends(get_db)
 ):
-    """Webhook endpoint for n8n to upload generated content"""
+    """Webhook endpoint for n8n to upload generated content as a draft for admin review"""
     try:
         # Create slug from title
         slug = create_slug(title)
@@ -404,9 +404,9 @@ async def n8n_content_webhook(
             content=content,
             file_url=None,
             file_size=f"{len(content.split())} words",
-            file_type='n8n-content',
-            author_id=uuid.uuid4(),
-            published=True
+            file_type='n8n',
+            author_id=None,
+            published=False
         )
         
         db.add(new_resource)

@@ -13,7 +13,7 @@ Pelaku: **Agent** (Claude di VPS, tanpa sudo/GitHub/Docker) · **User** (kamu: d
 
 ## Progres
 
-Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T18 dan T20 lulus, Vercel mati. Sisa: tiket opsional T21, T22, T26; webhook n8n wajib diamankan sebelum n8n dinyalakan.**
+Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T18 dan T20 lulus, Vercel mati. Sisa: rilis T27 (webhook n8n), lalu tiket opsional T21, T22, T26.**
 
 | ID | Tiket | Pelaku | Blocker | Status | Bukti |
 |---|---|---|---|---|---|
@@ -43,6 +43,7 @@ Diperbarui 2026-10-28. **Posisi sekarang: migrasi selesai. Situs live di VPS, T1
 | T24 | Admin melihat draft; publik tidak | Agent | – | ✅ | `8fab47e` + `e6f7d1c`: listing publik dan detail by id hanya published; `GET /api/admin/resources` untuk admin |
 | T25 | Bersihkan data uji di produksi | User | – | ✅ | 8 resource lama di-unpublish oleh user. Keputusan user 2026-10-28: dibiarkan sebagai draft (tidak dihapus). File PDF-nya tetap bisa diunduh lewat URL Supabase publik oleh siapa pun yang sudah punya link-nya (risiko diterima) |
 | T26 | Buang kolom `ai_review_score`, `ai_review_result`, `is_published` | Agent | T16 | ⬜ | Tidak dipakai kode; perlu migrasi `0002` + rilis image baru |
+| T27 | Amankan webhook konten n8n | Agent + User | – | 🟡 | Ditemukan 2026-10-28: `POST /api/n8n/webhook/content` publik tanpa auth dan langsung publish (belum pernah disalahgunakan). Kode: wajib `X-N8N-Secret` (`N8N_WEBHOOK_SECRET`, kosong → 503), hasil selalu draft, `author_id` kosong, `file_type` `n8n` (kolom produksi `VARCHAR(10)`, nilai lama `n8n-content` pasti gagal); `tests/test_n8n_webhook.py`. Review independen: tidak ada bypass. **Belum: rilis (`ship.sh`)** |
 
 ## Skill per jenis tiket
 

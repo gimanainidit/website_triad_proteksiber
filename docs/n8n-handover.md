@@ -47,7 +47,7 @@ Backend membaca `N8N_API_URL` dan `N8N_API_KEY` (`backend/optional_features.py`)
 
 | Endpoint | Auth | Fungsi | Kode |
 |---|---|---|---|
-| `POST /api/n8n/webhook/content` | **Tidak ada** (lihat §5) | n8n mengirim hasil konten (form: `title`, `content`, `category`, `source`, `material_type`) → baris baru `resources`, `file_type='n8n-content'`, tag `n8n-generated`, **langsung `published=True`** | `backend/server.py` |
+| `POST /api/n8n/webhook/content` | Header `X-N8N-Secret` = `N8N_WEBHOOK_SECRET`; tanpa secret di server → 503, salah → 401 | n8n mengirim hasil konten (form: `title`, `content`, `category`, `source`, `material_type`) → baris baru `resources`, `file_type='n8n'`, tag `n8n-generated`, **selalu draft** (`published=False`, `author_id` kosong). Admin mem-publish di `/admin/resources` | `backend/server.py`, test `tests/test_n8n_webhook.py` |
 | `GET /api/n8n/health` | Tidak ada; 503 bila n8n off | Cek `{N8N_API_URL}/healthz` | `backend/server.py` |
 | `GET /api/admin/n8n/workflows` | Admin | Daftar workflow via n8n REST API | `backend/routes/admin.py` |
 | `POST /api/admin/n8n/trigger` | Admin | POST ke `{N8N_API_URL}/webhook/{webhook_path}` dengan `{user_id, data}` | `backend/routes/admin.py` |
@@ -69,16 +69,13 @@ Service `n8n` sudah ada di `deploy/compose.yml` (image dipin dengan digest, port
 3. **Env.** Salin `deploy/n8n.env.example` ke `/opt/triad/n8n.env` (chmod 600). Buat `N8N_ENCRYPTION_KEY` sekali saja dan simpan di luar VPS.
 4. **Start.** Di `/opt/triad`, set `COMPOSE_PROFILES=automation` di `production.env`, lalu jalankan `docker compose --env-file production.env up -d n8n`. Perintah yang membutuhkan sudo dijalankan sendiri oleh pemilik VPS.
 5. **Editor hanya lewat SSH tunnel:** `ssh -L 5678:127.0.0.1:5678 <user>@<vps>`, lalu buka `http://localhost:5678`. Jangan buka port 5678 di ufw. Port yang di-publish Docker tidak lewat ufw, jadi bind harus tetap ke `127.0.0.1`.
-6. **Hubungkan ke backend.** Buat API key di n8n, isi `N8N_API_URL=http://n8n:5678` dan `N8N_API_KEY` di `/opt/triad/backend.env`, lalu recreate backend.
+6. **Hubungkan ke backend.** Buat API key di n8n, isi `N8N_API_URL=http://n8n:5678` dan `N8N_API_KEY` di `/opt/triad/backend.env`. Buat secret acak (`openssl rand -hex 32`), isi sebagai `N8N_WEBHOOK_SECRET` di `backend.env`, lalu recreate backend. Di n8n, buat credential **Header Auth** (name `X-N8N-Secret`, value = secret yang sama) dan pakai di node HTTP Request yang memanggil webhook. Jangan tulis secret langsung di parameter node, dan jangan pakai `$env` (itu membuka `N8N_ENCRYPTION_KEY` ke semua node).
 7. **Trigger dari luar** (Telegram webhook, dll.) butuh route publik. Caddy saat ini hanya meneruskan `/api/*` dan frontend. Kalau perlu, tambahkan route sempit (misalnya hanya `/webhook/<path>` ke `n8n:5678`) di `deploy/Caddyfile`. Editor dan `/rest` jangan pernah ikut terbuka. Alternatif tanpa route publik: Telegram Trigger mode polling.
 
 ## 5. Wajib sebelum workflow dinyalakan
 
-- **Lindungi `POST /api/n8n/webhook/content`.** Saat ini endpoint ini terbuka ke internet (lewat Caddy `/api/*`) tanpa autentikasi, dan hasilnya langsung tampil publik. Minimal perbaikannya:
-  - wajib header rahasia bersama (mis. `X-N8N-Secret`), dibandingkan dengan nilai di `backend.env`;
-  - simpan sebagai draft (`published=False`) supaya admin menyetujui dulu di `/admin/resources`;
-  - perbaikan `author_id` yang sekarang diisi UUID acak.
-  Lebih baik lagi kalau endpoint ini hanya bisa diakses dari jaringan Docker internal.
+- **Webhook konten sudah diamankan (2026-10-28):** wajib header `X-N8N-Secret`, hasil selalu draft. Endpoint ini tetap terjangkau dari internet lewat Caddy `/api/*` (dengan secret). Kalau workflow hanya memanggilnya dari jaringan Docker, boleh dipertimbangkan memblok path ini di Caddy.
+- Konten dari n8n tidak pernah tampil publik tanpa admin menekan Publish. Kalau tim ingin auto-publish, itu keputusan user dan wajib dicatat di `PLAN.md`.
 - Semua perubahan backend pakai TDD (test merah dulu) di `tests/`, lalu dirilis lewat `ship.sh`. Lihat bagian Seam di `PLAN.md`.
 - Jangan simpan secret di workflow JSON, repo, atau variabel `VITE_*`. Simpan di credential n8n atau di file env server.
 

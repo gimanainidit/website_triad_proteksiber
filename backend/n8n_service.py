@@ -44,6 +44,9 @@ class N8NIntegration:
                 {
                     "parameters": {
                         "url": f"{os.environ.get('BACKEND_INTERNAL_URL', 'http://backend:8001')}/api/n8n/webhook/content",
+                        # Pick a Header Auth credential (X-N8N-Secret = N8N_WEBHOOK_SECRET) in the editor.
+                        "authentication": "genericCredentialType",
+                        "genericAuthType": "httpHeaderAuth",
                         "sendHeaders": True,
                         "headerParameters": {
                             "parameters": [
