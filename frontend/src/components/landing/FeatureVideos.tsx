@@ -33,7 +33,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-navy-950/75 via-navy-950/30 to-transparent"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-950/60 to-navy-950/20 md:bg-gradient-to-r md:from-navy-950/90 md:via-navy-950/55 md:via-40% md:to-transparent md:to-70%"
       />
 
       <div ref={pillHost} className="absolute inset-0">
