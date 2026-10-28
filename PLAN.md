@@ -25,7 +25,7 @@ Diperbarui 2026-10-28. **Posisi sekarang: kerja agent untuk deploy selesai; beri
 | T06 | Buang dead code + jejak Emergent/Lovable | Agent | – | ✅ | `c6c918a`; frontend build/test hijau |
 | T07 | Mode deploy shared host + CA Supabase | Agent | – | ✅ | `d8e881d`; 24 test hijau; `nginx -t` site lolos |
 | T08 | Bucket Storage `templates` | Agent | T03 | ✅ | Dibuat public 15 MB; uji upload, ambil URL, hapus |
-| T09 | Review semua commit sebelum push | Agent | T05–T08 | 🟡 | Review independen `1972341..399b1d6`: 1 Medium + 5 Low, semua diperbaiki di `3db00be`. Review kedua untuk `399b1d6..3db00be` sedang jalan. |
+| T09 | Review semua commit sebelum push | Agent | T05–T08 | 🟡 | Review 1 (`1972341..399b1d6`): 1 Medium + 5 Low → `3db00be`. Review 2 (`399b1d6..3db00be`): 0 High/Medium, 6 Low + draft by id → `e6f7d1c`. Review 3 (`3db00be..e6f7d1c`) berjalan. |
 | T10 | Push riwayat bersih, default branch `main`, hapus branch legacy | User | T09 | ⬜ | |
 | T11 | Cabut akses Emergent/Lovable di GitHub | User | – | ⬜ | |
 | T12 | CI hijau dan image di GHCR | Agent cek | T10 | ⬜ | |
@@ -40,7 +40,7 @@ Diperbarui 2026-10-28. **Posisi sekarang: kerja agent untuk deploy selesai; beri
 | T21 | Hapus cache commit lama di GitHub | User | T10 | ⬜ | Opsional |
 | T22 | Rilis otomatis dari GitHub Actions | Agent + User | T18 | ⬜ | Opsional |
 | T23 | Perbaiki 5 error TypeScript + typecheck di CI | Agent | – | ✅ | `04f714f`; ternyata bug: API tidak mengirim `published`, tombol Publish admin selalu mengirim `true`. `tsc` 0, CI `npm run typecheck` |
-| T24 | Admin melihat draft; publik tidak | Agent | – | ✅ | `tests/test_resource_visibility.py` merah (anonim dapat `Draft`) lalu hijau; `GET /api/admin/resources` baru |
+| T24 | Admin melihat draft; publik tidak | Agent | – | ✅ | `8fab47e` + `e6f7d1c`: listing publik dan detail by id hanya published; `GET /api/admin/resources` untuk admin |
 
 ## Skill per jenis tiket
 
