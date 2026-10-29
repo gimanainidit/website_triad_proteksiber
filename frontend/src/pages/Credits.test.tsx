@@ -30,11 +30,14 @@ describe("Credits", () => {
 
   test("each entry credits its creator and links to its source page", () => {
     renderWithProviders(<Credits />);
-    const items = screen.getAllByRole("listitem");
+    const itemsByLink = new Map(
+      screen.getAllByRole("listitem").map((item) => {
+        const link = within(item).getByRole("link");
+        return [`${link.textContent}|${link.getAttribute("href")}`, item];
+      }),
+    );
     for (const asset of uniqueSources) {
-      const item = items.find((candidate) =>
-        within(candidate).queryByRole("link", { name: LINK_LABEL[asset.source] })?.getAttribute("href") === asset.pageURL,
-      );
+      const item = itemsByLink.get(`${LINK_LABEL[asset.source]}|${asset.pageURL}`);
       expect(item, `entry for ${sourceKey(asset)}`).toBeDefined();
       expect(item).toHaveTextContent(`oleh ${asset.user}`);
       expect(item).toHaveTextContent(asset.license);

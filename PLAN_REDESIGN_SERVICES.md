@@ -37,8 +37,8 @@ Pelaku: **Agent** (Claude) · **User** (kurasi gambar, persetujuan visual, merge
 | S02b | Layanan jadi 10: judul pentest diganti, tambah DFIR dan Awareness | Agent + User | S02 | `tdd` | ⛔ | Keputusan user 2026-10-29 "Layanan baru". Menunggu teks overview, cakupan, deliverables, dan kategori dari user. Perlu keputusan soal tumpang tindih dengan Red Teaming dan IT Security Training |
 | S03 | Kurasi dan unduh gambar layanan dari Unsplash | Agent + User | S02 | – | ✅ | 2026-10-29. 20 kueri, 228 hasil, 0 Unsplash+, 65 kandidat. User memilih 29 (DFIR 2 gambar). Ke-29 diverifikasi `license: https://unsplash.com/license` dari JSON-LD halaman fotonya. Diunduh atas izin user: 1280px, 57–305 KB, total 4,05 MB. 8 gambar `svc-*` Pixabay dicabut dari config, manifest, dan `public/media`. `public/media` 34 MB. Entri di `src/media/unsplash.json`, `MediaAsset` memakai `source` + `sourceId`, `/kredit` menautkan kedua lisensi. 8 layanan punya galeri 3 gambar dengan caption. 42 file / 321 test hijau dua kali berturut-turut, `typecheck` 0, build lulus. Build produksi: `/kredit` 33 entri (29 Unsplash, 4 Pixabay), 0 gambar rusak. Gambar DFIR dan Awareness menunggu S02b |
 | S04 | Prototipe daftar + berkas + lightbox, disetujui user | Agent + User | S03 | `prototype` | ✅ | 2026-10-29. `frontend/.cache/prototype/services.html` lewat dev server Vite, mengimpor `services.ts` dan `media` asli. Diuji di pane: 8 kartu, berkas 03 / 08, badge standar, `›` nonaktif di 08, lightbox ←/→/Escape dengan tombol nyata, fokus kembali ke stage, stage tersinkron. Keputusan user: zig-zag, nomor di dalam kartu, rasio 16:9 |
-| S05 | Route `/services/:slug` + kompatibilitas `#slug` | Agent | S02 | `tdd` | ⬜ | |
-| S06 | Modul `ImageGallery` (stage, rail, lightbox `<dialog>`) | Agent | S02 | `codebase-design`, `tdd` | ⬜ | |
+| S05 | Route `/services/:slug` + kompatibilitas `#slug` | Agent | S02 | `tdd` | ✅ | 2026-10-29, `81eed63` lewat merge `be382c9`. Route baru, `ServiceCase` minimal (h1, "04 / 08", judul dokumen, fokus h1, NotFound), `/services#slug` diarahkan dengan `Navigate replace`, link landing dan `features.ts` pindah ke `/services/<slug>`. `grep services#` hanya di test kompatibilitas. Catatan: `NotFound` tidak mengatur `document.title` |
+| S06 | Modul `ImageGallery` (stage, rail, lightbox `<dialog>`) | Agent | S02 | `codebase-design`, `tdd` | ✅ | 2026-10-29, `9595f0e` lewat merge `5859422`. `<ImageGallery images label />`, satu state indeks, Escape lewat `cancel`, fokus kembali ke pemicu, `lockScroll` pindah ke `src/lib/`. 16 test. Setelah merge: 45 file / 344 test hijau dua kali, `typecheck` 0, build lulus, JS 685.993 B (+1,5% dari S01). Test Credits dipercepat dari 2.061 ms ke 187 ms (kueri role kuadratik penyebab timeout saat suite paralel) |
 | S07 | Halaman daftar `/services` (kartu berkas) | Agent | S04, S05 | `tdd` | ⬜ | |
 | S08 | Halaman berkas `/services/:slug` | Agent | S04, S05, S06 | `tdd` | ⬜ | |
 | S09 | QA: a11y, responsif, reduced motion, bundle, browser | Agent | S07, S08 | `design:accessibility-review`, `slop-patterns:check-ui` | ⬜ | |
@@ -236,7 +236,7 @@ Tulis ulang `pages/Services.tsx` sesuai §2. Buat `ServiceFileCard` di `src/comp
 **Selesai bila:** test memastikan satu `h1`, 2 `h2` kategori, 8 link kartu dengan nama "Buka berkas: <judul>" dan href yang benar, tab nomor 01–08 `aria-hidden`, serta kartu genap memiliki kelas offset.
 
 ### S08 · Halaman berkas
-Buat `pages/ServiceCase.tsx` sesuai §3. Pakai `ImageGallery`, `Badge`, `Button`, `Eyebrow`, dan `useReveal`.
+Kembangkan `pages/ServiceCase.tsx` (kerangka dari S05) sesuai §3. Render `<ImageGallery key={slug} …/>`: tanpa `key`, indeks galeri sebelumnya bisa melebihi jumlah gambar layanan berikutnya. Pakai `ImageGallery`, `Badge`, `Button`, `Eyebrow`, dan `useReveal`.
 
 **Selesai bila:** test memastikan:
 - `h1` = judul, dan fokus pindah ke `h1` saat slug berganti;
