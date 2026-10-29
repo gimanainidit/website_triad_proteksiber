@@ -33,7 +33,7 @@ Pelaku: **Agent** (Claude) · **User** (kurasi gambar, persetujuan visual, merge
 |---|---|---|---|---|---|---|
 | S00 | Konfirmasi seam, route, dan copy label | User | – | `grilling` (opsional) | ✅ | Disetujui user 2026-10-29 tanpa perubahan: route `/services/:slug`, label "Buka berkas" / "BERKAS LAYANAN 03" / "Semua layanan" / "Layar penuh", `standards` hanya dari teks yang ada |
 | S01 | Baseline di branch `redesign/services` | Agent | S00 | – | ✅ | 2026-10-29 di `72198bb`. `typecheck` 0 error. Lint 2 error lama + 8 warning. Test 42 file / 317 hijau. Build lulus. JS 676.010 B (gzip 207.563 B), CSS 88.365 B (gzip 27.932 B). `public/media` 31 MB, 20 file. `/services`: 1 `h1`, 2 `h2`, 8 `article`, 0 gambar, tinggi 7.738px di 375px dan 6.666px di 1024px, tanpa overflow horizontal. Screenshot di `frontend/.cache/baseline/services/` |
-| S02 | Model data galeri + helper urutan | Agent | S01 | `tdd` | ⬜ | |
+| S02 | Model data galeri + helper urutan | Agent | S01 | `tdd` | ✅ | 2026-10-29. `ServiceImage`, `gallery` (tuple, cover di indeks 0), `standards`, `serviceBySlug`, `serviceNeighbors` di `src/content/services.ts`. `mediaId` dihapus dari `ServiceItem`, landing memakai `gallery[0]`. 4 test baru di `services.test.ts` merah lalu hijau. Total 42 file / 320 test, `typecheck` 0, build lulus, lint file tersentuh bersih. Caption sementara dari judul halaman Pixabay, diganti di S03 |
 | S03 | Kurasi dan unduh 24 gambar layanan | Agent + User | S02 | – | ⬜ | |
 | S04 | Prototipe daftar + berkas + lightbox, disetujui user | Agent + User | S03 | `prototype` | ⬜ | |
 | S05 | Route `/services/:slug` + kompatibilitas `#slug` | Agent | S02 | `tdd` | ⬜ | |
@@ -145,17 +145,16 @@ export interface ServiceItem {
 }
 
 export function serviceBySlug(slug: string): ServiceItem | undefined;
-export function serviceNeighbors(slug: string): { index: number; total: number; prev?: ServiceItem; next?: ServiceItem };
+export function serviceNeighbors(slug: string): { index: number; total: number; prev?: ServiceItem; next?: ServiceItem } | undefined;
 ```
 
 - `mediaId` diganti `gallery[0].mediaId`. Landing `Services.tsx` ikut memakai `gallery[0]`.
 - `standards` **tidak boleh dikarang**. Isi awal hanya dari teks yang sudah ada:
-  - ISO/IEC 27001:2022 (audit ISO)
+  - ISO 27001:2022 (audit ISO)
   - ANSI/TIA-942C (data center)
   - OWASP Top 10 dan CVSS (pentest)
-  - TTP (red teaming)
 
-  Layanan lain kosong, dan blok STANDAR disembunyikan. User boleh menambah di S00.
+  Layanan lain kosong, dan blok STANDAR disembunyikan. "TTP" di red teaming tidak dimasukkan karena itu istilah, bukan standar. Test memastikan setiap standar tertulis di teks layanannya.
 - Caption gambar ditulis deskriptif, tanpa klaim ("Ruang server dengan rak jaringan"), bukan "Klien kami di …".
 
 ### 5. Modul `ImageGallery` (`src/components/gallery/`)
