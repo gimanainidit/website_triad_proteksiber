@@ -19,9 +19,9 @@ describe("Footer", () => {
     expect(within(footer).getByRole("link", { name: "Kredit media" })).toHaveAttribute("href", "/kredit");
   });
 
-  test("the legal row credits Pixabay with a link to /kredit", () => {
+  test("the legal row credits Pixabay and Unsplash with a link to /kredit", () => {
     renderWithProviders(<Footer />);
-    expect(screen.getByRole("link", { name: "Video dan foto oleh Pixabay" })).toHaveAttribute("href", "/kredit");
+    expect(screen.getByRole("link", { name: "Video dan foto oleh Pixabay dan Unsplash" })).toHaveAttribute("href", "/kredit");
   });
 
   test("shows the contact email as a mailto link and the location", () => {

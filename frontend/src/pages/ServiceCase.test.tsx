@@ -71,16 +71,17 @@ describe("ServiceCase", () => {
     expect(next).toHaveAccessibleName("Layanan berikutnya: Digital Forensics & Incident Response");
   });
 
-  test("the first service has a disabled prev and the last a disabled next", () => {
+  test("at the ends the missing step is no link and stays out of the accessibility tree", () => {
     const first = renderCase("/services/iso-27001-audit");
     expect(screen.queryByRole("link", { name: /^Layanan sebelumnya/ })).not.toBeInTheDocument();
-    expect(screen.getByLabelText(/^Layanan sebelumnya/)).toHaveAttribute("aria-disabled", "true");
+    expect(screen.queryByLabelText(/^Layanan sebelumnya/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /^Layanan berikutnya/ })).toBeInTheDocument();
     first.unmount();
 
     renderCase("/services/zero-trust-consulting");
     expect(screen.queryByRole("link", { name: /^Layanan berikutnya/ })).not.toBeInTheDocument();
-    expect(screen.getByLabelText(/^Layanan berikutnya/)).toHaveAttribute("aria-disabled", "true");
+    expect(screen.queryByLabelText(/^Layanan berikutnya/)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /^Layanan sebelumnya/ })).toBeInTheDocument();
   });
 
@@ -125,6 +126,11 @@ describe("ServiceCase", () => {
   ])("the retired slug %s redirects to the service that absorbed it", (slug, title) => {
     renderCase(`/services/${slug}`);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(title);
+  });
+
+  test("the kicker uses primary ink, since link blue is 4.47:1 on the page background", () => {
+    renderCase("/services/penetration-testing");
+    expect(screen.getByText(/^BERKAS LAYANAN 03/)).toHaveClass("text-primary");
   });
 
   test("every reveal block sits inside the reveal host, since the CSS animates descendants only", () => {

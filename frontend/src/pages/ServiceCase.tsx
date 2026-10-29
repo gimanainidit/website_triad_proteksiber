@@ -27,7 +27,7 @@ const Step = ({ target, label, children }: StepProps) =>
       {children}
     </Link>
   ) : (
-    <span role="img" aria-label={label} aria-disabled="true" className={`${stepClass} ${stepOff}`}>
+    <span aria-hidden="true" className={`${stepClass} ${stepOff}`}>
       {children}
     </span>
   );
@@ -86,7 +86,7 @@ const ServiceCase = () => {
         </div>
         <div className="space-y-10 lg:col-span-5">
           <div className="reveal-fade space-y-4" style={revealIndex(2)}>
-            <Eyebrow>
+            <Eyebrow className="text-primary">
               BERKAS LAYANAN {pad(neighbors.index)} · {category.toUpperCase()}
             </Eyebrow>
             <h1 ref={heading} tabIndex={-1} className="text-heading-1 font-serif text-ink-strong outline-none">

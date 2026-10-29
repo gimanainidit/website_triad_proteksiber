@@ -17,7 +17,7 @@ const Services = () => {
     <div className="bg-background">
       <div ref={revealRef} className="container py-16 lg:py-24">
         <div className="reveal-fade max-w-2xl" style={revealIndex(0)}>
-          <Eyebrow>LAYANAN</Eyebrow>
+          <Eyebrow className="text-primary">LAYANAN</Eyebrow>
           <h1 className="text-display-lg mt-4 font-serif text-ink-strong">Layanan Kami</h1>
           <p className="text-subtitle mt-4 text-steel">
             Dua pilar layanan utama untuk melindungi dan memperkuat postur keamanan siber organisasi Anda.
