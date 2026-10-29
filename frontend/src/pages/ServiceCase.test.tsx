@@ -126,4 +126,21 @@ describe("ServiceCase", () => {
     renderCase(`/services/${slug}`);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(title);
   });
+
+  test("every reveal block sits inside the reveal host, since the CSS animates descendants only", () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === "(prefers-reduced-motion: reduce)",
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }));
+    renderCase("/services/penetration-testing");
+    const blocks = [...document.querySelectorAll(".reveal-fade")];
+    expect(blocks.length).toBeGreaterThan(0);
+    for (const block of blocks) {
+      expect(block.hasAttribute("data-visible")).toBe(false);
+      expect(block.parentElement?.closest("[data-visible]")).not.toBeNull();
+    }
+    vi.unstubAllGlobals();
+  });
 });

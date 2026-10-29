@@ -48,14 +48,7 @@ const ServiceCase = () => {
   const service = serviceBySlug(slug);
   const neighbors = serviceNeighbors(slug);
   const heading = useRef<HTMLHeadingElement>(null);
-  const barRef = useReveal<HTMLDivElement>();
-  const mediaRef = useReveal<HTMLDivElement>();
-  const headRef = useReveal<HTMLDivElement>();
-  const overviewRef = useReveal<HTMLDivElement>();
-  const scopeRef = useReveal<HTMLDivElement>();
-  const deliverablesRef = useReveal<HTMLDivElement>();
-  const standardsRef = useReveal<HTMLDivElement>();
-  const ctaRef = useReveal<HTMLDivElement>();
+  const revealRef = useReveal<HTMLElement>();
 
   useEffect(() => {
     if (!service) return;
@@ -70,8 +63,8 @@ const ServiceCase = () => {
   const category = serviceCategories.find((c) => c.services.includes(service))?.category.split(" ")[0] ?? "";
 
   return (
-    <article className="mx-auto max-w-7xl px-6 py-12">
-      <div ref={barRef} className="reveal-fade mb-8 flex items-center justify-between gap-4">
+    <article ref={revealRef} className="mx-auto max-w-7xl px-6 py-12">
+      <div className="reveal-fade mb-8 flex items-center justify-between gap-4">
         <Button asChild variant="secondary" size="sm" expand={false}>
           <Link to="/services">← Semua layanan</Link>
         </Button>
@@ -88,11 +81,11 @@ const ServiceCase = () => {
         </div>
       </div>
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-14">
-        <div ref={mediaRef} className="reveal-fade lg:col-span-7" style={revealIndex(1)}>
+        <div className="reveal-fade lg:col-span-7" style={revealIndex(1)}>
           <ImageGallery key={slug} images={service.gallery} label={`Galeri ${service.title}`} />
         </div>
         <div className="space-y-10 lg:col-span-5">
-          <div ref={headRef} className="reveal-fade space-y-4" style={revealIndex(2)}>
+          <div className="reveal-fade space-y-4" style={revealIndex(2)}>
             <Eyebrow>
               BERKAS LAYANAN {pad(neighbors.index)} · {category.toUpperCase()}
             </Eyebrow>
@@ -100,20 +93,20 @@ const ServiceCase = () => {
               {service.title}
             </h1>
           </div>
-          <div ref={overviewRef} className="reveal-fade space-y-3" style={revealIndex(3)}>
+          <div className="reveal-fade space-y-3" style={revealIndex(3)}>
             <Eyebrow tone="steel">RINGKASAN</Eyebrow>
             <p className="text-body text-ink">{service.overview}</p>
           </div>
-          <div ref={scopeRef} className="reveal-fade space-y-3" style={revealIndex(4)}>
+          <div className="reveal-fade space-y-3" style={revealIndex(4)}>
             <Eyebrow tone="steel">CAKUPAN</Eyebrow>
             <BulletList items={service.scope} />
           </div>
-          <div ref={deliverablesRef} className="reveal-fade space-y-3" style={revealIndex(5)}>
+          <div className="reveal-fade space-y-3" style={revealIndex(5)}>
             <Eyebrow tone="steel">DELIVERABLES</Eyebrow>
             <BulletList items={service.deliverables} />
           </div>
           {service.standards.length > 0 && (
-            <div ref={standardsRef} className="reveal-fade space-y-3" style={revealIndex(6)}>
+            <div className="reveal-fade space-y-3" style={revealIndex(6)}>
               <Eyebrow tone="steel">STANDAR</Eyebrow>
               <div className="flex flex-wrap gap-2">
                 {service.standards.map((standard) => (
@@ -124,7 +117,7 @@ const ServiceCase = () => {
               </div>
             </div>
           )}
-          <div ref={ctaRef} className="reveal-fade" style={revealIndex(7)}>
+          <div className="reveal-fade" style={revealIndex(7)}>
             <Button asChild>
               <Link to="/contact">Konsultasi layanan ini</Link>
             </Button>
