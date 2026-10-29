@@ -34,7 +34,8 @@ Pelaku: **Agent** (Claude) · **User** (kurasi gambar, persetujuan visual, merge
 | S00 | Konfirmasi seam, route, dan copy label | User | – | `grilling` (opsional) | ✅ | Disetujui user 2026-10-29 tanpa perubahan: route `/services/:slug`, label "Buka berkas" / "BERKAS LAYANAN 03" / "Semua layanan" / "Layar penuh", `standards` hanya dari teks yang ada |
 | S01 | Baseline di branch `redesign/services` | Agent | S00 | – | ✅ | 2026-10-29 di `72198bb`. `typecheck` 0 error. Lint 2 error lama + 8 warning. Test 42 file / 317 hijau. Build lulus. JS 676.010 B (gzip 207.563 B), CSS 88.365 B (gzip 27.932 B). `public/media` 31 MB, 20 file. `/services`: 1 `h1`, 2 `h2`, 8 `article`, 0 gambar, tinggi 7.738px di 375px dan 6.666px di 1024px, tanpa overflow horizontal. Screenshot di `frontend/.cache/baseline/services/` |
 | S02 | Model data galeri + helper urutan | Agent | S01 | `tdd` | ✅ | 2026-10-29. `ServiceImage`, `gallery` (tuple, cover di indeks 0), `standards`, `serviceBySlug`, `serviceNeighbors` di `src/content/services.ts`. `mediaId` dihapus dari `ServiceItem`, landing memakai `gallery[0]`. 4 test baru di `services.test.ts` merah lalu hijau. Total 42 file / 320 test, `typecheck` 0, build lulus, lint file tersentuh bersih. Caption sementara dari judul halaman Pixabay, diganti di S03 |
-| S03 | Kurasi dan unduh 24 gambar layanan | Agent + User | S02 | – | ⬜ | |
+| S02b | Layanan jadi 10: judul pentest diganti, tambah DFIR dan Awareness | Agent + User | S02 | `tdd` | ⛔ | Keputusan user 2026-10-29 "Layanan baru". Menunggu teks overview, cakupan, deliverables, dan kategori dari user. Perlu keputusan soal tumpang tindih dengan Red Teaming dan IT Security Training |
+| S03 | Kurasi dan unduh 30 gambar layanan dari Unsplash | Agent + User | S02 | – | 🟡 | Sumber diganti ke Unsplash atas permintaan user. 20 kueri, 228 hasil, 0 Unsplash+. 65 kandidat terkurasi untuk 10 layanan di `frontend/.cache/unsplash/candidates.html` (generator `candidates.mjs`). Menunggu pilihan user |
 | S04 | Prototipe daftar + berkas + lightbox, disetujui user | Agent + User | S03 | `prototype` | ⬜ | |
 | S05 | Route `/services/:slug` + kompatibilitas `#slug` | Agent | S02 | `tdd` | ⬜ | |
 | S06 | Modul `ImageGallery` (stage, rail, lightbox `<dialog>`) | Agent | S02 | `codebase-design`, `tdd` | ⬜ | |
@@ -197,13 +198,18 @@ TDD lewat seam data:
 
 **Selesai bila:** test seam data hijau, `grep -rn "mediaId" src/content/services.ts` hanya di dalam `gallery`, dan typecheck, test, serta build hijau.
 
-### S03 · Kurasi gambar
-1. `npm run assets:search -- "<kata kunci>" --kind image` per layanan. Contoh kata kunci: "server room", "audit document", "network cable", "team meeting security", "data center cooling".
-2. User memilih 3 gambar per layanan di `.cache/pixabay/candidates.html`.
-3. Kunci ID di `scripts/pixabay/assets.config.json` (rendisi `large`, `maxBytes` 450000), lalu jalankan `npm run assets:pixabay`.
-4. Isi `gallery` dan caption, lalu commit `public/media`, `manifest.json`, dan config.
+### S03 · Kurasi gambar (Unsplash)
+Sumber diganti dari Pixabay ke Unsplash atas permintaan user (2026-10-29). Contoh acuannya `text-4J2OD3njVgI` dan `a-security-and-privacy-dashboard-with-its-status--nBClEqKKVM`.
 
-**Selesai bila:** 24 ID ada di manifest, `du -sh public/media` ≤ 40 MB, dan tidak ada gambar yang melanggar larangan visual DS.
+1. Kandidat dicari di halaman pencarian Unsplash dengan filter `license=free&orientation=landscape`. Endpoint `napi` menolak akses tanpa key. Hasil dikurasi tangan: hacker berhoodie, still film "Matrix", gembok merah, dan hasil yang tidak relevan dibuang.
+2. User memilih 3 gambar per layanan di `frontend/.cache/unsplash/candidates.html`. Urutan centang menentukan urutan galeri.
+3. Unduh rendisi 1280px (`https://images.unsplash.com/<photo>?w=1280&q=75&fm=jpg`) ke `public/media/unsplash-<photo>.jpg`. Unduhan butuh izin user.
+4. Generalisasi `MediaAsset`. `pixabayId` diganti `source: "pixabay" | "unsplash"` + `sourceId`. `/kredit` menampilkan "Foto: <nama> di Unsplash" dengan tautan ke halaman foto, sesuai Unsplash License (atribusi tidak wajib tetapi dianjurkan).
+5. Isi `gallery` dan caption, lalu commit `public/media` dan `manifest.json`.
+
+Lisensi: Unsplash License mengizinkan unduh dan pakai komersial gratis. Gambar Unsplash+ dilarang. Setiap kandidat diperiksa `license: https://unsplash.com/license` di JSON-LD halaman fotonya sebelum diunduh.
+
+**Selesai bila:** 30 ID ada di manifest, `du -sh public/media` ≤ 40 MB, setiap gambar berlisensi Unsplash License, dan tidak ada gambar yang melanggar larangan visual DS.
 
 ### S04 · Prototipe
 Skill `prototype`. Satu HTML statis di `frontend/.cache/prototype/services.html` (tidak di-commit) memakai token DS dan gambar S03. Isinya daftar zig-zag, satu berkas, dan lightbox. Pertanyaan yang diputuskan:
