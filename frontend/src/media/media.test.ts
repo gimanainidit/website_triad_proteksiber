@@ -2,14 +2,26 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import manifest from "./manifest.json";
 import { MEDIA_IDS, allMedia, formatTimecode, media, resolveVideo, type MediaId } from "./index";
 
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), "../../public");
 
 describe("media manifest integrity", () => {
-  it("MEDIA_IDS lists exactly the ids in the manifest", () => {
-    expect([...MEDIA_IDS].sort()).toEqual(manifest.map((m) => m.id).sort());
+  it("MEDIA_IDS lists exactly the ids of the Pixabay and Unsplash entries, each once", () => {
+    const ids = allMedia().map((m) => m.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect([...MEDIA_IDS].sort()).toEqual(ids.sort());
+  });
+
+  it("every entry names its source, and Unsplash photos link to their unsplash.com page", () => {
+    for (const asset of allMedia()) {
+      expect(["pixabay", "unsplash"]).toContain(asset.source);
+      expect(asset.sourceId).toBeTruthy();
+      if (asset.source === "unsplash") {
+        expect(asset.pageURL).toMatch(new RegExp(`^https://unsplash\\.com/photos/.*${asset.sourceId}$`));
+        expect(asset.license).toBe("Unsplash License");
+      }
+    }
   });
 
   it("every src and poster exists under public/", () => {

@@ -1,13 +1,25 @@
 import { Card, Col, Eyebrow, LinkUnderline, SectionGrid } from "@/components/ds";
 import { allMedia, type MediaAsset } from "@/media";
 
-const LICENSE_SUMMARY = "https://pixabay.com/service/license-summary/";
+const SOURCES = {
+  pixabay: { name: "Pixabay", license: "Pixabay Content License", licenseURL: "https://pixabay.com/service/license-summary/" },
+  unsplash: { name: "Unsplash", license: "Unsplash License", licenseURL: "https://unsplash.com/license" },
+} as const;
 
-// One Pixabay item can back several manifest entries (the hero loop and the full hero video).
+// One source item can back several entries (the hero loop and the full hero video).
 function uniqueSources(assets: MediaAsset[]): MediaAsset[] {
-  const seen = new Set<number>();
-  return assets.filter(({ pixabayId }) => !seen.has(pixabayId) && seen.add(pixabayId));
+  const seen = new Set<string>();
+  return assets.filter(({ source, sourceId }) => {
+    const key = `${source}:${sourceId}`;
+    return !seen.has(key) && seen.add(key);
+  });
 }
+
+const licenseLink = ({ license, licenseURL }: (typeof SOURCES)[keyof typeof SOURCES]) => (
+  <LinkUnderline href={licenseURL} target="_blank" rel="noopener noreferrer" className="text-link">
+    {license}
+  </LinkUnderline>
+);
 
 const Credits = () => {
   const sources = uniqueSources(allMedia());
@@ -19,18 +31,15 @@ const Credits = () => {
           <Eyebrow>Atribusi</Eyebrow>
           <h1 className="text-heading-1 mt-4 text-ink-strong">Kredit media</h1>
           <p className="text-body-md mt-6 max-w-[720px] text-ink">
-            Video dan foto di situs ini berasal dari Pixabay dan dipakai di bawah{" "}
-            <LinkUnderline href={LICENSE_SUMMARY} target="_blank" rel="noopener noreferrer" className="text-link">
-              Pixabay Content License
-            </LinkUnderline>
-            .
+            Video dan foto di situs ini berasal dari Pixabay, dipakai di bawah {licenseLink(SOURCES.pixabay)}, dan dari
+            Unsplash, dipakai di bawah {licenseLink(SOURCES.unsplash)}.
           </p>
         </Col>
 
         <Col className="mt-12">
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {sources.map((asset) => (
-              <li key={asset.pixabayId}>
+              <li key={`${asset.source}:${asset.sourceId}`}>
                 <Card className="flex h-full flex-col gap-4">
                   <img
                     src={asset.kind === "video" ? asset.poster : asset.src}
@@ -50,7 +59,7 @@ const Credits = () => {
                     rel="noopener noreferrer"
                     className="text-body-sm mt-auto self-start text-link"
                   >
-                    Lihat di Pixabay
+                    Lihat di {SOURCES[asset.source].name}
                   </LinkUnderline>
                 </Card>
               </li>

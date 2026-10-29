@@ -10,10 +10,14 @@ describe("services content", () => {
     expect(services).toHaveLength(8);
   });
 
-  test("every service has a unique slug and a manifest-backed gallery whose first image is the cover", () => {
+  test("every service has a unique slug and a three-image gallery whose first image is the cover", () => {
     expect(new Set(services.map((s) => s.slug)).size).toBe(8);
     for (const service of services) {
-      expect(service.gallery[0].mediaId).toBe(`svc-${service.slug}`);
+      expect(service.gallery.map((image) => image.mediaId)).toEqual([
+        `svc-${service.slug}`,
+        `svc-${service.slug}-2`,
+        `svc-${service.slug}-3`,
+      ]);
       for (const image of service.gallery) {
         expect(media(image.mediaId).kind).toBe("image");
         expect(image.caption.trim()).not.toBe("");
