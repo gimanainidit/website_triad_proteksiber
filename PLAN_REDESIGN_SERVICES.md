@@ -36,7 +36,7 @@ Pelaku: **Agent** (Claude) · **User** (kurasi gambar, persetujuan visual, merge
 | S02 | Model data galeri + helper urutan | Agent | S01 | `tdd` | ✅ | 2026-10-29. `ServiceImage`, `gallery` (tuple, cover di indeks 0), `standards`, `serviceBySlug`, `serviceNeighbors` di `src/content/services.ts`. `mediaId` dihapus dari `ServiceItem`, landing memakai `gallery[0]`. 4 test baru di `services.test.ts` merah lalu hijau. Total 42 file / 320 test, `typecheck` 0, build lulus, lint file tersentuh bersih. Caption sementara dari judul halaman Pixabay, diganti di S03 |
 | S02b | Layanan jadi 10: judul pentest diganti, tambah DFIR dan Awareness | Agent + User | S02 | `tdd` | ⛔ | Keputusan user 2026-10-29 "Layanan baru". Menunggu teks overview, cakupan, deliverables, dan kategori dari user. Perlu keputusan soal tumpang tindih dengan Red Teaming dan IT Security Training |
 | S03 | Kurasi dan unduh gambar layanan dari Unsplash | Agent + User | S02 | – | ✅ | 2026-10-29. 20 kueri, 228 hasil, 0 Unsplash+, 65 kandidat. User memilih 29 (DFIR 2 gambar). Ke-29 diverifikasi `license: https://unsplash.com/license` dari JSON-LD halaman fotonya. Diunduh atas izin user: 1280px, 57–305 KB, total 4,05 MB. 8 gambar `svc-*` Pixabay dicabut dari config, manifest, dan `public/media`. `public/media` 34 MB. Entri di `src/media/unsplash.json`, `MediaAsset` memakai `source` + `sourceId`, `/kredit` menautkan kedua lisensi. 8 layanan punya galeri 3 gambar dengan caption. 42 file / 321 test hijau dua kali berturut-turut, `typecheck` 0, build lulus. Build produksi: `/kredit` 33 entri (29 Unsplash, 4 Pixabay), 0 gambar rusak. Gambar DFIR dan Awareness menunggu S02b |
-| S04 | Prototipe daftar + berkas + lightbox, disetujui user | Agent + User | S03 | `prototype` | ⬜ | |
+| S04 | Prototipe daftar + berkas + lightbox, disetujui user | Agent + User | S03 | `prototype` | ✅ | 2026-10-29. `frontend/.cache/prototype/services.html` lewat dev server Vite, mengimpor `services.ts` dan `media` asli. Diuji di pane: 8 kartu, berkas 03 / 08, badge standar, `›` nonaktif di 08, lightbox ←/→/Escape dengan tombol nyata, fokus kembali ke stage, stage tersinkron. Keputusan user: zig-zag, nomor di dalam kartu, rasio 16:9 |
 | S05 | Route `/services/:slug` + kompatibilitas `#slug` | Agent | S02 | `tdd` | ⬜ | |
 | S06 | Modul `ImageGallery` (stage, rail, lightbox `<dialog>`) | Agent | S02 | `codebase-design`, `tdd` | ⬜ | |
 | S07 | Halaman daftar `/services` (kartu berkas) | Agent | S04, S05 | `tdd` | ⬜ | |
@@ -75,20 +75,20 @@ S05 dan S06 bisa paralel setelah S02. S03–S04 adalah jalur aset dan visual.
 | Aspek | Dossier (observasi) | Design system | Hasil |
 |---|---|---|---|
 | Latar | Meja krem + lembar kertas + tumpukan + lipatan (§1) | `background` #f6f7f9, `canvas` #fff | Halaman `background`. Kartu `canvas`. Tanpa efek kertas, tumpukan, atau lipatan |
-| Aksen | Ungu `#4A2390` + kuning pastel (§2) | Navy–biru saja | Tab nomor `bg-soft` + `text-link`. Thumbnail aktif `border-link`. Fokus `outline-ring` |
+| Aksen | Ungu `#4A2390` + kuning pastel (§2) | Navy–biru saja | Nomor mono `text-link` di baris meta. Thumbnail aktif `border-link`. Fokus `outline-ring` |
 | Judul | Bricolage 800, coretan SVG (§3) | DM Serif Display ≥36px, Inter | `h1` daftar `text-display-lg font-serif`. Judul kartu `text-heading-4` Inter. `h1` berkas `text-heading-1 font-serif`. Coretan diganti `LineMarker` |
-| Label | Geist Mono 12px uppercase | JetBrains Mono, `.text-eyebrow` | Tab nomor, meta, kicker, label blok, penghitung: JetBrains Mono 11–12px |
-| Kartu | Radius 14px, gambar 10px, tab 10px (§3) | `xl` 12px kartu, `lg` 8px media | Kartu `rounded-xl border-hairline shadow-ds-1`. Gambar `rounded-lg aspect-[4/3]`. Tab `rounded-t-lg` |
-| Grid | 2 kolom ≥768px, kartu genap turun 56px (§3) | Container 1400px, 12 kolom ≥1024px | 2 kolom mulai `md`, kartu genap `md:mt-14`. Per kategori ada 4 kartu (2×2) |
+| Label | Geist Mono 12px uppercase | JetBrains Mono, `.text-eyebrow` | Nomor, meta, kicker, label blok, penghitung: JetBrains Mono 11–12px |
+| Kartu | Radius 14px, gambar 10px, tab 10px (§3) | `xl` 12px kartu, `lg` 8px media | Kartu `rounded-xl border-hairline shadow-ds-1`. Gambar `rounded-lg aspect-video` (16:9, keputusan S04). Tanpa tab nomor (keputusan S04) |
+| Grid | 2 kolom ≥768px, kartu genap turun 56px (§3) | Container 1400px, 12 kolom ≥1024px | 2 kolom mulai `md`, kartu genap `md:mt-14` (zig-zag, keputusan S04). Per kategori ada 4 kartu (2×2) |
 | Hover kartu | Naik 6px + `rotate(-0.4deg)`, 0,4s (§3) | State 150–200ms, expand 300ms, gerak tenang | Naik 4px, `shadow-ds-1` ke `shadow-ds-3`, 300ms `ease-out-cubic`, tanpa rotasi. Panah geser 4px. Mati saat reduced motion |
 | Buka berkas | Spread inline, URL tetap, fokus hilang (§4) | – | **Route `/services/:slug`**. Back berfungsi, berkas bisa dibagikan, fokus dikelola |
 | Navigasi berkas | `‹ 01 / 04 ›` berputar (§4) | Tombol `rounded-lg`, tanpa pil | `‹ 03 / 08 ›` dengan tombol ikon `secondary` 44px `rounded-lg`. Di ujung tidak berputar: tombol `disabled`, dan di bawah berkas terakhir ada CTA kontak |
 | Kembali | Ghost pil "← All case files" | Button `secondary` | `Button variant="secondary" size="sm"` "← Semua layanan" |
 | Transisi | Keluar `scale(.985)`, masuk `translateY(16–18px)` stagger ±70ms (§4) | Entrance 0,6s, geser ≤30px | `reveal-fade` + `revealIndex(i)`: bar, media, teks berurutan. Tanpa animasi keluar (route berganti) |
 | Blok teks | Brief, Tools (pil) | Badge satu-satunya pil | RINGKASAN (`overview`), CAKUPAN (`scope`), DELIVERABLES, STANDAR (Badge `soft`) |
-| Galeri | Stage 4:3, thumb 64×48, Full screen, caption (§5) | `radius-lg`, `hairline` | Stage `rounded-lg shadow-ds-2`, thumb 64×48 `rounded-md`, tombol "Layar penuh" `secondary sm` |
+| Galeri | Stage 4:3, thumb 64×48, Full screen, caption (§5) | `radius-lg`, `hairline` | Stage 16:9 `rounded-lg shadow-ds-2`, thumb 64×48 `rounded-md`, tombol "Layar penuh" `secondary sm` |
 | Lightbox | `div role=dialog`, `black/90`, fokus tidak dikelola (§5) | Pola video player | `<dialog>` native, backdrop `navy-950/95` + blur 4px seperti video player. Penghitung mono "2 / 3", caption `on-dark`, tombol 44px solid `rgb(2 18 34 / .6)` |
-| Foto | Unsplash | Pixabay build-time, larangan visual | Pixabay `large` 1280px. Tanpa hacker berkerudung, gembok neon, atau kode matriks |
+| Foto | Unsplash | Pixabay build-time, larangan visual | Unsplash 1280px (S03). Tanpa hacker berkerudung, gembok neon, atau kode matriks |
 
 ### 2. Halaman daftar `/services`
 
@@ -101,11 +101,9 @@ S05 dan S06 bisa paralel setelah S02. S03–S04 adalah jalur aset dan visual.
 `ServiceFileCard` (observasi §3, dipetakan):
 
 ```
-  ┌──────┐
-  │  03  │                       ← tab: JetBrains Mono 12px, bg-soft text-link, rounded-t-lg
-┌─┴──────┴──────────────────┐
-│ [ gambar 4:3, rounded-lg ]│   ← media(gallery[0])
-│ 3 GAMBAR · ASSURANCE      │   ← text-eyebrow steel
+┌───────────────────────────┐
+│ [ gambar 16:9, rounded-lg]│   ← media(gallery[0])
+│ 03 · 3 GAMBAR · ASSURANCE │   ← text-eyebrow steel, nomor text-link
 │ Penetration Testing …     │   ← h3 text-heading-4 ink-strong
 │ Uji keamanan menyeluruh … │   ← service.short, line-clamp-2, steel
 │ Buka berkas →             │   ← MaskReveal + ArrowRight text-link
@@ -119,7 +117,7 @@ Seluruh kartu adalah satu `<Link to="/services/<slug>">` dengan nama aksesibel "
 ```
 [← Semua layanan]                                   [‹] 03 / 08 [›]
 ┌────────────────────────────── 7 kol ─┐  BERKAS LAYANAN 03 · ASSURANCE
-│        stage 4:3 (button)            │  h1 Network, Web & Infrastructure
+│        stage 16:9 (button)           │  h1 Network, Web & Infrastructure
 │                                      │     Penetration Testing
 └──────────────────────────────────────┘  RINGKASAN   overview
 [▣][▢][▢]                  [⤢ Layar penuh] CAKUPAN     scope (marker ■)
@@ -228,7 +226,7 @@ Skill `prototype`. Satu HTML statis di `frontend/.cache/prototype/services.html`
 **Selesai bila:** test route di tabel Seam hijau dan `grep -rn "services#" src` hanya tersisa di test kompatibilitas.
 
 ### S06 · ImageGallery
-Rancang interface dengan `codebase-design` sebelum test pertama. Pindahkan `lockScroll` ke `src/lib/` dan pastikan test video player tetap hijau. Pakai stub `dialog` di `src/test/setup.ts` yang sudah ada.
+Rancang interface dengan `codebase-design` sebelum test pertama. Stage dan lightbox membaca **satu state indeks**. Jangan menyinkronkan stage lewat event `close` dialog: event itu masuk antrean task dan di prototipe S04 tidak pernah tiba di browser pane. Escape ditangani lewat `cancel`. Pindahkan `lockScroll` ke `src/lib/` dan pastikan test video player tetap hijau. Pakai stub `dialog` di `src/test/setup.ts` yang sudah ada.
 
 **Selesai bila:** test seam galeri mencakup thumbnail, buka lightbox, ←/→, Escape, fokus kembali, sinkron indeks, dan kunci scroll.
 
