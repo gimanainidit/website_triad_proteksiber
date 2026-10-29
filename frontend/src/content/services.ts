@@ -1,4 +1,4 @@
-import { Shield, Lock, Search, ServerCog, Target, BookOpen, GraduationCap, ShieldCheck } from "lucide-react";
+import { Shield, Lock, Search, ServerCog, BookOpen, GraduationCap, ShieldCheck, ScanSearch } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import type { MediaId } from "@/media";
@@ -65,33 +65,35 @@ export const serviceCategories: ServiceCategory[] = [
       },
       {
         icon: Search,
-        title: "Network, Web & Infrastructure Penetration Testing",
+        title: "Penetration Testing dan Red Teaming Exercise",
         slug: "penetration-testing",
         gallery: [
           { mediaId: "svc-penetration-testing", caption: "Dashboard status keamanan dan privasi" },
           { mediaId: "svc-penetration-testing-2", caption: "Meja kerja penguji dengan beberapa monitor" },
           { mediaId: "svc-penetration-testing-3", caption: "Kode aplikasi yang diuji" },
-        ],
-        standards: ["OWASP Top 10", "CVSS"],
-        short: "Uji keamanan menyeluruh pada jaringan, aplikasi web, dan infrastruktur melalui simulasi serangan terkontrol untuk mengidentifikasi kerentanan sebelum dieksploitasi.",
-        overview: "Penetration testing komprehensif yang mencakup pengujian terhadap seluruh permukaan serangan digital organisasi Anda.",
-        scope: ["External & internal network pentest", "Web application security testing (OWASP Top 10)", "API security assessment", "Infrastructure vulnerability scanning"],
-        deliverables: ["Laporan temuan kerentanan terperinci", "Proof-of-concept exploit documentation", "Risk severity matrix (CVSS)", "Rekomendasi remediasi prioritas"],
-      },
-      {
-        icon: Target,
-        title: "Adversary Simulation / Red Teaming",
-        slug: "red-teaming",
-        gallery: [
           { mediaId: "svc-red-teaming", caption: "Operator menyiapkan skenario serangan" },
           { mediaId: "svc-red-teaming-2", caption: "Kamera pengawas sebagai target uji keamanan fisik" },
           { mediaId: "svc-red-teaming-3", caption: "Analis menjalankan simulasi di komputer" },
         ],
+        standards: ["OWASP Top 10", "CVSS"],
+        short: "Pengujian mendalam pada aplikasi, jaringan, dan infrastruktur, dilanjutkan red teaming yang mengukur risiko nyata lewat emulasi dan simulasi TTP adversary.",
+        overview: "Penetration testing menggali kerentanan aplikasi web, API, jaringan, dan infrastruktur secara mendalam. Red teaming exercise melangkah lebih jauh: kami meniru taktik, teknik, dan prosedur (TTP) penyerang nyata melalui adversary emulation dan simulation, untuk menguji apakah people, process, dan technology organisasi mampu mendeteksi dan merespons serangan di dunia nyata.",
+        scope: ["Web application & API security testing (OWASP Top 10)", "External & internal network pentest", "Infrastructure vulnerability assessment", "Adversary emulation & simulation berbasis TTP", "OSINT, social engineering & physical security testing", "Post-exploitation & lateral movement"],
+        deliverables: ["Laporan temuan kerentanan terperinci", "Proof-of-concept exploit documentation", "Risk severity matrix (CVSS)", "Attack narrative & timeline red team", "Detection gap analysis", "Rekomendasi remediasi prioritas"],
+      },
+      {
+        icon: ScanSearch,
+        title: "Digital Forensics & Incident Response",
+        slug: "digital-forensics-incident-response",
+        gallery: [
+          { mediaId: "svc-digital-forensics-incident-response", caption: "Menelusuri bukti digital" },
+          { mediaId: "svc-digital-forensics-incident-response-2", caption: "Papan sirkuit perangkat yang diperiksa" },
+        ],
         standards: [],
-        short: "Simulasi serangan realistis yang meniru taktik, teknik, dan prosedur (TTP) penyerang nyata untuk menguji ketahanan pertahanan organisasi secara menyeluruh.",
-        overview: "Red team assessment yang menggunakan pendekatan adversarial untuk menguji efektivitas people, process, dan technology dalam mendeteksi dan merespons ancaman.",
-        scope: ["OSINT & reconnaissance", "Social engineering campaigns", "Physical security testing", "Post-exploitation & lateral movement"],
-        deliverables: ["Red team operation report", "Attack narrative & timeline", "Detection gap analysis", "Blue team improvement recommendations"],
+        short: "Investigasi forensik digital dan penanganan insiden untuk menahan serangan, menemukan akar masalah, dan memulihkan operasi.",
+        overview: "Saat insiden terjadi, kami membantu menahan dampaknya, mengumpulkan dan menganalisis bukti digital, menelusuri jalur serangan hingga akar masalah, lalu memandu pemulihan agar insiden serupa tidak terulang.",
+        scope: ["Incident triage & containment", "Akuisisi dan analisis bukti digital", "Analisis log, endpoint & malware", "Root cause analysis & pemulihan"],
+        deliverables: ["Laporan investigasi forensik", "Timeline insiden", "Indicator of compromise (IoC)", "Rekomendasi pemulihan dan pencegahan"],
       },
     ],
   },
@@ -131,16 +133,16 @@ export const serviceCategories: ServiceCategory[] = [
       },
       {
         icon: GraduationCap,
-        title: "IT Security Training",
-        slug: "security-training",
+        title: "Peningkatan Awareness Program, Training, dan Edukasi",
+        slug: "awareness-program",
         gallery: [
-          { mediaId: "svc-security-training", caption: "Sesi presentasi di ruang konferensi" },
-          { mediaId: "svc-security-training-2", caption: "Kelas dengan layar proyektor" },
-          { mediaId: "svc-security-training-3", caption: "Peserta pelatihan mencatat materi" },
+          { mediaId: "svc-awareness-program", caption: "Diskusi di depan layar besar" },
+          { mediaId: "svc-awareness-program-2", caption: "Ruang sesi edukasi yang penuh peserta" },
+          { mediaId: "svc-awareness-program-3", caption: "Audiens mengikuti sesi awareness" },
         ],
         standards: [],
-        short: "Pelatihan keamanan IT untuk meningkatkan kesadaran dan kompetensi tim dalam menghadapi ancaman siber modern.",
-        overview: "Program pelatihan komprehensif yang dirancang untuk berbagai level organisasi, dari awareness hingga technical deep-dive.",
+        short: "Program awareness, pelatihan, dan edukasi keamanan siber untuk membangun kesadaran dan kompetensi di seluruh lapisan organisasi.",
+        overview: "Program terstruktur yang dirancang untuk berbagai level organisasi, dari awareness untuk seluruh karyawan hingga technical deep-dive untuk tim IT.",
         scope: ["Security awareness training", "Technical security workshops", "Phishing simulation exercises", "Executive briefing sessions"],
         deliverables: ["Training materials & modules", "Phishing simulation report", "Competency assessment results", "Continuous learning roadmap"],
       },
@@ -165,13 +167,22 @@ export const serviceCategories: ServiceCategory[] = [
 
 export const services: ServiceItem[] = serviceCategories.flatMap(c => c.services);
 
+/** Slugs of services merged into another, kept so old links still land. */
+const RETIRED_SLUGS: Record<string, string> = {
+  "red-teaming": "penetration-testing",
+  "security-training": "awareness-program",
+};
+
+/** Resolves retired slugs too: compare the result's slug to redirect them. */
 export function serviceBySlug(slug: string): ServiceItem | undefined {
-  return services.find((s) => s.slug === slug);
+  const current = RETIRED_SLUGS[slug] ?? slug;
+  return services.find((s) => s.slug === current);
 }
 
 /** Position is 1-based. The ends have no neighbor: the list does not wrap. */
 export function serviceNeighbors(slug: string) {
-  const i = services.findIndex((s) => s.slug === slug);
+  const service = serviceBySlug(slug);
+  const i = service ? services.indexOf(service) : -1;
   if (i === -1) return undefined;
   return { index: i + 1, total: services.length, prev: services[i - 1], next: services[i + 1] };
 }

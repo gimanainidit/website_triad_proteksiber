@@ -240,42 +240,6 @@
     "license": "Unsplash License"
   },
   {
-    "id": "svc-security-training",
-    "kind": "image",
-    "src": "/media/unsplash-1758691736067-b309ee3ef7b9.jpg",
-    "width": 1280,
-    "height": 720,
-    "source": "unsplash",
-    "sourceId": "l0E0Y1TdzxE",
-    "pageURL": "https://unsplash.com/photos/business-people-in-a-modern-conference-room-during-a-presentation-l0E0Y1TdzxE",
-    "user": "Vitaly Gariev",
-    "license": "Unsplash License"
-  },
-  {
-    "id": "svc-security-training-2",
-    "kind": "image",
-    "src": "/media/unsplash-1524178232363-1fb2b075b655.jpg",
-    "width": 1280,
-    "height": 853,
-    "source": "unsplash",
-    "sourceId": "1-aA2Fadydc",
-    "pageURL": "https://unsplash.com/photos/a-group-of-people-in-a-room-with-a-projector-screen-1-aA2Fadydc",
-    "user": "Quilia",
-    "license": "Unsplash License"
-  },
-  {
-    "id": "svc-security-training-3",
-    "kind": "image",
-    "src": "/media/unsplash-1503428593586-e225b39bddfe.jpg",
-    "width": 1280,
-    "height": 853,
-    "source": "unsplash",
-    "sourceId": "Hb6uWq0i4MI",
-    "pageURL": "https://unsplash.com/photos/selective-focus-photography-of-people-sitting-on-chairs-while-writing-on-notebooks-Hb6uWq0i4MI",
-    "user": "The Climate Reality Project",
-    "license": "Unsplash License"
-  },
-  {
     "id": "svc-zero-trust-consulting",
     "kind": "image",
     "src": "/media/unsplash-1762340275855-ae8f4c2c144e.jpg",

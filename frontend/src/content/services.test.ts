@@ -10,14 +10,11 @@ describe("services content", () => {
     expect(services).toHaveLength(8);
   });
 
-  test("every service has a unique slug and a three-image gallery whose first image is the cover", () => {
+  test("every service has a unique slug and a multi-image gallery whose first image is the cover", () => {
     expect(new Set(services.map((s) => s.slug)).size).toBe(8);
     for (const service of services) {
-      expect(service.gallery.map((image) => image.mediaId)).toEqual([
-        `svc-${service.slug}`,
-        `svc-${service.slug}-2`,
-        `svc-${service.slug}-3`,
-      ]);
+      expect(service.gallery[0].mediaId).toBe(`svc-${service.slug}`);
+      expect(service.gallery.length).toBeGreaterThanOrEqual(2);
       for (const image of service.gallery) {
         expect(media(image.mediaId).kind).toBe("image");
         expect(image.caption.trim()).not.toBe("");
@@ -33,7 +30,9 @@ describe("services content", () => {
   });
 
   test("serviceBySlug finds a service and returns undefined for an unknown slug", () => {
-    expect(serviceBySlug("red-teaming")?.title).toBe("Adversary Simulation / Red Teaming");
+    expect(serviceBySlug("penetration-testing")?.title).toBe("Penetration Testing dan Red Teaming Exercise");
+    expect(serviceBySlug("red-teaming")?.slug).toBe("penetration-testing");
+    expect(serviceBySlug("security-training")?.slug).toBe("awareness-program");
     expect(serviceBySlug("tidak-ada")).toBeUndefined();
   });
 
@@ -42,13 +41,13 @@ describe("services content", () => {
     expect(first).toMatchObject({ index: 1, total: 8, prev: undefined });
     expect(first?.next?.slug).toBe("data-center-audit");
 
-    const crossing = serviceNeighbors("red-teaming");
+    const crossing = serviceNeighbors("digital-forensics-incident-response");
     expect(crossing?.index).toBe(4);
     expect(crossing?.next?.slug).toBe("strategic-planning");
 
     const last = serviceNeighbors("zero-trust-consulting");
     expect(last).toMatchObject({ index: 8, total: 8, next: undefined });
-    expect(last?.prev?.slug).toBe("security-training");
+    expect(last?.prev?.slug).toBe("awareness-program");
 
     expect(serviceNeighbors("tidak-ada")).toBeUndefined();
   });

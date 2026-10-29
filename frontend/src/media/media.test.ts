@@ -62,7 +62,7 @@ describe("resolveVideo()", () => {
   });
 
   it("returns undefined for images and unknown ids", () => {
-    expect(resolveVideo("svc-red-teaming")).toBeUndefined();
+    expect(resolveVideo("svc-penetration-testing")).toBeUndefined();
     expect(resolveVideo("nope")).toBeUndefined();
   });
 });

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 
 import { serviceBySlug, serviceNeighbors } from "@/content/services";
 import NotFound from "./NotFound";
@@ -20,6 +20,7 @@ const ServiceCase = () => {
   }, [service]);
 
   if (!service || !neighbors) return <NotFound />;
+  if (service.slug !== slug) return <Navigate replace to={`/services/${service.slug}`} />;
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
