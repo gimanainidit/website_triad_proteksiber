@@ -12,7 +12,7 @@ import {
 import { useInRouterContext, useLocation } from "react-router-dom";
 import "./video-player.css";
 import { VideoPlayerContext, type ResolveVideo, type VideoPlayerControls, type VideoSource } from "./context";
-import { lockScroll } from "./scroll-lock";
+import { lockScroll } from "@/lib/scroll-lock";
 import { formatTimecode } from "./timecode";
 
 const SEEK_STEP_SECONDS = 5;
