@@ -1,21 +1,13 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ds";
-import { serviceCategories } from "@/content/services";
+import { serviceBySlug, serviceCategories } from "@/content/services";
 
 const Services = () => {
   const location = useLocation();
 
-  useEffect(() => {
-    if (location.hash) {
-      const el = document.getElementById(location.hash.slice(1));
-      if (el) {
-        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
-      }
-    }
-  }, [location.hash]);
+  const legacy = serviceBySlug(location.hash.slice(1));
+  if (legacy) return <Navigate replace to={`/services/${legacy.slug}`} />;
 
   return (
     <div>

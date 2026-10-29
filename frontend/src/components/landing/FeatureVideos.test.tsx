@@ -28,7 +28,7 @@ describe("Pelajari links", () => {
     renderWithProviders(<FeatureVideos />);
 
     const targets = cards().map((card) => within(card).getByRole("link", { name: "Pelajari" }).getAttribute("href"));
-    expect(targets).toEqual(["/services#penetration-testing", "/services#iso-27001-audit"]);
+    expect(targets).toEqual(["/services/penetration-testing", "/services/iso-27001-audit"]);
   });
 });
 

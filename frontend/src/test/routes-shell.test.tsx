@@ -59,7 +59,7 @@ afterEach(() => {
 });
 
 describe("public pages share the one site shell", () => {
-  test.each(["/services", "/contact", "/resources", "/login", "/tidak-ada"])(
+  test.each(["/services", "/services/penetration-testing", "/contact", "/resources", "/login", "/tidak-ada"])(
     "%s has one banner, one main, one footer, one skip link and an h1",
     async (path) => {
       renderAt(path);

@@ -23,14 +23,14 @@ describe("Services", () => {
     expect(screen.getByRole("tab", { name: "Assurance" })).toHaveAttribute("aria-selected", "true");
   });
 
-  test("the active tab shows four numbered cards linking to /services#slug", () => {
+  test("the active tab shows four numbered cards linking to /services/slug", () => {
     renderWithProviders(<Services />);
     const panel = screen.getByRole("tabpanel");
     const cards = within(panel).getAllByRole("article");
     expect(cards).toHaveLength(4);
     expect(cards.map((c) => within(c).getByText(/^0\d$/).textContent)).toEqual(["01", "02", "03", "04"]);
     const first = within(cards[0]).getByRole("link", { name: "Pelajari ISMS ISO 27001 Audit" });
-    expect(first).toHaveAttribute("href", "/services#iso-27001-audit");
+    expect(first).toHaveAttribute("href", "/services/iso-27001-audit");
   });
 
   test("switching to Consulting shows its four services", () => {
@@ -41,7 +41,7 @@ describe("Services", () => {
     const hrefs = within(panel)
       .getAllByRole("link")
       .map((a) => a.getAttribute("href"));
-    expect(hrefs).toEqual(serviceCategories[1].services.map((s) => `/services#${s.slug}`));
+    expect(hrefs).toEqual(serviceCategories[1].services.map((s) => `/services/${s.slug}`));
   });
 
   test("card images are decorative and lazy", () => {
