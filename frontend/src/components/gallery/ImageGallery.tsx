@@ -170,12 +170,9 @@ export function ImageGallery({ images, label }: ImageGalleryProps) {
                 </button>
               )}
             </div>
-            <div className="text-center">
+            <div aria-live="polite" className="text-center">
               <p>{current.caption}</p>
-              <p
-                aria-live="polite"
-                className="mt-1 font-mono text-xs text-on-dark-muted"
-              >
+              <p className="mt-1 font-mono text-xs text-on-dark-muted">
                 {index + 1} / {count}
               </p>
             </div>

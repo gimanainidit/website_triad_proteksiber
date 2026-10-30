@@ -23,6 +23,19 @@ describe("Services legacy anchors", () => {
   });
 });
 
+describe("Services retired anchors", () => {
+  test("/services#red-teaming lands on the service that absorbed it", () => {
+    renderWithProviders(
+      <Routes>
+        <Route path="/services" element={<Services />} />
+        <Route path="/services/:slug" element={<Where />} />
+      </Routes>,
+      { route: "/services#red-teaming" },
+    );
+    expect(screen.getByTestId("where")).toHaveTextContent("/services/penetration-testing");
+  });
+});
+
 describe("Services list page", () => {
   const renderList = () =>
     renderWithProviders(

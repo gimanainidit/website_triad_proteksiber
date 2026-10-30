@@ -182,4 +182,12 @@ describe("ImageGallery with one image", () => {
     fireEvent.keyDown(dialog(), { key: "ArrowRight" });
     expect(within(dialog()).getByText("1 / 1")).toBeInTheDocument();
   });
+
+  test("announces the caption together with the counter", () => {
+    render(<ImageGallery images={images} label="Galeri" />);
+    fireEvent.click(screen.getByRole("button", { name: "Buka galeri layar penuh" }));
+    const live = document.querySelector("dialog [aria-live]");
+    expect(live).toHaveTextContent(images[0].caption);
+    expect(live).toHaveTextContent(`1 / ${images.length}`);
+  });
 });

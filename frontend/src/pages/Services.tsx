@@ -8,7 +8,7 @@ import { revealIndex, useReveal } from "@/motion";
 
 const Services = () => {
   const location = useLocation();
-  const revealRef = useReveal<HTMLDivElement>();
+  const revealRef = useReveal<HTMLDivElement>({ threshold: 0 });
 
   const legacy = serviceBySlug(location.hash.slice(1));
   if (legacy) return <Navigate replace to={`/services/${legacy.slug}`} />;

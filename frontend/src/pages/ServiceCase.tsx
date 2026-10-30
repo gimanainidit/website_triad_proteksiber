@@ -35,7 +35,7 @@ const Step = ({ target, label, children }: StepProps) =>
 const BulletList = ({ items }: { items: string[] }) => (
   <ul className="space-y-3">
     {items.map((item) => (
-      <li key={item} className="text-body flex gap-3 text-ink">
+      <li key={item} className="text-body-md flex gap-3 text-ink">
         <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 bg-shield" />
         {item}
       </li>
@@ -43,22 +43,24 @@ const BulletList = ({ items }: { items: string[] }) => (
   </ul>
 );
 
-const ServiceCase = () => {
-  const { slug = "" } = useParams();
-  const service = serviceBySlug(slug);
-  const neighbors = serviceNeighbors(slug);
+interface ServiceCaseViewProps {
+  service: ServiceItem;
+  neighbors: NonNullable<ReturnType<typeof serviceNeighbors>>;
+}
+
+const ServiceCaseView = ({ service, neighbors }: ServiceCaseViewProps) => {
   const heading = useRef<HTMLHeadingElement>(null);
-  const revealRef = useReveal<HTMLElement>();
+  const revealRef = useReveal<HTMLElement>({ threshold: 0 });
 
   useEffect(() => {
-    if (!service) return;
+    const previousTitle = document.title;
     document.title = `${service.title} | Layanan TRIAD PRO-TX SIBER`;
     window.scrollTo(0, 0);
     heading.current?.focus({ preventScroll: true });
+    return () => {
+      document.title = previousTitle;
+    };
   }, [service]);
-
-  if (!service || !neighbors) return <NotFound />;
-  if (service.slug !== slug) return <Navigate replace to={`/services/${service.slug}`} />;
 
   const category = serviceCategories.find((c) => c.services.includes(service))?.category.split(" ")[0] ?? "";
 
@@ -82,7 +84,7 @@ const ServiceCase = () => {
       </div>
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-14">
         <div className="reveal-fade lg:col-span-7" style={revealIndex(1)}>
-          <ImageGallery key={slug} images={service.gallery} label={`Galeri ${service.title}`} />
+          <ImageGallery key={service.slug} images={service.gallery} label={`Galeri ${service.title}`} />
         </div>
         <div className="space-y-10 lg:col-span-5">
           <div className="reveal-fade space-y-4" style={revealIndex(2)}>
@@ -95,7 +97,7 @@ const ServiceCase = () => {
           </div>
           <div className="reveal-fade space-y-3" style={revealIndex(3)}>
             <Eyebrow tone="steel">RINGKASAN</Eyebrow>
-            <p className="text-body text-ink">{service.overview}</p>
+            <p className="text-body-md text-ink">{service.overview}</p>
           </div>
           <div className="reveal-fade space-y-3" style={revealIndex(4)}>
             <Eyebrow tone="steel">CAKUPAN</Eyebrow>
@@ -126,6 +128,17 @@ const ServiceCase = () => {
       </div>
     </article>
   );
+};
+
+// Redirects stay above the view: its reveal and focus effects need the article mounted on first render.
+const ServiceCase = () => {
+  const { slug = "" } = useParams();
+  const service = serviceBySlug(slug);
+  const neighbors = serviceNeighbors(slug);
+
+  if (!service || !neighbors) return <NotFound />;
+  if (service.slug !== slug) return <Navigate replace to={`/services/${service.slug}`} />;
+  return <ServiceCaseView service={service} neighbors={neighbors} />;
 };
 
 export default ServiceCase;

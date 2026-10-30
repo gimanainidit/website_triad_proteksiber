@@ -1,14 +1,27 @@
 import { act, fireEvent, screen } from "@testing-library/react";
-import { Link, Route, Routes } from "react-router-dom";
-import { beforeAll, describe, expect, test, vi } from "vitest";
+import { Link, Route, Routes, useLocation } from "react-router-dom";
+import { afterEach, beforeAll, describe, expect, test, vi } from "vitest";
 
 import { renderWithProviders } from "@/test/render";
 import NotFound from "./NotFound";
 import ServiceCase from "./ServiceCase";
 
+function Where() {
+  return <p data-testid="where">{useLocation().pathname}</p>;
+}
+
+const stubReducedMotion = () =>
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: query === "(prefers-reduced-motion: reduce)",
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }));
+
 function renderCase(route: string) {
   return renderWithProviders(
     <>
+      <Where />
       <Link to="/services/penetration-testing">ke pentest</Link>
       <Link to="/services/digital-forensics-incident-response">ke dfir</Link>
       <Routes>
@@ -23,8 +36,9 @@ function renderCase(route: string) {
 
 beforeAll(() => {
   window.scrollTo = vi.fn();
-  vi.spyOn(console, "error").mockImplementation(() => {});
 });
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("ServiceCase", () => {
   test("shows one h1 with the service title and its position", () => {
@@ -124,8 +138,36 @@ describe("ServiceCase", () => {
     ["red-teaming", "Penetration Testing dan Red Teaming Exercise"],
     ["security-training", "Peningkatan Awareness Program, Training, dan Edukasi"],
   ])("the retired slug %s redirects to the service that absorbed it", (slug, title) => {
+    stubReducedMotion();
     renderCase(`/services/${slug}`);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(title);
+    const h1 = screen.getByRole("heading", { level: 1 });
+    expect(h1).toHaveTextContent(title);
+    expect(screen.getByTestId("where")).not.toHaveTextContent(slug);
+    expect(h1).toHaveFocus();
+    expect(h1.closest("[data-visible]")).not.toBeNull();
+  });
+
+  test("leaving the case page restores the tab title", () => {
+    const view = renderCase("/services/penetration-testing");
+    expect(document.title).toContain("Layanan TRIAD");
+    view.unmount();
+    expect(document.title).not.toContain("Layanan TRIAD");
+  });
+
+  test("the reveal host uses threshold 0, since a tall host never reaches a ratio", () => {
+    const observed: IntersectionObserverInit[] = [];
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(_: unknown, options: IntersectionObserverInit) {
+          observed.push(options);
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    renderCase("/services/penetration-testing");
+    expect(observed.some((options) => options.threshold === 0)).toBe(true);
   });
 
   test("the kicker uses primary ink, since link blue is 4.47:1 on the page background", () => {
@@ -134,12 +176,7 @@ describe("ServiceCase", () => {
   });
 
   test("every reveal block sits inside the reveal host, since the CSS animates descendants only", () => {
-    vi.stubGlobal("matchMedia", (query: string) => ({
-      matches: query === "(prefers-reduced-motion: reduce)",
-      media: query,
-      addEventListener: () => {},
-      removeEventListener: () => {},
-    }));
+    stubReducedMotion();
     renderCase("/services/penetration-testing");
     const blocks = [...document.querySelectorAll(".reveal-fade")];
     expect(blocks.length).toBeGreaterThan(0);
@@ -147,6 +184,5 @@ describe("ServiceCase", () => {
       expect(block.hasAttribute("data-visible")).toBe(false);
       expect(block.parentElement?.closest("[data-visible]")).not.toBeNull();
     }
-    vi.unstubAllGlobals();
   });
 });
