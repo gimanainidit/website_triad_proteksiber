@@ -25,7 +25,7 @@ function ServiceCard({ service, number }: { service: ServiceItem; number: number
     <article className="group flex min-w-[80%] snap-start flex-col gap-4 rounded-xl border border-hairline bg-canvas p-4 sm:min-w-0">
       <div className="overflow-hidden rounded-lg">
         <img
-          src={media(service.mediaId).src}
+          src={media(service.gallery[0].mediaId).src}
           alt=""
           loading="lazy"
           className="aspect-video w-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
@@ -35,7 +35,7 @@ function ServiceCard({ service, number }: { service: ServiceItem; number: number
       <h3 className="text-heading-4 text-ink-strong">{service.title}</h3>
       <p className="text-body-sm text-steel">{service.short}</p>
       <Link
-        to={`/services#${service.slug}`}
+        to={`/services/${service.slug}`}
         aria-label={`Pelajari ${service.title}`}
         className="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-medium text-steel focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >

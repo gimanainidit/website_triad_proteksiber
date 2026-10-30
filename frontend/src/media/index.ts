@@ -1,4 +1,5 @@
-import manifest from "./manifest.json";
+import pixabay from "./manifest.json";
+import unsplash from "./unsplash.json";
 
 export const MEDIA_IDS = [
   "hero-loop",
@@ -8,13 +9,31 @@ export const MEDIA_IDS = [
   "feature-pentest",
   "feature-iso",
   "svc-iso-27001-audit",
+  "svc-iso-27001-audit-2",
+  "svc-iso-27001-audit-3",
   "svc-data-center-audit",
+  "svc-data-center-audit-2",
+  "svc-data-center-audit-3",
   "svc-penetration-testing",
+  "svc-penetration-testing-2",
+  "svc-penetration-testing-3",
   "svc-red-teaming",
+  "svc-red-teaming-2",
+  "svc-red-teaming-3",
+  "svc-digital-forensics-incident-response",
+  "svc-digital-forensics-incident-response-2",
   "svc-strategic-planning",
+  "svc-strategic-planning-2",
+  "svc-strategic-planning-3",
   "svc-security-development-program",
-  "svc-security-training",
+  "svc-security-development-program-2",
+  "svc-security-development-program-3",
   "svc-zero-trust-consulting",
+  "svc-zero-trust-consulting-2",
+  "svc-zero-trust-consulting-3",
+  "svc-awareness-program",
+  "svc-awareness-program-2",
+  "svc-awareness-program-3",
 ] as const;
 
 export type MediaId = (typeof MEDIA_IDS)[number];
@@ -27,13 +46,18 @@ export interface MediaAsset {
   width: number;
   height: number;
   duration?: number;
-  pixabayId: number;
+  source: "pixabay" | "unsplash";
+  sourceId: string;
   pageURL: string;
   user: string;
   license: string;
 }
 
-const assets = manifest as MediaAsset[];
+// manifest.json is rewritten whole by npm run assets:pixabay, so Unsplash photos live in their own file.
+const assets: MediaAsset[] = [
+  ...pixabay.map(({ pixabayId, ...asset }) => ({ ...asset, source: "pixabay", sourceId: String(pixabayId) }) as MediaAsset),
+  ...(unsplash as MediaAsset[]),
+];
 
 export function allMedia(): MediaAsset[] {
   return assets;
@@ -43,7 +67,7 @@ const byId = new Map(assets.map((asset) => [asset.id, asset]));
 
 export function media(id: MediaId): MediaAsset {
   const asset = byId.get(id);
-  if (!asset) throw new Error(`Media "${id}" is not in manifest.json. Run npm run assets:pixabay.`);
+  if (!asset) throw new Error(`Media "${id}" is in neither manifest.json nor unsplash.json.`);
   return asset;
 }
 

@@ -8,6 +8,7 @@ import Credits from "./pages/Credits";
 import { SiteLayout } from "./components/site";
 import Contact from "./pages/Contact";
 import Services from "./pages/Services";
+import ServiceCase from "./pages/ServiceCase";
 import Resources from "./pages/Resources";
 import ResourceDetail from "./pages/ResourceDetail";
 import Login from "./pages/Login";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/kredit" element={<Credits />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/services/:slug" element={<ServiceCase />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/resources/:id" element={<ResourceDetail />} />
             <Route path="/login" element={<Login />} />

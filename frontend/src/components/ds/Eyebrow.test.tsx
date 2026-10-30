@@ -8,8 +8,13 @@ describe("Eyebrow", () => {
     expect(screen.getByText("Enterprise Cybersecurity")).toBeInTheDocument();
   });
 
-  test.each(["link", "on-dark", "steel"] as const)("renders text for tone %s", (tone) => {
+  test.each(["link", "on-dark", "steel"] as const)("keeps the eyebrow type style with tone %s", (tone) => {
     render(<Eyebrow tone={tone}>Label</Eyebrow>);
-    expect(screen.getByText("Label")).toBeInTheDocument();
+    expect(screen.getByText("Label")).toHaveClass("text-eyebrow");
+  });
+
+  test("a color override keeps the eyebrow type style", () => {
+    render(<Eyebrow className="text-primary">Label</Eyebrow>);
+    expect(screen.getByText("Label")).toHaveClass("text-eyebrow", "text-primary");
   });
 });

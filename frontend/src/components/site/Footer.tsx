@@ -64,7 +64,7 @@ export function Footer() {
         <div className="mt-12 flex flex-wrap justify-between gap-4 border-t border-white/10 pt-6 text-xs">
           <p>&copy; {new Date().getFullYear()} TRIAD PRO-TX SIBER. All rights reserved.</p>
           <Link to="/kredit" className={linkClass}>
-            Video dan foto oleh Pixabay
+            Video dan foto oleh Pixabay dan Unsplash
           </Link>
         </div>
       </div>
