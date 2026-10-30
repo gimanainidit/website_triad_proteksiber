@@ -1,6 +1,9 @@
 {$SITE_ADDRESS} {
     encode zstd gzip
     handle /api/* {
+        request_body {
+            max_size 20MB
+        }
         reverse_proxy backend:8001
     }
     handle {
