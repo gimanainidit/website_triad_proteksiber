@@ -3,4 +3,5 @@ export const cta = {
   subtitle:
     "Hubungi tim kami untuk konsultasi gratis dan temukan solusi keamanan yang tepat untuk kebutuhan bisnis Anda.",
   action: { label: "Konsultasi Gratis", to: "/contact" },
+  chat: { label: "Buka TXsiber AI", href: "https://chat.txsiber.online" },
 } as const;

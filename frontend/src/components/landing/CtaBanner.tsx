@@ -16,9 +16,14 @@ export function CtaBanner() {
         <p className="text-subtitle reveal-fade mb-8 max-w-xl text-ink" style={revealIndex(1)}>
           {cta.subtitle}
         </p>
-        <div className="reveal-fade" style={revealIndex(2)}>
+        <div className="reveal-fade flex flex-wrap items-center gap-3" style={revealIndex(2)}>
           <Button asChild>
             <Link to={cta.action.to}>{cta.action.label}</Link>
+          </Button>
+          <Button asChild variant="on-soft">
+            <a href={cta.chat.href} target="_blank" rel="noopener noreferrer">
+              {cta.chat.label}
+            </a>
           </Button>
         </div>
       </div>

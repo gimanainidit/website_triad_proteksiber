@@ -15,7 +15,15 @@ describe("CtaBanner", () => {
   test("offers a free consultation with a link to /contact", () => {
     renderWithProviders(<CtaBanner />);
     expect(screen.getByRole("link", { name: "Konsultasi Gratis" })).toHaveAttribute("href", "/contact");
-    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.getAllByRole("link")).toHaveLength(2);
+  });
+
+  test("lets API-key customers open TXsiber AI in a new tab", () => {
+    renderWithProviders(<CtaBanner />);
+    const chat = screen.getByRole("link", { name: "Buka TXsiber AI" });
+    expect(chat).toHaveAttribute("href", "https://chat.txsiber.online");
+    expect(chat).toHaveAttribute("target", "_blank");
+    expect(chat).toHaveAttribute("rel", "noopener noreferrer");
   });
 
   test("explains the offer under the heading", () => {
