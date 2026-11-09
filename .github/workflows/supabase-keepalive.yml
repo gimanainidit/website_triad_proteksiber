@@ -1,0 +1,24 @@
+name: Supabase keepalive
+# Free-plan Supabase pauses projects with too few user queries over 7 days.
+# /api/categories runs a real SELECT through the backend, so each run counts as
+# app traffic. A failed run means the database is unreachable or already paused.
+on:
+  schedule:
+    - cron: '17 2,14 * * *'  # 09:17 and 21:17 WIB
+  workflow_dispatch:
+permissions: {}
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query the database through the public API
+        run: |
+          for attempt in 1 2 3; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 https://eranusasiber.my.id/api/categories) || code=000
+            echo "attempt $attempt: HTTP $code"
+            [ "$code" = 200 ] && exit 0
+            sleep 20
+          done
+          echo "::error::/api/categories did not return 200; the Supabase project may be paused or unreachable"
+          exit 1
